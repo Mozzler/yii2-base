@@ -1,0 +1,18 @@
+{
+    "name": "mozzler/yii2-base",
+    "description": "mozzler core",
+    "type": "yii2-extension",
+    "authors": [
+        {
+            "name": "Chris Were",
+            "email": "chris@mozzler.com.au"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "mozzler\\base\\": ""
+        }
+    }
+}
