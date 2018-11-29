@@ -1,28 +1,32 @@
 <?php
 namespace mozzler\base\fields;
 
-class Base extends \yii\base\Component {
+use yii\base\Component;
+use yii\helpers\ArrayHelper;
+
+class Base extends Component {
 	
 	public $type;
-	public $options;
 	public $label;
 	public $hint;
-	public $filter;
-	public $help;
-	public $config;
-	public $format = 'text';	// see i18n/Formatter
+	public $config = [];
+	public $rules = [];
 	public $model;
 	public $attribute;
-	public $multiple;
 	public $operator = "=";
-	public $readOnly;
-	public $_field;
+	
+	//public $format = 'text';	// see i18n/Formatter
+	//public $options;
+	//public $filter;
+	//public $help;
+	//public $multiple;
+	//public $readOnly;
 	
 	/**
 	 * format: [validator, parameter => value]
 	 */
-	public function rules($config=[]) {
-		return self::mergeConfig($this->defaultRules(), $config);
+	public function rules() {
+		return ArrayHelper::merge($this->defaultRules(), $this->rules);
 	}
 	
 	public function defaultRules() {

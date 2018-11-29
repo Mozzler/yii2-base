@@ -2,12 +2,14 @@
 namespace mozzler\base\models;
 
 use \yii\mongodb\ActiveRecord;
-use mozzler\components\FieldFactory as FF;
+use mozzler\base\helpers\FieldHelper;
 
 class Base extends ActiveRecord {
 
 	public static $moduleClass = '\mozzler\base\Module';	
 	protected static $collectionName;
+	protected $modelFields;
+	protected $modelConfig;
 	
 	const SCENARIO_CREATE = 'create';
 	const SCENARIO_UPDATE = 'update';
@@ -16,38 +18,22 @@ class Base extends ActiveRecord {
 	const SCENARIO_SEARCH = 'search';
 	const SCENARIO_EXPORT = 'export';
 	
-	public function config() {
+	public function init() {
+		parent::init();
+		
+		$this->initModelConfig();
+		$this->initModelFields();
+	}
+	
+	protected function modelConfig() {
 		return [
 			'label' => 'Base Model',
 			'labelPlural' => 'Base Models',
 		];
 	}
 	
-	public function fields()
-	{
-		return [
-			'_id' => FF:create([
-				'type' => 'MongoId',
-				'label' => 'ID'
-			]),
-			'name' => FF:create([
-				'type' => 'Text',
-				'label' => 'Name',
-				'rules' => [
-					'string' => [
-						'max' => 255
-					]
-				]
-			]),
-			'_id' => FF:create([
-				'type' => 'MongoId',
-				'label' => 'ID'
-			]),
-			'_id' => FF:create([
-				'type' => 'MongoId',
-				'label' => 'ID'
-			]),
-		]
+	protected function initModelConfig() {
+		$this->modelConfig = $this->modelConfig();
 	}
 	
 	public function scenarios()
@@ -63,18 +49,118 @@ class Base extends ActiveRecord {
         ];
     }
 	
+	protected function initModelFields() {
+		$this->modelFields = FieldHelper::createFields($this, $this->modelFields());
+	}
+	
+	/**
+	 * Define the available fields for this model, along with their configuration
+	 */
+	protected function modelFields() {
+		return [
+			'_id' => [
+				'type' => 'MongoId',
+				'label' => 'ID'
+			],
+			'name' => [
+				'type' => 'Text',
+				'label' => 'Name',
+				'rules' => [
+					'string' => [
+						'max' => 255
+					]
+				]
+			],
+			'createdAt' => [
+				'type' => 'Timestamp',
+				'label' => 'Inserted'
+			],
+			'createdUserId' => [
+				'type' => 'RelateOne',
+				'label' => 'Created user',
+				'config' => [
+					'relatedField' => '_id',
+					'relatedModel' => 'User'
+				]
+			],
+			'updatedAt' => [
+				'type' => 'Timestamp',
+				'label' => 'Inserted'
+			],
+			'updatedUserId' => [
+				'type' => 'RelateOne',
+				'label' => 'Updated user',
+				'config' => [
+					'relatedField' => '_id',
+					'relatedModel' => 'User'
+				]
+			],
+		];
+	}
+	
+	public function getModelConfig($key=null) {
+		if ($key) {
+			if (isset($this->modelConfig[$key])) {
+				return $this->modelConfig[$key];
+			}
+			
+			return null;
+		}
+		
+		return $this->modelConfig;
+	}
+	
+	public function getModelField($key=null) {
+		if ($key) {
+			if (isset($this->modelFields[$key])) {
+				return $this->modelFields[$key];
+			}
+			
+			return null;
+		}
+		
+		return $this->modelFields;
+	}
+	
+	public function fields()
+	{
+		// TODO: return fields based on this->modelFields;
+	}
+	
+	public function attributes()
+	{
+		$attributes = [];
+		$fields = $this->modelFields;
+		
+		foreach ($fields as $fieldKey => $field) {
+			$attributes[] = $fieldKey;
+		}
+		
+		return $attributes;
+	}
+	
+	public function attributeLabels()
+	{
+		$labels = [];
+		$fields = $this->modelFields;
+		
+		foreach ($fields as $fieldKey => $field) {
+			$labels[$fieldKey] = \Yii::t('app', $field->label);
+		}
+		
+		return $labels;
+	}
+	
 	/**
 	 * Build field rules from fields() configuration
 	 */
 	public function rules()
 	{
 		$rules = [];
-		$fields = $this->fields();
+		$fields = $this->modelFields;
 		
-		foreach ($fields as $fieldKey => $fieldValue) {
-			if (isset($fieldValue['rules'])) {
-				$rules[$fieldKey] = $fieldValue['rules'];
-			}
+		foreach ($fields as $fieldKey => $field) {
+			$rules[$fieldKey] = $field->rules();
 		}
 		
 		return $rules;

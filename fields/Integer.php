@@ -1,7 +1,7 @@
 <?php
 namespace mozzler\base\fields;
 
-class IntegerInput extends Base {
+class Integer extends Base {
 	
 	public $type = 'Integer';
 	

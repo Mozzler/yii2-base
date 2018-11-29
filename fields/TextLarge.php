@@ -1,5 +1,5 @@
 <?php
-namespace mozzler\libraries\fields;
+namespace mozzler\base\fields;
 
 class TextLarge extends Base {
 	
