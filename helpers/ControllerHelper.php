@@ -69,7 +69,7 @@ class ControllerHelper {
 			
 			// If we have processed mozzler\web\models we are at the top of the mozzler
 			// heirarchy, so no need to continue
-			if ($className == 'mozzler\base\models\Base') {
+			if ($className == 'mozzler\base\models\Model') {
 				break;
 			}
 		}

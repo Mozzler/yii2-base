@@ -4,7 +4,7 @@ namespace mozzler\base\models;
 use \yii\mongodb\ActiveRecord;
 use mozzler\base\helpers\FieldHelper;
 
-class Base extends ActiveRecord {
+class Model extends ActiveRecord {
 
 	public static $moduleClass = '\mozzler\base\Module';	
 	protected static $collectionName;
@@ -45,7 +45,7 @@ class Base extends ActiveRecord {
             self::SCENARIO_VIEW => ['name', 'insertedUserId', 'inserted', 'updatedUserId', 'updated'],
             self::SCENARIO_SEARCH => ['_id', 'name', 'insertedUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => ['_id', 'name', 'inserted', 'insertedUserId', 'updated', 'updatedUserId'],
-            self::SCENARIO_DEFAULT => array_keys($this->fields())
+            self::SCENARIO_DEFAULT => array_keys($this->attributes())
         ];
     }
 	
@@ -115,11 +115,9 @@ class Base extends ActiveRecord {
 			if (isset($this->modelFields[$key])) {
 				return $this->modelFields[$key];
 			}
-			
-			return null;
 		}
 		
-		return $this->modelFields;
+		return null;
 	}
 	
 	public function fields()
@@ -160,7 +158,14 @@ class Base extends ActiveRecord {
 		$fields = $this->modelFields;
 		
 		foreach ($fields as $fieldKey => $field) {
-			$rules[$fieldKey] = $field->rules();
+			foreach ($field->rules() as $validator => $fieldRules) {
+				$rule = [$fieldKey, $validator];
+				$rule = array_merge($rule, $fieldRules);
+			}
+			
+			if (isset($rule)) {
+				$rules[] = $rule;
+			}
 		}
 		
 		return $rules;

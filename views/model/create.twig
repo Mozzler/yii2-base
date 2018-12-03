@@ -1,0 +1,11 @@
+{% set form = ActiveForm.begin({'id': 'form-' ~ data.scenario}) %}
+
+	{% for attribute in model.attributes() %}
+		{{ form.field(model, attribute) }}
+	{% endfor %}
+
+    <div class="form-group">
+        {{ Html.submitButton('Create') }}
+    </div>
+
+{% set a = form.end() %}

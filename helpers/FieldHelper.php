@@ -11,6 +11,8 @@ class FieldHelper {
 		foreach ($fieldsConfig as $fieldName => $fieldConfig) {
 			$fields[$fieldName] = self::createField($model, $fieldName, $fieldConfig);
 		}
+		
+		return $fields;
 	}
 	
 	private static function createField($model, $fieldName, $config) {
