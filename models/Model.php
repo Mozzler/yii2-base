@@ -171,4 +171,15 @@ class Model extends ActiveRecord {
 		return $rules;
 	}
 	
+	/**
+	 * Helper method to load default values for all fields in this model
+	 */
+	public function loadDefaultValues() {
+		foreach ($this->modelFields as $fieldName => $field) {
+			if (!isset($this->$fieldName) && $field->default != null) {
+				$this->$fieldName = $field->default;
+			}
+		}
+	}
+	
 }

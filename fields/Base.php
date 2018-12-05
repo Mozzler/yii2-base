@@ -14,6 +14,8 @@ class Base extends Component {
 	public $model;
 	public $attribute;
 	public $operator = "=";
+	public $default = null;
+	public $required = false;
 	public $widgets = [
 		'input' => 'mozzler\base\widgets\model\input\BaseField',
 		'view' => 'mozzler\base\widgets\model\view\BaseField'
@@ -31,7 +33,17 @@ class Base extends Component {
 	 * format: [validator, parameter => value]
 	 */
 	public function rules() {
-		return ArrayHelper::merge($this->defaultRules(), $this->rules);
+		$rules = ArrayHelper::merge($this->defaultRules(), $this->rules);
+		
+		if ($this->required && !isset($customRules['required'])) {
+			$rules['required'] = ['message' => $this->label.' cannot be blank'];
+		}
+		
+		if ($this->default) {
+			$rules['default'] = ['value' => $this->default];
+		}
+		
+		return $rules;
 	}
 	
 	public function defaultRules() {
