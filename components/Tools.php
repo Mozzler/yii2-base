@@ -11,18 +11,33 @@ class Tools extends Component {
 	}
 	
 	public static function load($className, $config=[]) {
-		$className = '\\'.preg_replace("/\./", "\\\\", $className);
-		\Yii::trace("Loading ".$className);
+		$className = self::getClassName($className);
+		\Yii::trace("Loading widget".$className);
 		
 		return \Yii::createObject($className, $config);
 	}
 	
-	public static function renderWidget($widgetName, $widgetConfig=[], $constructorConfig=[]) {
-		$config = ArrayHelper::merge($constructorConfig, [
-			'config' => $widgetConfig
-		]);
+	public static function renderWidget($widgetName, $config=[], $wrapConfig=true) {
+		if ($wrapConfig) {
+			$config = ['config' => $config];
+		}
 		
-		$widget = self::load($widgetName, $config);
-		return $widget::widget($config);
-	}	
+		$widget = self::getWidget($widgetName);
+		$output = $widget::widget($config);
+		return $output;
+	}
+	
+	public static function getWidget($widget) {
+		\Yii::trace('getWidget('.$widget.')');
+		$className = self::getClassName($widget);
+		ob_start();
+        ob_implicit_flush(false);
+		$widget = new $className;
+		ob_get_clean();
+		return $widget;
+	}
+	
+	public static function getClassName($className) {
+		return '\\'.preg_replace("/\./", "\\\\", $className);
+	}
 }

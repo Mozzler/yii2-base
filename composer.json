@@ -8,8 +8,10 @@
             "email": "chris@mozzler.com.au"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {},
+    "minimum-stability": "stable",
+    "require": {
+        "yiisoft/yii2": "~2.0.14"
+    },
     "autoload": {
         "psr-4": {
             "mozzler\\base\\": ""

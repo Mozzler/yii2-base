@@ -1,0 +1,22 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    {% if widget.heading %}
+    <{{ widget.heading.tag }} {{ html.renderTagAttributes(widget.heading.options) }}>
+        {% if widget.heading.title %}
+        <{{ widget.heading.title.tag }} {{ html.renderTagAttributes(widget.heading.title.options) }}>
+            {{ widget.heading.title.content }}
+        </{{ widget.heading.title.tag }}>
+        {% endif %}
+        {{ widget.heading.content }}
+    </{{ widget.heading.tag }}>
+    {% endif %}
+    {% if widget.body %}
+    <{{ widget.body.tag }} {{ html.renderTagAttributes(widget.body.options) }}>
+        {{ widget.body.content }}
+    </{{ widget.body.tag }}>
+    {% endif %}
+    {% if widget.footer %}
+    <{{ widget.footer.tag }} {{ html.renderTagAttributes(widget.footer.options) }}>
+        {{ widget.footer.content }}
+    </{{ widget.footer.tag }}>
+    {% endif %}
+</{{ widget.tag }}>

@@ -31,7 +31,6 @@ class CreateModel extends BaseWidget {
 		$t = new \mozzler\base\components\Tools;
 		
 		$config['attributes'] = $config['model']->activeAttributes();
-		$form = $t->load('yii.widgets.ActiveForm');
 		$config['items'] = [];
 		$config['hiddenItems'] = [];
 		$hasFileUpload = false;
@@ -53,8 +52,6 @@ class CreateModel extends BaseWidget {
 		if ($hasFileUpload) {
 			$config['formConfig']['options']['enctype'] = 'multipart/form-data';
 		}
-		
-		$config['form'] = $form;
 		
 		return $config;
 	}

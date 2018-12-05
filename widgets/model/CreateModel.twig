@@ -1,10 +1,11 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
-    {% set form = widget.form.begin({
+	{% set form = t.getWidget('yii.widgets.ActiveForm') %}
+    {% set form = form.begin({
         "id": "form-" ~ widget.id
     }|merge(widget.formConfig)) %}
     
     {% set bodyContent %}
-        {% for hiddenInput in widget.hiddenItems %}
+		{% for hiddenInput in widget.hiddenItems %}
         	{{ t.renderWidget('mozzler.base.widgets.model.input.HiddenField', {
 				'form': form,
 				'model': widget.model,
@@ -18,12 +19,36 @@
 				'attribute': inputItem
 			}) }}
         {% endfor %}
-        {# r.renderWidget("ui/columns", r.helpers().ArrayMerge({
-            "items": widget.items
-        }, widget.columnsConfig)) #}
     {% endset %}
-    
-    {{ bodyContent }}
 
+    <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
+	    {{ t.renderWidget('mozzler.base.widgets.bootstrap.Panel', {
+		    'heading': {
+		    	'title': {
+		    		'content': '<div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>Create ' ~ widget.model.getModelConfig("label")
+		    	}
+		    },
+		    'footer': {
+		    	'content': '&nbsp; <div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>'
+		    },
+		    'body': {
+			    'content': form.errorSummary(widget.model) ~ bodyContent
+			}
+	    }) }}
+    </{{ widget.container.tag }}>
+    
+    
+	    {# t.renderWidget('amass.panel.Panel', {
+		    'headerTitle': '<div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>Create ' ~ widget.model.getModelConfig("label"),
+		    'content': form.errorSummary(widget.model) ~ bodyContent,
+		    'footerTitle': '&nbsp; <div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>'
+	    }, false) #}
+	    
+	    {# t.renderWidget('amass.panel.Panel', {
+		    'content': "hello world"
+	    }, false) #}
+	    
+	
+	
     {% set form = form.end() %}
 </{{ widget.tag }}>
