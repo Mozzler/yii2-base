@@ -35,6 +35,7 @@ class ModelCreateAction extends BaseAction
         /* @var $model \yii\db\ActiveRecord */
         $model = $this->controller->data['model'];
         $model->setScenario($this->scenario);
+        \Yii::trace('model scenario: '.$this->scenario);
 
         $model->load(Yii::$app->getRequest()->getBodyParams());
         if ($model->save()) {

@@ -1,5 +1,5 @@
 <?php
-namespace mozzler\base;
+namespace mozzler\base\components;
 
 use yii\base\Component;
 
@@ -14,7 +14,8 @@ class Mozzler extends Component {
         'DateTime' => 'mozzler\base\fields\DateTime',
         'Boolean' => 'mozzler\base\fields\Boolean',
         'Email' => 'mozzler\base\fields\Email',
-        'RelateOne' => 'mozzler\base\fields\RelateOne'
+        'RelateOne' => 'mozzler\base\fields\RelateOne',
+        'Password' => 'mozzler\base\fields\Password'
 	];
 	
 }

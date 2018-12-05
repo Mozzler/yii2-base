@@ -1,16 +1,8 @@
 <?php
 namespace mozzler\base\widgets\model\input;
 
-use yii\base\Widget;
+use mozzler\base\widgets\BaseWidget;
 
-class BaseField extends Widget {
-	
-	public $config = [];
-	
-	public function run($model, $field, $config=[]) {
-		
-	}
-	
-}
+class BaseField extends BaseWidget {}
 
 ?>

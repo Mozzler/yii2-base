@@ -1,11 +1,16 @@
-{% set form = ActiveForm.begin({'id': 'form-' ~ data.scenario}) %}
+{% set form = t.load('yii.widgets.ActiveForm', {'id': 'form-' ~ model.name ~ '-' ~ model.scenario}) %}
+{% set form = form.begin() %}
 
-	{% for attribute in model.attributes() %}
-		{{ form.field(model, attribute) }}
+	{% for attribute in model.activeAttributes() %}
+		{{ t.renderWidget('mozzler.base.widgets.model.input.RenderField', {
+			'form': form,
+			'model': model,
+			'attribute': attribute
+		}) }}
 	{% endfor %}
 
     <div class="form-group">
-        {{ Html.submitButton('Create') }}
+        {{ html.submitButton('Create', []) }}
     </div>
 
-{% set a = form.end() %}
+{% set form = form.end() %}

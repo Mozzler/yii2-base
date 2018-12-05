@@ -14,6 +14,10 @@ class Base extends Component {
 	public $model;
 	public $attribute;
 	public $operator = "=";
+	public $widgets = [
+		'input' => 'mozzler\base\widgets\model\input\BaseField',
+		'view' => 'mozzler\base\widgets\model\view\BaseField'
+	];
 	
 	//public $format = 'text';	// see i18n/Formatter
 	//public $options;
