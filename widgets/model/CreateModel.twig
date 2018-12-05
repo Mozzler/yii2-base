@@ -1,0 +1,29 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    {% set form = widget.form.begin({
+        "id": "form-" ~ widget.id
+    }|merge(widget.formConfig)) %}
+    
+    {% set bodyContent %}
+        {% for hiddenInput in widget.hiddenItems %}
+        	{{ t.renderWidget('mozzler.base.widgets.model.input.HiddenField', {
+				'form': form,
+				'model': widget.model,
+				'attribute': hiddenInput
+			}) }}
+        {% endfor %}
+        {% for inputItem in widget.items %}
+        	{{ t.renderWidget('mozzler.base.widgets.model.input.RenderField', {
+				'form': form,
+				'model': widget.model,
+				'attribute': inputItem
+			}) }}
+        {% endfor %}
+        {# r.renderWidget("ui/columns", r.helpers().ArrayMerge({
+            "items": widget.items
+        }, widget.columnsConfig)) #}
+    {% endset %}
+    
+    {{ bodyContent }}
+
+    {% set form = form.end() %}
+</{{ widget.tag }}>

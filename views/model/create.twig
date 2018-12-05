@@ -1,3 +1,8 @@
+{{ t.renderWidget('mozzler.base.widgets.model.CreateModel', {
+	'model': model
+}) }}
+
+{#
 {% set form = t.load('yii.widgets.ActiveForm', {'id': 'form-' ~ model.name ~ '-' ~ model.scenario}) %}
 {% set form = form.begin() %}
 
@@ -14,3 +19,4 @@
     </div>
 
 {% set form = form.end() %}
+#}
