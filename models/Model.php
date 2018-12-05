@@ -2,6 +2,9 @@
 namespace mozzler\base\models;
 
 use \yii\mongodb\ActiveRecord;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
+
 use mozzler\base\helpers\FieldHelper;
 
 class Model extends ActiveRecord {
@@ -41,10 +44,10 @@ class Model extends ActiveRecord {
         return [
             self::SCENARIO_CREATE => ['name'],
             self::SCENARIO_UPDATE => ['name'],
-            self::SCENARIO_LIST => ['name', 'insertedUserId', 'inserted'],
-            self::SCENARIO_VIEW => ['name', 'insertedUserId', 'inserted', 'updatedUserId', 'updated'],
-            self::SCENARIO_SEARCH => ['_id', 'name', 'insertedUserId', 'updatedUserId'],
-            self::SCENARIO_EXPORT => ['_id', 'name', 'inserted', 'insertedUserId', 'updated', 'updatedUserId'],
+            self::SCENARIO_LIST => ['name', 'createdUserId', 'createdAt'],
+            self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
+            self::SCENARIO_SEARCH => ['_id', 'name', 'createdUserId', 'updatedUserId'],
+            self::SCENARIO_EXPORT => ['_id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
             self::SCENARIO_DEFAULT => array_keys($this->attributes())
         ];
     }
@@ -181,5 +184,23 @@ class Model extends ActiveRecord {
 			}
 		}
 	}
+	
+	public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['createdAt', 'updatedAt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updatedAt'],
+                ],
+            ],
+            [
+            	'class' => BlameableBehavior::className(),
+            	'createdByAttribute' => 'createdUserId',
+            	'updatedByAttribute' => 'updatedUserId',
+            ]
+        ];
+    }
 	
 }
