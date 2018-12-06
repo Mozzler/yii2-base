@@ -1,0 +1,16 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    {% for item in widget.items %}
+        {% if loop.index0 % widget.columns.count == 0 %}
+        <{{ widget.rows.tag }} {{ html.renderTagAttributes(widget.rows.options) }}>
+        {% endif %}
+        {% set col = loop.index0 % widget.columns.count %}
+        {% set colClass = widget.columns.classes["col-" ~ (col+1)] %}
+        {% set options = widget.columns.options | merge({"class": widget.columns.options.class ~ " " ~ colClass}) %}
+        <{{ widget.columns.tag }} {{ html.renderTagAttributes(options) }}>
+            {{ item }}
+        </{{ widget.columns.tag }}>
+        {% if loop.index0 % widget.columns.count == widget.columns.count-1 or loop.last %}
+        </{{ widget.rows.tag }}>
+        {% endif %}
+    {% endfor %}
+</{{ widget.tag }}>

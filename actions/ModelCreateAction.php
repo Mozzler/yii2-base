@@ -57,6 +57,6 @@ class ModelCreateAction extends BaseAction
         
         $this->controller->data['model'] = $model;
 
-        return $this->controller->render($this->name);
+		parent::run();
     }
 }
