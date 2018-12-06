@@ -1,17 +1,15 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
     {% set bodyContent %}
         {{ t.renderWidget("mozzler.base.widgets.ui.Columns", {
-	        'config': {
-	        	'items': widget.items
-	        }
+        	'items': widget.items
 	    }) }}
     {% endset %}
     
     <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
-        {{ t.renderWidget("mozzler.base.widgets.ui.panel", arrayhelper.merge({
+        {{ t.renderWidget("mozzler.base.widgets.bootstrap.Panel", arrayhelper.merge({
             "body": {
                 "content": bodyContent
-            },
+            }
         }, widget.panelConfig)) }}
     </{{ widget.container.tag }}>
 </{{ widget.tag }}>

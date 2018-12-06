@@ -19,7 +19,7 @@ class Columns extends BaseWidget {
 					'class' => 'row'
 				]
 			],
-			'columnns' => [
+			'columns' => [
 				'count' => 2,
 				'tag' => 'div',
 				'options' => [],
@@ -34,9 +34,8 @@ class Columns extends BaseWidget {
 	// take $config and process it to generate final config
 	public function code() {
 		$config = $this->config();
-		
-		print_r($config['items']); die();
-		
+		$t = new \mozzler\base\components\Tools;
+
 		// direction can be "ltr" (left to right) or "ttb" (top to bottom)
 		if ($config['direction'] == "ttb") {
 		    $columnItems = [];
@@ -69,7 +68,7 @@ class Columns extends BaseWidget {
 		    
 		    $config['items'] = $items;
 		}
-		
+
 		if ($config['columns']['calculateClasses']) {
 			$classes = [];
 			$column = 1;
@@ -80,10 +79,17 @@ class Columns extends BaseWidget {
 					'count' => $config['columns']['count'],
 					'columnWidth' => ceil(12 / $config['columns']['count'])
 				];
-				
-				$classes['col-'+$column] = $t->renderTwig($config['columns']['classTemplate'], $data);
+
+				$classes['col-'.$column] = $t->renderTwig($config['columns']['classTemplate'], $data);
+				$column++;
 			}
+			
+			$config['columns']['classes'] += $classes;
 		}
+		
+		
+		\Yii::trace(print_r($config['items'],true), __METHOD__);
+		\Yii::trace(print_r($config['columns'],true), __METHOD__);
 				
 		return $config;
 	}

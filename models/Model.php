@@ -48,7 +48,7 @@ class Model extends ActiveRecord {
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['_id', 'name', 'createdUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => ['_id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
-            self::SCENARIO_DEFAULT => array_keys($this->attributes())
+            self::SCENARIO_DEFAULT => array_keys($this->modelFields())
         ];
     }
 	
@@ -201,6 +201,33 @@ class Model extends ActiveRecord {
             	'updatedByAttribute' => 'updatedUserId',
             ]
         ];
+    }
+    
+    /**
+	 * Add support for Rappsio internals
+	 * 
+	 * @ignore
+	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
+	 */
+	protected function resolveFields(array $fields, array $expand) {
+        $result = [];
+
+        foreach ($this->modelFields as $field => $definition) {
+        	if ($fields && !in_array($field, $fields))
+        		continue;
+
+            $result[$field] = $field;
+        }
+
+        if (empty($expand)) {
+            return $result;
+        }
+
+        foreach ($this->extraFields() as $field => $definition) {
+            $result[$field] = $field;
+        }
+		
+        return $result;
     }
 	
 }

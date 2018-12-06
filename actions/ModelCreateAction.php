@@ -7,7 +7,7 @@ use yii\helpers\Url;
 
 class ModelCreateAction extends BaseAction
 {
-	public $name = 'create';
+	public $id = 'create';
     
     /**
      * @var string the scenario to be assigned to the new model before it is validated and saved.

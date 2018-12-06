@@ -32,8 +32,6 @@ class ControllerHelper {
 			$viewPaths[] = $moduleClass::$viewPath . DIRECTORY_SEPARATOR . $controllerName;
 		}
 		
-		\Yii::trace(print_r($viewPaths,true));
-		
 		return $viewPaths;
 	}
 	
@@ -73,8 +71,6 @@ class ControllerHelper {
 				break;
 			}
 		}
-		
-		\Yii::trace(print_r($viewPaths,true));
 		
 		return $viewPaths;
 	}

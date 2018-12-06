@@ -2,9 +2,9 @@
 namespace mozzler\base\actions;
 
 
-class ModelUpdateAction extends BaseAction
+class ModelUpdateAction extends BaseModelAction
 {
-	public $name = 'update';
+	public $id = 'update';
 	
     public function run()
     {

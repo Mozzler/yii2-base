@@ -6,7 +6,7 @@ use yii\helpers\ArrayHelper;
 
 class Base extends Component {
 	
-	public $type;
+	public $type = 'Base';
 	public $label;
 	public $hint;
 	public $config = [];
@@ -16,10 +16,7 @@ class Base extends Component {
 	public $operator = "=";
 	public $default = null;
 	public $required = false;
-	public $widgets = [
-		'input' => 'mozzler\base\widgets\model\input\BaseField',
-		'view' => 'mozzler\base\widgets\model\view\BaseField'
-	];
+	public $widgets = [];
 	public $hidden = false;
 	
 	//public $format = 'text';	// see i18n/Formatter
@@ -28,6 +25,19 @@ class Base extends Component {
 	//public $help;
 	//public $multiple;
 	//public $readOnly;
+	
+	public function init() {
+		parent::init();
+		
+		// set default input / view widgets based on this field type
+		if (!isset($this->widgets['input'])) {
+			$this->widgets['input'] = 'mozzler\base\widgets\model\input\\'.$this->type.'Field';
+		}
+		
+		if (!isset($this->widgets['view'])) {
+			$this->widgets['view'] = 'mozzler\base\widgets\model\view\\'.$this->type.'Field';
+		}
+	}
 	
 	/**
 	 * format: [validator, parameter => value]

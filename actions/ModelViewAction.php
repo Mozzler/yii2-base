@@ -4,9 +4,9 @@ namespace mozzler\base\actions;
 use mozzler\base\models\Model;
 use yii\helpers\ArrayHelper;
 
-class ModelViewAction extends BaseAction
+class ModelViewAction extends BaseModelAction
 {
-	public $name = 'view';
+	public $id = 'view';
     
     /**
      * @var string the scenario to be assigned to the new model before it is validated and saved.
@@ -16,37 +16,37 @@ class ModelViewAction extends BaseAction
     
     public function defaultConfig() {
 	    return ArrayHelper::merge(parent::defaultConfig(),[
-		    "containerClass": "col-md-12",
+		    "containerClass" => "col-md-12",
 		    "headerConfig" => [
 		        "leftButtons" => [
 		            "back" => [
-		                "href": "{{ widget.model.getUrl(\"list\") }}",
-		                "label": "&laquo Back"
+		                "href" =>"{{ widget.model.getUrl(\"list\") }}",
+		                "label" =>"&laquo Back"
 		            ]
 		        ],
-		        "leftButtonsOrder": "back",
+		        "leftButtonsOrder" =>"back",
 		        "leftButtonsConfig" => [],
 		        "rightButtons" => [
 		            "update" => [
-		                "href": "{{ widget.model.getUrl(\"update\") }}",
-		                "label": "<span class=\"glyphicon glyphicon-pencil\"></span>"
+		                "href" =>"{{ widget.model.getUrl(\"update\") }}",
+		                "label" =>"<span class=\"glyphicon glyphicon-pencil\"></span>"
 		            ],
 		            "delete" => [
-		                "href": "{{ widget.model.getUrl(\"delete\") }}",
-		                "label": "<span class=\"glyphicon glyphicon-trash\"></span>",
+		                "href" =>"{{ widget.model.getUrl(\"delete\") }}",
+		                "label" =>"<span class=\"glyphicon glyphicon-trash\"></span>",
 		                "options" => [
-		                    "data-confirm": "Are you sure you want to delete this {{ widget.model.getConfig(\"label\") }}?"
+		                    "data-confirm" =>"Are you sure you want to delete this {{ widget.model.getConfig(\"label\") }}?"
 		                ]
 		            ]
 		        ],
-		        "rightButtonsOrder": "update,delete",
+		        "rightButtonsOrder" =>"update,delete",
 		        "rightButtonsConfig" => []
 		    ],
 		    "viewConfig" => [
-		        "action": "view",
+		        "action" =>"view",
 		        "widgetConfig" => [
 		            "panel" => [
-		                "heading": "{{ widget.model.getConfig(\"label\") }}"
+		                "heading" =>"{{ widget.model.getConfig(\"label\") }}"
 		            ]
 		        ],
 		        "fieldsConfig" => []
@@ -56,12 +56,12 @@ class ModelViewAction extends BaseAction
 		            "actions" => [
 		                "buttonDefaults" => [
 		                    "options" => [
-		                        "class": "btn btn-primary"
+		                        "class" =>"btn btn-primary"
 		                    ]
 		                ],
 		                "buttons" => [
 		                    "create" => [
-		                        "content": "<span class=\"glyphicon glyphicon-plus\"></span> {{ widget.relatedModel.getConfig(\"label\") }}"
+		                        "content" =>"<span class=\"glyphicon glyphicon-plus\"></span> {{ widget.relatedModel.getConfig(\"label\") }}"
 		                    ]
 		                ]
 		            ]
@@ -74,15 +74,21 @@ class ModelViewAction extends BaseAction
      */
     public function run()
     {
+		$id = \Yii::$app->request->get('id');
+		\Yii::trace('calling find model');
 	    $model = $this->findModel($id);
+	    
         if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this->id, $model);
+            call_user_func($this->checkAccess, $this->getUniqueId(), $model);
         }
         
-        $model->setScenario($this->scenario);        
-        $this->controller->data['model'] = $model;
+        if ($model) {
+	        $model->setScenario($this->scenario);
+	        $this->controller->data['model'] = $model;
+        }
+        
         $this->controller->data['config'] = $this->config();
 
-        parent::run();
+        return parent::run();
     }
 }

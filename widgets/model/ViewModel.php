@@ -22,7 +22,7 @@ class ViewModel extends BaseWidget {
 			'panelConfig' => [
 				'heading' => [
 					'title' => [
-						'content' => '<h3>{{ widget.model.getModelConfig(\"label\") }}</h3>'
+						'content' => '<h3>{{ widget.model.getModelConfig("label") }}</h3>'
 					]
 				],
 				'body' => [],
@@ -32,11 +32,35 @@ class ViewModel extends BaseWidget {
 	}
 	
 	// take $config and process it to generate final config
-	/*public function code() {
-		$config = $this->config();
+	public function code() {
+		$config = $this->config(true);
+		$model = $config['model'];
+		$t = new \mozzler\base\components\Tools;
 		
+		//widget = include("rappsio.base/ui/tools.js").processTemplates(widget, {"widget": widget});
+		$attributes = $model->activeAttributes();
+		
+		$items = [];
+		
+		foreach ($attributes as $attribute) {
+			$modelField = $model->getModelField($attribute);
+			
+			if (in_array($modelField->type, ['RelateMany', 'RelateManyMany'])) {
+				// Don't render relate many fields in the view
+				continue;
+			}
+			
+			$fieldConfig = [
+				'model' => $model,
+				'attribute' => $attribute
+			];
+			
+			$items[] = $t->renderWidget('mozzler.base.widgets.model.view.RenderField', $fieldConfig);
+		}
+		
+		$config['items'] = $items;
 		return $config;
-	}*/
+	}
 	
 }
 

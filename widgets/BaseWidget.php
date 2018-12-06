@@ -3,6 +3,7 @@ namespace mozzler\base\widgets;
 
 use yii\base\Widget;
 use yii\helpers\ArrayHelper;
+use mozzler\base\helpers\WidgetHelper;
 
 class BaseWidget extends Widget {
 	
@@ -16,8 +17,14 @@ class BaseWidget extends Widget {
 		];
 	}
 	
-	public function config() {
-		return ArrayHelper::merge($this->defaultConfig(), $this->config);
+	public function config($templatify=false) {
+		$config = ArrayHelper::merge($this->defaultConfig(), $this->config);
+		
+		if ($templatify) {
+			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
+		}
+		
+		return $config;
 	}
 	
 	public function init() {

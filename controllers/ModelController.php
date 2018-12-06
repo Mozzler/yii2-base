@@ -19,28 +19,20 @@ class ModelController extends WebController {
 		return ArrayHelper::merge(parent::actions(), [
 			'create' => [
 	            'class' => 'mozzler\base\actions\ModelCreateAction'
+	        ],
+	        'view' => [
+	            'class' => 'mozzler\base\actions\ModelViewAction'
+	        ],
+	        'update' => [
+	            'class' => 'mozzler\base\actions\ModelUpdateAction'
+	        ],
+	        'list' => [
+	            'class' => 'mozzler\base\actions\ModelListAction'
+	        ],
+	        'delete' => [
+	            'class' => 'mozzler\base\actions\ModelDeleteAction'
 	        ]
 	    ]);
-	}
-	
-	public function actionIndex() {
-		return $this->actionList();
-	}
-	
-	public function actionUpdate() {
-		return "update";
-	}
-	
-	public function actionDelete() {
-		return "delete";
-	}
-	
-	public function actionView() {
-		return $this->render('view');
-	}
-	
-	public function actionList() {		
-		return $this->render('list');
 	}
 	
 	public function getModel() {
@@ -57,7 +49,6 @@ class ModelController extends WebController {
 
 	    foreach ($viewPaths as $path) {
 		    $path = \Yii::getAlias($path);
-		    \Yii::trace($path, __METHOD__);
 		    $viewPath = $path . DIRECTORY_SEPARATOR . $view . '.' . $this->view->defaultExtension;
 		    
 		    if (file_exists($viewPath)) {

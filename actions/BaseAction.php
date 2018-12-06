@@ -2,10 +2,11 @@
 namespace mozzler\base\actions;
 
 use yii\base\Action;
+use yii\helpers\ArrayHelper;
 
 class BaseAction extends Action
 {
-	public $name = 'base';
+	public $id = 'base';
 	
 	public $config = [];
 	
@@ -25,7 +26,7 @@ class BaseAction extends Action
 	
     public function run()
     {   
-	    return $this->controller->render($this->name);
+	    return $this->controller->render($this->id);
     }
     
     public function defaultConfig()

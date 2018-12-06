@@ -1,5 +1,5 @@
 <?php
-namespace mozzler\base\widgets\model\input;
+namespace mozzler\base\widgets\model\view;
 
 use mozzler\base\widgets\BaseWidget;
 
@@ -15,14 +15,14 @@ class RenderField extends BaseWidget
 		$fieldType = $modelField->type;
 
 		// load the field class, if it exists
-		$className = $modelField->widgets['input'];
+		$className = '\\'.$modelField->widgets['view'];
 
 		if (class_exists($className)) {
 			$fieldWidget = \Yii::createObject($className, $config);
 		} else {
 			// no specific field class, so fall back to the base class
 			$config['viewName'] = $fieldType.'Field';
-			$fieldWidget = \Yii::createObject('\\mozzler\\base\\widgets\\model\\input\\BaseField', $config);
+			$fieldWidget = \Yii::createObject('\\mozzler\\base\\widgets\\model\\view\\BaseField', $config);
 		}
 		
 		return $fieldWidget::widget(["config" => $config]);
