@@ -4,12 +4,16 @@ namespace mozzler\base\models;
 use \yii\mongodb\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
+use yii\helpers\ArrayHelper;
 
 use mozzler\base\helpers\FieldHelper;
+use mozzler\base\helpers\ControllerHelper;
 
 class Model extends ActiveRecord {
 
-	public static $moduleClass = '\mozzler\base\Module';	
+	public static $moduleClass = '\mozzler\base\Module';
+	public $controllerRoute;
+	
 	protected static $collectionName;
 	protected $modelFields;
 	protected $modelConfig;
@@ -26,6 +30,19 @@ class Model extends ActiveRecord {
 		
 		$this->initModelConfig();
 		$this->initModelFields();
+		
+		if (!$this->controllerRoute) {
+			$className = self::className();
+			preg_match('/([^\\\\]*)$/i', $className, $matches);
+			\Yii::trace(print_r($matches,true));
+		
+			if (sizeof($matches) == 2) {
+				$this->controllerRoute = strtolower($matches[1]);
+			}
+			else {
+				throw new \Exception('Unable to determine controller route for model '.$className);
+			}
+		}
 	}
 	
 	protected function modelConfig() {
@@ -233,5 +250,37 @@ class Model extends ActiveRecord {
 		
         return $result;
     }
+    
+    /**
+     * Get the route for an action on this model
+     *
+     * If a model has a custom route, the custom route will be returned.
+     *
+     * Defaults to returning a relative URL.
+     *
+     * @param	string		$action		Page action to obtain URL from (eg: view, list or update)
+     * @param	array		$params		Array of additional GET parameters to append to the URL
+     * @param	boolean		$absolute	Whether to return an absolute path
+     * @return	string	URL for the requested action on this model
+     */
+    public function getUrl($action='view', $params=[], $absolute=false) {
+	    $urlParams = ArrayHelper::merge([$this->controllerRoute.'/'.$action], $params);
+	    if (!isset($urlParams['id']) && $this->id()) {
+		    $urlParams['id'] = $this->id();
+	    }
+
+		if ($absolute) {
+			return \Yii::$app->urlManager->createAbsoluteUrl($urlParams);
+		}
+		else {
+		    //return Url::toRoute($params);
+		    return \Yii::$app->urlManager->createUrl($urlParams);
+		}
+    }
+    
+    public function id() {
+	    return (string)$this->getPrimaryKey();
+	}
+
 	
 }

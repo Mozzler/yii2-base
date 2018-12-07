@@ -36,19 +36,5 @@
 			}
 	    }) }}
     </{{ widget.container.tag }}>
-    
-    
-	    {# t.renderWidget('amass.panel.Panel', {
-		    'headerTitle': '<div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>Create ' ~ widget.model.getModelConfig("label"),
-		    'content': form.errorSummary(widget.model) ~ bodyContent,
-		    'footerTitle': '&nbsp; <div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>'
-	    }, false) #}
-	    
-	    {# t.renderWidget('amass.panel.Panel', {
-		    'content': "hello world"
-	    }, false) #}
-	    
-	
-	
     {% set form = form.end() %}
 </{{ widget.tag }}>

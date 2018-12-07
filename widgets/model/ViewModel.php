@@ -22,7 +22,7 @@ class ViewModel extends BaseWidget {
 			'panelConfig' => [
 				'heading' => [
 					'title' => [
-						'content' => '<h3>{{ widget.model.getModelConfig("label") }}</h3>'
+						'content' => '<div class="pull-right"><a href="{{ widget.model.getUrl("update") }}" class="btn btn-success btn-sm">Edit {{ widget.model.getModelConfig(\'label\') }}</a></div>{{ widget.model.getModelConfig("label") }}'
 					]
 				],
 				'body' => [],
