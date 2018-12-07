@@ -13,6 +13,7 @@ class TwigFactory {
 	public static function getEnvironment() {
 		$twig = new \Twig_Environment(new Twig_Empty_Loader(),["autoescape" => false]);
 		$twig->getExtension('Twig_Extension_Core')->setTimezone(\Yii::$app->formatter->timeZone);
+		$twig->getExtension('Twig_Extension_Core')->setDateFormat(\Yii::$app->formatter->dateFormat, '%d days');
 		
 		$twig->addGlobal('html', '\yii\helpers\Html');
 		$twig->addGlobal('arrayhelper', '\yii\helpers\ArrayHelper');

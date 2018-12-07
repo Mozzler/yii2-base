@@ -3,11 +3,13 @@ namespace mozzler\base\widgets;
 
 use yii\base\Widget;
 use yii\helpers\ArrayHelper;
+use yii\web\View as WebView;
+
 use mozzler\base\helpers\WidgetHelper;
 
 class BaseWidget extends Widget {
 	
-	protected $viewName = null;
+	public $viewName = null;
 	public $config = [];
 	
 	public function defaultConfig()
@@ -57,6 +59,12 @@ class BaseWidget extends Widget {
     {
         $class = new \ReflectionClass($this);
         return dirname($class->getFileName());
+    }
+    
+    // take an object and output it to Javascript for this widget
+    public function outputJsData($jsData) {
+	    $view = \Yii::$app->controller->getView();
+	    $view->registerJs(" m.widgets['".$this->id."'] = ".json_encode($jsData)."; ", WebView::POS_HEAD);
     }
 	
 }

@@ -86,10 +86,6 @@ class Columns extends BaseWidget {
 			
 			$config['columns']['classes'] += $classes;
 		}
-		
-		
-		\Yii::trace(print_r($config['items'],true), __METHOD__);
-		\Yii::trace(print_r($config['columns'],true), __METHOD__);
 				
 		return $config;
 	}

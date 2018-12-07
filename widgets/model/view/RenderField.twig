@@ -1,0 +1,9 @@
+{% if widget.wrapLayout %}
+{{ t.renderWidget('mozzler.base.widgets.model.view.RenderFieldLayout', arrayhelper.merge(widget.layoutConfig, {
+	'content': widget.widgetHtml,
+	'model': widget.model,
+	'attribute': widget.attribute
+})) }}
+{% else %}
+{{ widget.widgetHtml }}
+{% endif %}
