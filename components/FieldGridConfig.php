@@ -34,9 +34,20 @@ class FieldGridConfig {
 				'class' => '\kartik\grid\DataColumn',
 				'format' => ['date', 'php:'.Yii::$app->formatter->datetimeFormat]
 			],
+			'SingleSelect' => [
+				'class' => '\kartik\grid\EnumColumn'
+			]
 		];
-		
-		\Yii::trace(Yii::$app->formatter->datetimeFormat);
+	}
+	
+	public function fieldFunctions() {
+		return [
+			'SingleSelect' => function($field) {
+				return [
+					'enum' => $field->options
+				];
+			}
+		];
 	}
 	
 	/**
@@ -52,15 +63,21 @@ class FieldGridConfig {
 	 * @param $fieldType	Type of field (ie: Boolean)
 	 * @param $customConfig	Custom configuration for this field
 	 */
-	public function getFieldConfig($fieldType, $attribute, $customConfig=[]) {
+	public function getFieldConfig($field, $customConfig=[]) {
 		$config = $this->config();
 		
-		if (!isset($config[$fieldType])) {
+		if (!isset($config[$field->type])) {
 			return $customConfig;
 		}
 		
-		$config = ArrayHelper::merge($config[$fieldType], $customConfig);
-		$config['attribute'] = $attribute;
+		$config = ArrayHelper::merge($config[$field->type], $customConfig);
+		$config['attribute'] = $field->attribute;
+		
+		$fieldFunctions = $this->fieldFunctions();
+		if (isset($fieldFunctions[$field->type])) {
+			$config = ArrayHelper::merge($fieldFunctions[$field->type]($field), $config);
+		}
+		
 		return $config;
 	}
 	

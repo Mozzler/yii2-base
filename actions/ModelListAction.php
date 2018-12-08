@@ -50,7 +50,7 @@ class ModelListAction extends BaseModelAction
 		foreach ($attributes as $attribute) {
 			$field = $model->getModelField($attribute);
 			$customFieldConfig = [];
-			$columns[] = $fieldGridConfig->getFieldConfig($field->type, $attribute, $customFieldConfig);
+			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
 		}
 		
 		$config = ArrayHelper::merge([
@@ -59,8 +59,6 @@ class ModelListAction extends BaseModelAction
 				'columns' => $columns
 			]
 		], $this->config());
-		
-		\Yii::trace(print_r($columns,true));
         
         $this->controller->data['config'] = $config;
         $this->controller->data['model'] = $model;

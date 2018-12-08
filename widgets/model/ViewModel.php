@@ -36,8 +36,7 @@ class ViewModel extends BaseWidget {
 		$config = $this->config(true);
 		$model = $config['model'];
 		$t = new \mozzler\base\components\Tools;
-		
-		//widget = include("rappsio.base/ui/tools.js").processTemplates(widget, {"widget": widget});
+
 		$attributes = $model->activeAttributes();
 		
 		$items = [];
