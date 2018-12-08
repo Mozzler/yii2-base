@@ -1,7 +1,9 @@
 <?php
 return [
     'components' => [
-        // list of component configurations
+	    'fieldGridConfig' => [
+		    'class' => 'mozzler\base\components\FieldGridConfig'
+	    ]
     ],
     'params' => [
         // list of parameters

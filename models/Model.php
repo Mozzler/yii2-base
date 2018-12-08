@@ -34,7 +34,6 @@ class Model extends ActiveRecord {
 		if (!$this->controllerRoute) {
 			$className = self::className();
 			preg_match('/([^\\\\]*)$/i', $className, $matches);
-			\Yii::trace(print_r($matches,true));
 		
 			if (sizeof($matches) == 2) {
 				$this->controllerRoute = strtolower($matches[1]);

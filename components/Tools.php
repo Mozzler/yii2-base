@@ -21,8 +21,8 @@ class Tools extends Component {
 		if ($wrapConfig) {
 			$config = ['config' => $config];
 		}
-		
-		$widget = self::getWidget($widgetName);
+
+		$widget = self::getWidget($widgetName, $config);
 		$output = $widget::widget($config);
 		return $output;
 	}
@@ -63,11 +63,11 @@ class Tools extends Component {
 		
 	}
 	
-	public static function getWidget($widget) {
+	public static function getWidget($widget, $config=[]) {
 		$className = self::getClassName($widget);
 		ob_start();
         ob_implicit_flush(false);
-		$widget = new $className;
+		$widget = new $className($config);
 		ob_get_clean();
 		return $widget;
 	}
