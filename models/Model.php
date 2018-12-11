@@ -25,6 +25,11 @@ class Model extends ActiveRecord {
 	const SCENARIO_SEARCH = 'search';
 	const SCENARIO_EXPORT = 'export';
 	
+	const SCENARIO_CREATE_API = 'create-api';
+	const SCENARIO_UPDATE_API = 'update-api';
+	const SCENARIO_LIST_API = 'list-api';
+	const SCENARIO_VIEW_API = 'view-api';
+	
 	public function init() {
 		parent::init();
 		
@@ -145,13 +150,18 @@ class Model extends ActiveRecord {
 	
 	public function fields()
 	{
-		// TODO: return fields based on this->modelFields;
+		// just use the current scenario fields
+		return $this->activeAttributes();
 	}
 	
 	public function attributes()
 	{
 		$attributes = [];
 		$fields = $this->modelFields;
+		
+		if (!$fields) {
+			return [];
+		}
 		
 		foreach ($fields as $fieldKey => $field) {
 			$attributes[] = $fieldKey;
