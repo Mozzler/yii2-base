@@ -18,11 +18,11 @@ class BaseModelAction extends BaseAction
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function findModel($id)
-    { \Yii::trace('findmodel!!!');
+    {
         if ($this->findModel !== null) {
             return call_user_func($this->findModel, $id, $this);
         }
-\Yii::trace('findmodel');
+
         /* @var $modelClass ActiveRecordInterface */
         $modelClass = $this->controller->modelClass;
         $keys = $modelClass::primaryKey();
