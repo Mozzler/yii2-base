@@ -16,7 +16,8 @@ class Mozzler extends Component {
         'Email' => 'mozzler\base\fields\Email',
         'RelateOne' => 'mozzler\base\fields\RelateOne',
         'Password' => 'mozzler\base\fields\Password',
-        'SingleSelect' => 'mozzler\base\fields\SingleSelect'
+        'SingleSelect' => 'mozzler\base\fields\SingleSelect',
+        'Json' => 'mozzler\base\fields\Json'
 	];
 	
 }
