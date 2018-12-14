@@ -26,8 +26,8 @@ class ModelController extends WebController {
 	        'update' => [
 	            'class' => 'mozzler\base\actions\ModelUpdateAction'
 	        ],
-	        'list' => [
-	            'class' => 'mozzler\base\actions\ModelListAction'
+	        'index' => [
+	            'class' => 'mozzler\base\actions\ModelIndexAction'
 	        ],
 	        'delete' => [
 	            'class' => 'mozzler\base\actions\ModelDeleteAction'

@@ -7,9 +7,9 @@ use yii\helpers\ArrayHelper;
 use mozzler\base\models\Model;
 use yii\helpers\Html;
 
-class ModelListAction extends BaseModelAction
+class ModelIndexAction extends BaseModelAction
 {
-	public $id = 'list';
+	public $id = 'index';
     
     /**
      * @var string the scenario to be assigned to the new model before it is validated and saved.

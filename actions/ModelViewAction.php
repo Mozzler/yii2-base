@@ -75,7 +75,6 @@ class ModelViewAction extends BaseModelAction
     public function run()
     {
 		$id = \Yii::$app->request->get('id');
-		\Yii::trace('calling find model');
 	    $model = $this->findModel($id);
 	    
         if ($this->checkAccess) {
