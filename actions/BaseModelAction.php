@@ -1,6 +1,8 @@
 <?php
 namespace mozzler\base\actions;
 
+use yii\web\NotFoundHttpException;
+
 class BaseModelAction extends BaseAction
 {
 	public $id = 'model';
