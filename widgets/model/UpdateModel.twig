@@ -1,0 +1,40 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+	{% set form = t.getWidget('yii.widgets.ActiveForm') %}
+    {% set form = form.begin({
+        "id": "form-" ~ widget.id
+    }|merge(widget.formConfig)) %}
+    
+    {% set bodyContent %}
+		{% for hiddenInput in widget.hiddenItems %}
+        	{{ t.renderWidget('mozzler.base.widgets.model.input.HiddenField', {
+				'form': form,
+				'model': widget.model,
+				'attribute': hiddenInput
+			}) }}
+        {% endfor %}
+        {% for inputItem in widget.items %}
+        	{{ t.renderWidget('mozzler.base.widgets.model.input.RenderField', {
+				'form': form,
+				'model': widget.model,
+				'attribute': inputItem
+			}) }}
+        {% endfor %}
+    {% endset %}
+
+    <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
+	    {{ t.renderWidget('mozzler.base.widgets.bootstrap.Panel', {
+		    'heading': {
+		    	'title': {
+		    		'content': '<div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>Create ' ~ widget.model.getModelConfig("label")
+		    	}
+		    },
+		    'footer': {
+		    	'content': '&nbsp; <div class=\"pull-right\"><input type=\"submit\" class=\"btn btn-success btn-sm\" value=\"Save ' ~ widget.model.getModelConfig('label') ~ '\" /></div>'
+		    },
+		    'body': {
+			    'content': form.errorSummary(widget.model) ~ bodyContent
+			}
+	    }) }}
+    </{{ widget.container.tag }}>
+    {% set form = form.end() %}
+</{{ widget.tag }}>

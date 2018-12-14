@@ -2,10 +2,9 @@
 namespace mozzler\base\actions;
 
 use mozzler\base\models\Model;
-use Yii;
 use yii\helpers\Url;
 
-class ModelCreateAction extends BaseAction
+class ModelCreateAction extends BaseModelAction
 {
 	public $id = 'create';
     
@@ -14,6 +13,7 @@ class ModelCreateAction extends BaseAction
      */
 
     public $scenario = Model::SCENARIO_CREATE;
+    
     /**
      * @var string the name of the view action. This property is need to create the URL when the model is successfully created.
      */
@@ -30,8 +30,6 @@ class ModelCreateAction extends BaseAction
             call_user_func($this->checkAccess, $this->id);
         }
         
-        $modelClass = $this->controller->modelClass;
-
         /* @var $model \yii\db\ActiveRecord */
         $model = $this->controller->data['model'];
         $model->setScenario($this->scenario);
@@ -45,7 +43,7 @@ class ModelCreateAction extends BaseAction
 		// populate the model with any POST data
 		if ($model->load(\Yii::$app->request->post())) {
 	        if ($model->save()) {
-	            $response = Yii::$app->getResponse();
+	            $response = \Yii::$app->getResponse();
 	            $response->setStatusCode(201);
 	            $id = implode(',', array_values($model->getPrimaryKey(true)));
 	            
