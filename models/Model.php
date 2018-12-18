@@ -286,10 +286,9 @@ class Model extends ActiveRecord {
 		    return \Yii::$app->urlManager->createUrl($urlParams);
 		}
     }
-    
-    public function id() {
-	    return (string)$this->getPrimaryKey();
-	}
 
+	public function getId() {
+        return (string)$this->getPrimaryKey();
+    }
 	
 }

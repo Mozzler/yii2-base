@@ -5,6 +5,14 @@ use yii\rest\ActiveController as BaseActiveController;
 
 use mozzler\base\models\Model;
 
+use yii\helpers\ArrayHelper;
+use mozzler\base\yii\oauth\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
+use mozzler\base\yii\oauth\auth\CompositeAuth;
+
+use mozzler\base\yii\oauth\auth\ErrorToExceptionFilter;
+//use filsh\yii2\oauth2server\filters\ErrorToExceptionFilter;
+
 class ActiveController extends BaseActiveController
 {
 	
@@ -64,5 +72,20 @@ class ActiveController extends BaseActiveController
                 'viewScenario' => $this->viewScenario
             ]
         ];
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'authenticator' => [
+                'class' => CompositeAuth::className(),
+                'authMethods' => [
+                    ['class' => HttpBearerAuth::className()]
+                ]
+            ]
+        ]);
     }
 }
