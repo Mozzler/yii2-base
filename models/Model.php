@@ -274,8 +274,8 @@ class Model extends ActiveRecord {
      */
     public function getUrl($action='view', $params=[], $absolute=false) {
 	    $urlParams = ArrayHelper::merge([$this->controllerRoute.'/'.$action], $params);
-	    if (!isset($urlParams['id']) && $this->id()) {
-		    $urlParams['id'] = $this->id();
+	    if (!isset($urlParams['id']) && $this->id) {
+		    $urlParams['id'] = $this->id;
 	    }
 
 		if ($absolute) {
@@ -289,6 +289,16 @@ class Model extends ActiveRecord {
 
 	public function getId() {
         return (string)$this->getPrimaryKey();
+    }
+    
+    public static function collectionName()
+    {
+	    if (isset(static::$collectionName))
+	    {
+		    return static::$collectionName;
+	    }
+	    
+	    return parent::collectionName();
     }
 	
 }
