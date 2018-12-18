@@ -207,8 +207,10 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
 
     public function getUserDetails($username)
     {
+	    $details = [];
         if ($user = $this->getUser($username)) {
-            $user['user_id'] = $user['username'];
+	        $usernameField = $user::$usernameField;
+            $details['user_id'] = $user->$usernameField;
         }
         return $user;
     }
@@ -246,38 +248,43 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
     // plaintext passwords are bad!  Override this for your application
     protected function checkPassword($user, $password)
     {
-        return $user['password'] == $password;
+        return $user->validatePassword($password);
     }
 
     public function getUser($username)
     {
-        $result = $this->collection('user_table')->findOne(array('username' => $username));
-        return is_null($result) ? false : $result;
+	    $identity = \Yii::createObject(\Yii::$app->user->identityClass);
+	    $user = $identity::findByUsername($username);
+	    
+        //$result = $this->collection('user_table')->findOne(array('username' => $username));
+        return is_null($user) ? false : $user;
     }
 
     public function setUser($username, $password, $firstName = null, $lastName = null)
     {
-        if ($this->getUser($username)) {
-            $result = $this->collection('user_table')->updateOne(
+	    $user = $this->getUser($username);
+        if ($user) {
+	        $user->password = $password;
+	        return $user->save();
+	        
+            /*$result = $this->collection('user_table')->updateOne(
                 array('username' => $username),
                 array('$set' => array(
                     'password' => $password,
                     'first_name' => $firstName,
                     'last_name' => $lastName
                 ))
-            );
+            );*/
 
             return $result->getMatchedCount() > 0;
         }
+        
+        $user = \Yii::createObject(\Yii::$app->user->identityClass);
+        $usernameField = $user::$usernameField;
 
-        $user = array(
-            'username' => $username,
-            'password' => $password,
-            'first_name' => $firstName,
-            'last_name' => $lastName
-        );
-        $result = $this->collection('user_table')->insertOne($user);
-        return $result->getInsertedCount() > 0;
+        $user->$usernameField = $username;
+        $user->password = $password;
+        return $user->save();
     }
 
     public function getClientKey($client_id, $subject)
