@@ -71,8 +71,8 @@ class Model extends ActiveRecord {
             self::SCENARIO_UPDATE => ['name'],
             self::SCENARIO_LIST => ['name', 'createdUserId', 'createdAt'],
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
-            self::SCENARIO_SEARCH => ['_id', 'name', 'createdUserId', 'updatedUserId'],
-            self::SCENARIO_EXPORT => ['_id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
+            self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
+            self::SCENARIO_EXPORT => ['id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
             self::SCENARIO_DEFAULT => array_keys($this->modelFields())
         ];
     }
@@ -248,6 +248,10 @@ class Model extends ActiveRecord {
 
             $result[$field] = $field;
         }
+        
+        $result['id'] = function($model) {
+			return $model->getId();
+		};
 
         if (empty($expand)) {
             return $result;
