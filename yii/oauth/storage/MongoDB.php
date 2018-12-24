@@ -202,6 +202,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
         if ($user = $this->getUser($username)) {
             return $this->checkPassword($user, $password);
         }
+        
         return false;
     }
 

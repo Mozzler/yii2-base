@@ -304,5 +304,29 @@ class Model extends ActiveRecord {
 	    
 	    return parent::collectionName();
     }
+    
+    /**
+	 * Override the default getDirtyAttributes() method to remove
+	 * any fields that shouldn't be saved to the database.
+	 *
+	 * Doing it this way allows fields to still be returned via a
+	 * scenario (as the value isn't cleared from the model), but
+	 * is never saved to the database as all the save() methods
+	 * use getDirtyAttributes() to determine what to save.
+	 */
+    public function getDirtyAttributes($names = null) {
+	    $attributes = parent::getDirtyAttributes($names);
+	    
+	    // only include attributes that should be saved
+	    $finalAttributes = [];
+	    foreach ($attributes as $key => $value) {
+		    $field = $this->getModelField($key);
+		    if ($field && $field->save) {
+			    $finalAttributes[$key] = $value;
+		    }
+	    }
+	    
+	    return $finalAttributes;
+    }
 	
 }

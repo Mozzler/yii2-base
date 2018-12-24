@@ -19,6 +19,11 @@ class Base extends Component {
 	public $widgets = [];
 	public $hidden = false;
 	
+	/**
+	 * Should this field be saved to the database?
+	 */
+	public $save = true;
+	
 	//public $format = 'text';	// see i18n/Formatter
 	//public $options;
 	//public $filter;
