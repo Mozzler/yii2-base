@@ -24,25 +24,18 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
             $this->db = $connection;
         } else {
 	        $this->db = \Yii::$app->get($this->db);
-	        //throw new \InvalidArgumentException('First argument to mozzler\base\yii\oauth\storage\MongoDB must be an instance of yii\mongodb\Connection');
-            /*if (!is_array($connection)) {
-                throw new \InvalidArgumentException('First argument to OAuth2\Storage\Mongo must be an instance of MongoDB\Database or a configuration array');
-            }
-            $server = sprintf('mongodb://%s:%d', $connection['host'], $connection['port']);
-            $m = new Client($server);
-            $this->db = $m->selectDatabase($connection['database']);*/
         }
         
         $this->config = ArrayHelper::merge([
-            'client_table' => 'oauth_clients',
-            'access_token_table' => 'oauth_access_tokens',
-            'refresh_token_table' => 'oauth_refresh_tokens',
-            'code_table' => 'oauth_authorization_codes',
-            'user_table' => 'oauth_users',
-            'jwt_table' => 'oauth_jwt',
-            'jti_table' => 'oauth_jti',
-            'scope_table'  => 'oauth_scopes',
-            'key_table'  => 'oauth_keys'
+            'client_table' => 'mozzler.auth.clients',
+            'access_token_table' => 'mozzler.auth.access_tokens',
+            'refresh_token_table' => 'mozzler.auth.refresh_tokens',
+            'code_table' => 'mozzler.auth.authorization_codes',
+            'user_table' => 'mozzler.auth.users',
+            'jwt_table' => 'mozzler.auth.jwt',
+            'jti_table' => 'mozzler.auth.jti',
+            'scope_table'  => 'mozzler.auth.scopes',
+            'key_table'  => 'mozzler.auth.keys'
         ], $config);
     }
 
@@ -73,7 +66,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
     public function setClientDetails($client_id, $client_secret = null, $redirect_uri = null, $grant_types = null, $scope = null, $user_id = null)
     {
         if ($this->getClientDetails($client_id)) {
-            $result = $this->collection('client_table')->updateOne(
+            $result = $this->collection('client_table')->update(
                 array('client_id' => $client_id),
                 array('$set' => array(
                     'client_secret' => $client_secret,
@@ -83,7 +76,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
                     'user_id'       => $user_id,
                 ))
             );
-            return $result->getMatchedCount() > 0;
+            return $result > 0;
         }
         $client = array(
             'client_id'     => $client_id,
@@ -93,8 +86,8 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
             'scope'         => $scope,
             'user_id'       => $user_id,
         );
-        $result = $this->collection('client_table')->insertOne($client);
-        return $result->getInsertedCount() > 0;
+        $result = $this->collection('client_table')->insert($client);
+        return !is_null($result);
     }
 
     public function checkRestrictedGrantType($client_id, $grant_type)
@@ -112,6 +105,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
     public function getAccessToken($access_token)
     {
         $token = $this->collection('access_token_table')->findOne(array('access_token' => $access_token));
+        \Yii::trace(print_r($token,true));
         return is_null($token) ? false : $token;
     }
 
@@ -119,7 +113,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
     {
         // if it exists, update it.
         if ($this->getAccessToken($access_token)) {
-            $result = $this->collection('access_token_table')->updateOne(
+            $result = $this->collection('access_token_table')->update(
                 array('access_token' => $access_token),
                 array('$set' => array(
                     'client_id' => $client_id,
@@ -128,7 +122,8 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
                     'scope' => $scope
                 ))
             );
-            return $result->getMatchedCount() > 0;
+
+            return $result > 0;
         }
         $token = array(
             'access_token' => $access_token,
@@ -137,16 +132,18 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
             'user_id' => $user_id,
             'scope' => $scope
         );
-        $result = $this->collection('access_token_table')->insertOne($token);
-        return $result->getInsertedCount() > 0;
+        $result = $this->collection('access_token_table')->insert($token);
+        
+        return !is_null($result);
     }
 
     public function unsetAccessToken($access_token)
     {
-        $result = $this->collection('access_token_table')->deleteOne(array(
+        $result = $this->collection('access_token_table')->remove([
             'access_token' => $access_token
-        ));
-        return $result->getDeletedCount() > 0;
+        ]);
+        
+        return true;
     }
 
     /* AuthorizationCodeInterface */
@@ -184,16 +181,18 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
             'scope' => $scope,
             'id_token' => $id_token,
         );
-        $result = $this->collection('code_table')->insertOne($token);
-        return $result->getInsertedCount() > 0;
+        $result = $this->collection('code_table')->insert($token);
+
+        return !is_null($result);
     }
 
     public function expireAuthorizationCode($code)
     {
-        $result = $this->collection('code_table')->deleteOne(array(
+        $result = $this->collection('code_table')->remove([
             'authorization_code' => $code
-        ));
-        return $result->getDeletedCount() > 0;
+        ]);
+        
+        return true;
     }
 
     /* UserCredentialsInterface */
@@ -213,7 +212,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
 	        $usernameField = $user::$usernameField;
             $details['user_id'] = $user->$usernameField;
         }
-        return $user;
+        return $details;
     }
 
     /* RefreshTokenInterface */
@@ -222,6 +221,7 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
         $token = $this->collection('refresh_token_table')->findOne(array(
             'refresh_token' => $refresh_token
         ));
+
         return is_null($token) ? false : $token;
     }
 
@@ -234,16 +234,18 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
             'expires' => $expires,
             'scope' => $scope
         );
-        $result = $this->collection('refresh_token_table')->insertOne($token);
-        return $result->getInsertedCount() > 0;
+        $result = $this->collection('refresh_token_table')->insert($token);
+
+        return !is_null($result);
     }
 
     public function unsetRefreshToken($refresh_token)
     {
-        $result = $this->collection('refresh_token_table')->deleteOne(array(
+        $result = $this->collection('refresh_token_table')->remove([
             'refresh_token' => $refresh_token
-        ));
-        return $result->getDeletedCount() > 0;
+        ]);
+        
+        return true;
     }
 
     // plaintext passwords are bad!  Override this for your application
@@ -267,17 +269,6 @@ class MongoDB implements Storage\AuthorizationCodeInterface,
         if ($user) {
 	        $user->password = $password;
 	        return $user->save();
-	        
-            /*$result = $this->collection('user_table')->updateOne(
-                array('username' => $username),
-                array('$set' => array(
-                    'password' => $password,
-                    'first_name' => $firstName,
-                    'last_name' => $lastName
-                ))
-            );*/
-
-            return $result->getMatchedCount() > 0;
         }
         
         $user = \Yii::createObject(\Yii::$app->user->identityClass);
