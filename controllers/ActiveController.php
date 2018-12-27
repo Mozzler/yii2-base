@@ -17,7 +17,10 @@ class ActiveController extends BaseActiveController
 {
 	
 	// custom serializer to support scenario based responses
-	public $serializer = '\mozzler\base\yii\rest\Serializer';
+	public $serializer = [
+        'class' => 'yii\rest\Serializer',
+        'collectionEnvelope' => 'items'
+    ];
 	
 	/**
      * @var string the scenario used for updating a model.
