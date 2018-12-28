@@ -1,5 +1,5 @@
 <div class="page-model-view">
-        {# r.renderWidget("model/view/header", config.headerConfig|merge({"model": model})) #}
-        {{ t.renderWidget("mozzler.base.widgets.model.ViewModel", arrayhelper.merge(config.viewConfig, {"model": model})) }}
-        {# r.renderWidget("model/view/relatePanels", config.relatePanelsConfig|merge({"model": model})) #}
+    {{ t.renderWidget("mozzler.base.widgets.model.ViewHeader", arrayhelper.merge(config.headerConfig, {"model": model})) }}
+    {{ t.renderWidget("mozzler.base.widgets.model.ViewModel", arrayhelper.merge(config.viewConfig, {"model": model})) }}
+    {# t.renderWidget("model/view/relatePanels", config.relatePanelsConfig|merge({"model": model})) #}
 </div>

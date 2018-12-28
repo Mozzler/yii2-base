@@ -1,0 +1,5 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+	<{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
+		<a href="{{ widget.emptyModel.getUrl("create") }}" class="btn btn-primary btn-sm">Create {{ widget.model.modelConfig('label') }}</a>
+	</{{ widget.container.tag }}>
+</{{ widget.tag }}>

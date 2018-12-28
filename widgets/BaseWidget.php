@@ -10,6 +10,7 @@ use mozzler\base\helpers\WidgetHelper;
 class BaseWidget extends Widget {
 	
 	public $viewName = null;
+	public $dirName = null;
 	public $config = [];
 	
 	public function defaultConfig()
@@ -36,6 +37,7 @@ class BaseWidget extends Widget {
 			$class = new \ReflectionClass($this);
 			$pathInfo = pathinfo($class->getFileName());
 			$this->viewName = $pathInfo['filename'];
+			$this->dirName = $pathInfo['dirname'];
 		}
 	}
 	
@@ -50,6 +52,7 @@ class BaseWidget extends Widget {
 	}
 	
 	public function html($config=[]) {
+		$this->outputCss();
 		return $this->render($this->viewName, [
 			'widget' => $config
 		]);
@@ -65,6 +68,22 @@ class BaseWidget extends Widget {
     public function outputJsData($jsData) {
 	    $view = \Yii::$app->controller->getView();
 	    $view->registerJs(" m.widgets['".$this->id."'] = ".json_encode($jsData)."; ", WebView::POS_HEAD);
+    }
+    
+    /**
+	 * This is a quick and dirty way to dynamically include a CSS file linked to a widget.
+	 * If the same widget is included twice in a page this CSS will be included twice (not good).
+	 * Need to refactor this to use SCSS and conver the SCSS into CSS using a core theme CSS files
+	 */
+    public function outputCss()
+    {
+	    $view = \Yii::$app->controller->getView();
+	    $cssFile = $this->dirName . DIRECTORY_SEPARATOR . $this->viewName.'.css';
+	    
+	    if (file_exists($cssFile))
+	    {
+		    $view->registerCss(file_get_contents($cssFile));
+	    }
     }
 	
 }
