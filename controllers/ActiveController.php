@@ -6,9 +6,9 @@ use yii\rest\ActiveController as BaseActiveController;
 use mozzler\base\models\Model;
 
 use yii\helpers\ArrayHelper;
-use mozzler\base\yii\oauth\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
-use mozzler\base\yii\oauth\auth\CompositeAuth;
+use mozzler\auth\yii\oauth\auth\CompositeAuth;
+use mozzler\auth\yii\oauth\auth\HttpBearerAuth;
 
 use mozzler\base\yii\oauth\auth\ErrorToExceptionFilter;
 //use filsh\yii2\oauth2server\filters\ErrorToExceptionFilter;
