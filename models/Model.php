@@ -1,11 +1,11 @@
 <?php
 namespace mozzler\base\models;
 
-use \yii\mongodb\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\helpers\ArrayHelper;
 
+use mozzler\rbac\mongodb\ActiveRecord as ActiveRecord;
 use mozzler\base\helpers\FieldHelper;
 use mozzler\base\helpers\ControllerHelper;
 
@@ -124,6 +124,42 @@ class Model extends ActiveRecord {
 				]
 			],
 		];
+	}
+	
+	/**
+	 * Deny access to public users, which ensures
+	 */
+	public static function rbac() {
+		return [
+			'public' => [
+				'find' => [
+		            'grant' => false
+		        ],
+		        'insert' => [
+		            'grant' => false
+		        ],
+		        'update' => [
+		            'grant' => false
+		        ],
+		        'delete' => [
+		            'grant' => false
+		        ]
+	        ],
+	        'registered' => [
+				'find' => [
+		            'grant' => true
+		        ],
+		        'insert' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
+	        ]
+	    ];
 	}
 	
 	public function getModelConfig($key=null) {

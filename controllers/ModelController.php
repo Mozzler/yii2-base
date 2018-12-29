@@ -39,7 +39,7 @@ class ModelController extends WebController {
 	 * Deny access to public users, which ensures
 	 */
 	public static function rbac() {
-		return ArrayHelper::merge(parent::rbac(), [
+		return [
 			'public' => [
 				'create' => [
 		            'grant' => false
@@ -74,7 +74,7 @@ class ModelController extends WebController {
 		            'grant' => true
 		        ]
 	        ]
-	    ]);
+	    ];
 	}
 	
 	public function getModel() {
