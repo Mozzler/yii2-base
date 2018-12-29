@@ -35,6 +35,48 @@ class ModelController extends WebController {
 	    ]);
 	}
 	
+	/**
+	 * Deny access to public users, which ensures
+	 */
+	public static function rbac() {
+		return ArrayHelper::merge(parent::rbac(), [
+			'public' => [
+				'create' => [
+		            'grant' => false
+		        ],
+		        'view' => [
+		            'grant' => false
+		        ],
+		        'update' => [
+		            'grant' => false
+		        ],
+		        'index' => [
+		            'grant' => false
+		        ],
+		        'delete' => [
+		            'grant' => false
+		        ]
+	        ],
+	        'registered' => [
+				'create' => [
+		            'grant' => true
+		        ],
+		        'view' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'index' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
+	        ]
+	    ]);
+	}
+	
 	public function getModel() {
 		return \Yii::createObject($this->modelClass);
 	}

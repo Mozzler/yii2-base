@@ -41,4 +41,8 @@ class WebController extends Controller {
 	    return false;
     }
     
+    public static function rbac() {
+	    return [];
+    }
+    
 }
