@@ -11,7 +11,7 @@ class SingleSelectField extends BaseField
 	{
 		return [
 			'widgetConfig' => [
-				'options' => ['placeholder' => 'Select a {{ widget.model.getModelField(widget.attribute).label }} ...'],
+				'options' => ['placeholder' => 'Select {{ widget.model.getModelField(widget.attribute).label }} ...'],
 				'pluginOptions' => [
 					'allowClear' => false
 				]
