@@ -11,9 +11,16 @@ class MultiSelectField extends BaseField {
 		
 		$modelField = $config['model']->getModelField($config['attribute']);
 		$attribute = $config['attribute'];
-		$labels = $modelField->getOptionLabels($config['model']->$attribute);
+		$value = $config['model']->$attribute;
 		
-		$config['displayValues'] = join($labels, ', ');
+		if ($value) {
+			$labels = $modelField->getOptionLabels($value);
+			$config['displayValues'] = join($labels, ', ');
+		} else {
+			$config['displayValues'] = '';
+		}
+		
+		
 		
 		return $config;
 	}
