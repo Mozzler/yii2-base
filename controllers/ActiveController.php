@@ -77,6 +77,45 @@ class ActiveController extends BaseActiveController
         ];
     }
     
+    public static function rbac() {
+		return [
+			'public' => [
+				'create' => [
+		            'grant' => false
+		        ],
+		        'view' => [
+		            'grant' => false
+		        ],
+		        'update' => [
+		            'grant' => false
+		        ],
+		        'index' => [
+		            'grant' => false
+		        ],
+		        'delete' => [
+		            'grant' => false
+		        ]
+	        ],
+	        'registered' => [
+				'create' => [
+		            'grant' => true
+		        ],
+		        'view' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'index' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
+	        ]
+	    ];
+	}
+    
     /**
      * @inheritdoc
      */
