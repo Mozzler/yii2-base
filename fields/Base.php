@@ -52,6 +52,11 @@ class Base extends Component {
 		
 		if ($this->required && !isset($customRules['required'])) {
 			$rules['required'] = ['message' => $this->label.' cannot be blank'];
+			
+			// required may be an array of scenarios where it is required
+			if (is_array($this->required)) {
+				$rules['required']['on'] = $this->required;
+			}
 		}
 		
 		if ($this->default) {
