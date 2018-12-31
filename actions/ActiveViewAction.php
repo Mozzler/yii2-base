@@ -10,9 +10,7 @@ class ActiveViewAction extends \yii\rest\ViewAction
 	public function run($id) {
 		$item = parent::run($id);
 		
-		return [
-			'item' => $item
-		];
+		return $item;
 	}
 	
     public function findModel($id)

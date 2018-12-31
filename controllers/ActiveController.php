@@ -11,15 +11,15 @@ use mozzler\auth\yii\oauth\auth\CompositeAuth;
 use mozzler\auth\yii\oauth\auth\HttpBearerAuth;
 
 use mozzler\base\yii\oauth\auth\ErrorToExceptionFilter;
-//use filsh\yii2\oauth2server\filters\ErrorToExceptionFilter;
 
 class ActiveController extends BaseActiveController
 {
 	
 	// custom serializer to support scenario based responses
 	public $serializer = [
-        'class' => 'yii\rest\Serializer',
-        'collectionEnvelope' => 'items'
+        'class' => 'mozzler\base\yii\rest\Serializer',
+        'collectionEnvelope' => 'items',
+        'itemEnvelope' => 'item'
     ];
 	
 	/**

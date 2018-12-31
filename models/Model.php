@@ -290,9 +290,9 @@ class Model extends ActiveRecord {
             $result[$field] = $field;
         }
         
-        $result['id'] = function($model) {
+        $result = array_merge(['id' => function($model) {
 			return $model->getId();
-		};
+		}], $result);
 
         if (empty($expand)) {
             return $result;

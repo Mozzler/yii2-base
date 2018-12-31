@@ -4,6 +4,8 @@ namespace mozzler\base\yii\rest;
 class Serializer extends \yii\rest\Serializer
 {
 	
+	public $itemEnvelope;
+	
 	/**
 	 * Override base serializeModel() to adhere to scenario if defined
 	 */
@@ -37,7 +39,13 @@ class Serializer extends \yii\rest\Serializer
 	        $finalFields = $activeAttributes;
         }
         
-        return $model->toArray($finalFields, $finalExpand);
+        if ($this->itemEnvelope === null) {
+	        return $model->toArray($finalFields, $finalExpand);
+        }
+        
+        return [
+	        $this->itemEnvelope => $model->toArray($finalFields, $finalExpand)
+        ];
 	}
 	
 }
