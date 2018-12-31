@@ -43,6 +43,10 @@ class ViewModel extends BaseWidget {
 		
 		foreach ($attributes as $attribute) {
 			$modelField = $model->getModelField($attribute);
+			if (!$modelField) {
+				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ".$model->scenario." on ".$model->className());
+				continue;
+			}
 			
 			if (in_array($modelField->type, ['RelateMany', 'RelateManyMany'])) {
 				// Don't render relate many fields in the view

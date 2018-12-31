@@ -176,6 +176,11 @@ class Model extends ActiveRecord {
 	
 	public function getModelField($key=null) {
 		if ($key) {
+			// Handle 'id' as an alias for _id
+			if ($key == 'id') {
+				$key = '_id';
+			}
+			
 			if (isset($this->modelFields[$key])) {
 				return $this->modelFields[$key];
 			}

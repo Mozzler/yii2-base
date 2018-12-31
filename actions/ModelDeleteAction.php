@@ -22,10 +22,6 @@ class ModelDeleteAction extends BaseModelAction
 	    $id = \Yii::$app->request->get('id');
         $model = $this->findModel($id);
 	    
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this->getUniqueId(), $model);
-        }
-        
         if ($model && $model->delete()) {
 	        return $this->controller->redirect([$this->viewAction]);
         }

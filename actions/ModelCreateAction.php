@@ -26,10 +26,6 @@ class ModelCreateAction extends BaseModelAction
      */
     public function run()
     {
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this->id);
-        }
-        
         /* @var $model \yii\db\ActiveRecord */
         $model = $this->controller->data['model'];
         $model->setScenario($this->scenario);

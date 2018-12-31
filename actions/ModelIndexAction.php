@@ -30,11 +30,7 @@ class ModelIndexAction extends BaseModelAction
     /**
      */
     public function run()
-    {
-	    if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this->id);
-        }
-        
+    {   
         $model = $this->controller->data['model'];
         $model->setScenario($this->scenario);
         

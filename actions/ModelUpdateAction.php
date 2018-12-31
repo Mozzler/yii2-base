@@ -23,10 +23,6 @@ class ModelUpdateAction extends BaseModelAction
     {
 	    $id = \Yii::$app->request->get('id');
 	    $model = $this->findModel($id);
-	    
-	    if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this->getUniqueId(), $model);
-        }
         
         // set scenario so we load and save the correct fields
         $model->setScenario($this->scenario);
