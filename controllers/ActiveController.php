@@ -68,25 +68,21 @@ class ActiveController extends BaseActiveController
             'index' => [
                 'class' => 'mozzler\base\actions\ActiveIndexAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->listScenario
             ],
             'view' => [
                 'class' => 'mozzler\base\actions\ActiveViewAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->viewScenario
             ],
             'create' => [
                 'class' => 'mozzler\base\actions\ActiveCreateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->createScenario
             ],
             'update' => [
                 'class' => 'mozzler\base\actions\ActiveUpdateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
                 'viewScenario' => $this->viewScenario
             ]
