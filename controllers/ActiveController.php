@@ -45,6 +45,22 @@ class ActiveController extends BaseActiveController
      * @see \yii\base\Model::scenarios()
      */
     public $listScenario = Model::SCENARIO_VIEW;
+    
+    /**
+	 * Model class associated with this controller
+	 */
+    public $modelClass = null;
+    
+    public function init()
+    {
+        if ($this->modelClass === null) {
+            throw new InvalidConfigException(get_class($this) . '::$modelClass must be set.');
+        }
+        
+        // Instantiate an instance of the model class to ensure the database collectoin
+        // is configured for RBAC
+        \Yii::createObject($this->modelClass);
+    }
 
     public function actions()
     {

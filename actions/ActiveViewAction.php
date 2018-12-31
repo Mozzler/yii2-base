@@ -7,6 +7,14 @@ class ActiveViewAction extends \yii\rest\ViewAction
 {
 	public $scenario = Model::SCENARIO_VIEW;
 	
+	public function run($id) {
+		$item = parent::run($id);
+		
+		return [
+			'item' => $item
+		];
+	}
+	
     public function findModel($id)
     {
         $model = parent::findModel($id);
