@@ -7,10 +7,13 @@ use mozzler\base\models\Model;
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
-use mozzler\auth\yii\oauth\auth\CompositeAuth;
+
+//use mozzler\auth\yii\oauth\auth\CompositeAuth;
+use mozzler\rbac\filters\CompositeAuth;
+
 use mozzler\auth\yii\oauth\auth\HttpBearerAuth;
 
-use mozzler\base\yii\oauth\auth\ErrorToExceptionFilter;
+use mozzler\rbac\filters\RbacFilter;
 
 class ActiveController extends BaseActiveController
 {
@@ -134,6 +137,9 @@ class ActiveController extends BaseActiveController
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
+	        'rbacFilter' => [
+                'class' => RbacFilter::className()
+            ],
             'authenticator' => [
                 'class' => CompositeAuth::className(),
                 'authMethods' => [
