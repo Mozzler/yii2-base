@@ -6,13 +6,9 @@ use yii\rest\ActiveController as BaseActiveController;
 use mozzler\base\models\Model;
 
 use yii\helpers\ArrayHelper;
-use yii\filters\auth\QueryParamAuth;
-
-//use mozzler\auth\yii\oauth\auth\CompositeAuth;
-use mozzler\rbac\filters\CompositeAuth;
 
 use mozzler\auth\yii\oauth\auth\HttpBearerAuth;
-
+use mozzler\rbac\filters\CompositeAuth;
 use mozzler\rbac\filters\RbacFilter;
 
 class ActiveController extends BaseActiveController
@@ -137,14 +133,20 @@ class ActiveController extends BaseActiveController
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
-	        'rbacFilter' => [
-                'class' => RbacFilter::className()
-            ],
+	        /**
+			 * Enable OAuth2 authentication as this is an API request
+			 */
             'authenticator' => [
                 'class' => CompositeAuth::className(),
                 'authMethods' => [
                     ['class' => HttpBearerAuth::className()]
                 ]
+            ],
+            /**
+			 * Enable RBAC permission checks on controller actions
+			 */
+            'rbacFilter' => [
+                'class' => RbacFilter::className()
             ]
         ]);
     }

@@ -6,6 +6,10 @@ use yii\helpers\ArrayHelper;
 
 use mozzler\base\helpers\ControllerHelper;
 
+use mozzler\auth\yii\oauth\auth\HttpBearerAuth;
+use mozzler\rbac\filters\CompositeAuth;
+use mozzler\rbac\filters\RbacFilter;
+
 class WebController extends Controller {
 
 	public static $moduleClass = 'mozzler\base\Module';
@@ -39,5 +43,20 @@ class WebController extends Controller {
 	    }
 	    
 	    return false;
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+	    /**
+		 * Enable RBAC permission checks on controller actions
+		 */
+        return ArrayHelper::merge(parent::behaviors(), [
+            'rbacFilter' => [
+                'class' => RbacFilter::className()
+            ]
+        ]);
     }
 }
