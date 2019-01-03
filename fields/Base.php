@@ -80,4 +80,9 @@ class Base extends Component {
 		return $value;
 	}
 	
+	public function applySearchRules($searchModel) {
+		$searchModel->addRule($this->attribute, 'trim');
+		$searchModel->addRule($this->attribute, 'string');
+	}
+	
 }

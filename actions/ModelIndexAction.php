@@ -1,7 +1,6 @@
 <?php
 namespace mozzler\base\actions;
 
-use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 
 use mozzler\base\models\Model;
@@ -31,17 +30,32 @@ class ModelIndexAction extends BaseModelAction
      */
     public function run()
     {   
-        $model = $this->controller->data['model'];
-        $model->setScenario($this->scenario);
+        $indexModel = $this->controller->data['model'];
+        $indexModel->setScenario($this->scenario);
         
-        // build data provider
-		$dataProvider = new ActiveDataProvider([
-			'query' => $model::find()
-		]);
+        $searchModel = $indexModel->generateSearchModel();
+        $dataProvider = $searchModel->search(\Yii::$app->request->get());
+		$columns = $this->buildColumns($indexModel);
 		
-		$base = \Yii::$app->getModule('mozzlerBase');
+		$config = ArrayHelper::merge([
+			'gridViewConfig' => [
+				'dataProvider' => $dataProvider,
+				'filterModel' => $searchModel,
+				'columns' => $columns
+			]
+		], $this->config());
+        
+        $this->controller->data['config'] = $config;
+        $this->controller->data['model'] = $searchModel;
+        
+        return parent::run();
+    }
+    
+    protected function buildColumns($model) {
+	    $base = \Yii::$app->getModule('mozzlerBase');
 		$fieldGridConfig = $base->fieldGridConfig;
-		$attributes = $model->activeAttributes();
+		
+	    $attributes = $model->activeAttributes();
 		$columns = [];
 		foreach ($attributes as $attribute) {
 			$field = $model->getModelField($attribute);
@@ -49,16 +63,6 @@ class ModelIndexAction extends BaseModelAction
 			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
 		}
 		
-		$config = ArrayHelper::merge([
-			'gridViewConfig' => [
-				'dataProvider' => $dataProvider,
-				'columns' => $columns
-			]
-		], $this->config());
-        
-        $this->controller->data['config'] = $config;
-        $this->controller->data['model'] = $model;
-        
-        return parent::run();
+		return $columns;
     }
 }

@@ -369,5 +369,10 @@ class Model extends ActiveRecord {
 	    
 	    return $finalAttributes;
     }
+    
+    public function generateSearchModel() {
+	    \Yii::trace('generating search model');
+	    return \Yii::createObject(SearchModel::className(), [$this]);
+    }
 	
 }
