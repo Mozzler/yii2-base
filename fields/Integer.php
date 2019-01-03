@@ -17,6 +17,11 @@ class Integer extends Base {
 			return intval($value);
 	}
 	
+	public function applySearchRules($searchModel) {
+		$searchModel->addRule($this->attribute, 'trim');
+		$searchModel->addRule($this->attribute, 'integer');
+	}
+	
 }
 
 ?>

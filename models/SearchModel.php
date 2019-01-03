@@ -12,26 +12,25 @@ class SearchModel extends DynamicModel {
 	/**
 	 * Build attributes for this dynamic model from the parent model
 	 */
-	public function __construct($parentModel) {
+	public function __construct($attributes=[], $config=[]) {
+		if (!isset($config['parentModel'])) {
+			return;
+		}
+		
+		$parentModel = $config['parentModel'];
 		$attributes = $parentModel->activeAttributes();
 		$this->parentModel = $parentModel;
-		\Yii::trace('set parent');
 		return parent::__construct($attributes, []);
 	}
 	
 	public function init() {
-		\Yii::trace('init start');
 		parent::init();
-		
-		\Yii::trace('parent init done');
 		
 		// Add fields to this search model based on parentModel activeAttributes()
 		foreach ($this->parentModel->activeAttributes() as $attribute) {
 			$modelField = $this->parentModel->getModelField($attribute);
 			$modelField->applySearchRules($this);
 		}
-		
-		\Yii::trace('init done');
 	}
 	
 	/**
@@ -63,15 +62,19 @@ class SearchModel extends DynamicModel {
 				$dataFilter = new ActiveDataFilter([
 					'searchModel' => $this
 				]);
+			
 				$filterCondition = null;
-		        if ($dataFilter->load($params)) {
+				$dataFilter->load($params);
+		        if ($dataFilter->validate()) {
 		            $filterCondition = $dataFilter->build();
-		        }
-				
-				// if we have a valid filter condition, add it to the query
-				if ($filterCondition !== null) {
-					$query->andWhere($filterCondition);
-				}
+		            
+		            // if we have a valid filter condition, add it to the query
+					if ($filterCondition !== null) {
+						$query->andWhere($filterCondition);
+					}
+		        } else {		        
+			        \Yii::warning('Search filter isn\'t valid: '.print_r($dataFilter->getErrors()['filter'],true));
+			    }
 			}
 		}
 		

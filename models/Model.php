@@ -372,7 +372,7 @@ class Model extends ActiveRecord {
     
     public function generateSearchModel() {
 	    \Yii::trace('generating search model');
-	    return \Yii::createObject(SearchModel::className(), [$this]);
+	    return \Yii::createObject(SearchModel::className(), [[], ['parentModel' => $this]]);
     }
 	
 }
