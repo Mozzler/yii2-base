@@ -12,7 +12,6 @@ class Tools extends Component {
 	
 	public static function load($className, $config=[]) {
 		$className = self::getClassName($className);
-		\Yii::trace("Loading widget".$className);
 		
 		return \Yii::createObject($className, $config);
 	}

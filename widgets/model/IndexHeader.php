@@ -25,6 +25,7 @@ class IndexHeader extends BaseWidget {
 		$config = parent::config($templatify);
 		
 		$config['emptyModel'] = \Yii::createObject($config['model']::className());
+		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['emptyModel'], 'create');
 		
 		return $config;
 	}
