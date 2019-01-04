@@ -5,6 +5,7 @@ use yii\helpers\ArrayHelper;
 
 use mozzler\base\models\Model;
 use yii\helpers\Html;
+use mozzler\base\helpers\WidgetHelper;
 
 class ModelIndexAction extends BaseModelAction
 {
@@ -21,6 +22,17 @@ class ModelIndexAction extends BaseModelAction
 		    'gridViewConfig' => [
 			    'columns' => [
 				    ['class' => '\kartik\grid\ActionColumn']
+			    ],
+			    'panel' => [
+				    'before' => '{{ t.renderWidget("mozzler.base.widgets.model.FilterModel", {"filterModel": widget.filterModel}) }}',
+				    'heading' => '{{ widget.model.getModelConfig("labelPlural") }}'
+			    ],
+			    'toolbar' => [
+				    '{filterButton}',
+				    //'exportButton',
+			    ],
+			    'replaceTags' => [
+				    '{filterButton}' => '<a href="" class="btn btn-sm btn-default">Filter</a>',
 			    ]
 		    ],
 	    ]);
@@ -44,9 +56,13 @@ class ModelIndexAction extends BaseModelAction
 				'columns' => $columns
 			]
 		], $this->config());
+		
+		$config['model'] = $indexModel;
+		$config['filterModel'] = $searchModel;
+		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
         
         $this->controller->data['config'] = $config;
-        $this->controller->data['model'] = $searchModel;
+        $this->controller->data['model'] = $indexModel;
         
         return parent::run();
     }
