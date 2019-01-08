@@ -1,1 +1,37 @@
-FilterModel.twig
+<{{ widget.tag }} id="{{ widget.id }}" {{ r.helpers.Html.renderTagAttributes(widget.options) }}>
+    {% set form = r.getWidget("yii.widgets.ActiveForm") %}
+    {% set form = form.begin({
+        "options": widget.form.options,
+        "action": widget.submitUrl,
+        "method": "GET",
+        "enableClientValidation": false
+    }) %}
+    <div class="col-md-12">
+        <div class="panel panel-default" id="{{ widget.id }}" style="clear: both">
+            <div class="panel-heading">
+                Filter {{ widget.model.getConfig("label_plural") }}
+                <{{ widget.clear.tag }} href="{{ widget.clear.url }}" {{ r.helpers.Html.renderTagAttributes(widget.clear.options) }}>{{ widget.clear.label }}</{{ widget.clear.tag }}>
+            </div>
+            <div class="panel-body">
+                {% for field, details in widget.fields %}
+                {% if loop.index % widget.row.limit == 1 %}
+                <{{ widget.row.tag }} {{ r.helpers.Html.renderTagAttributes(widget.row.options) }}>
+                {% endif %}
+                    <{{ widget.container.tag }} {{ r.helpers.Html.renderTagAttributes(widget.container.options) }}>
+                        {{ r.renderWidget(details.widget, {
+                            "model": widget.model,
+                            "form": form,
+                            "field": details.name,
+                            "fieldConfig": widget.fieldConfigs[details.name].fieldConfig ? widget.fieldConfigs[details.name].fieldConfig : {},
+                            "widgetConfig": widget.fieldConfigs[details.name].widgetConfig ? widget.fieldConfigs[details.name].widgetConfig : {}
+                        }) }}
+                    </{{ widget.container.tag }}>
+                {% if loop.index % widget.row.limit == 0 or loop.last %}
+                </{{ widget.row.tag }}>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% set form = form.end() %}
+</{{ widget.tag }}>
