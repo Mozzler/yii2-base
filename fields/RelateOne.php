@@ -13,7 +13,9 @@ class RelateOne extends MongoId {
 	/**
 	 * What is the foreign key field for this relationship?
 	 */
-	public $relatedModelField = '_id';
+	public $relatedField = '_id';
+	
+	public $linkField = '_id';
 	
 }
 

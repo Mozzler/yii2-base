@@ -1,19 +1,18 @@
 <?php
 namespace mozzler\base\fields;
 
-class RelateMany extends MongoId {
+class RelateMany extends RelateOne {
 	
 	public $type = 'RelateMany';
 	
-	/**
-	 * What model is this relationship linked to?
-	 */
-	public $relatedModel;
-	
-	/**
-	 * What is the foreign key field for this relationship?
-	 */
-	public $relatedField = '_id';
+	public $relationDefaults = [
+		'filter' => [],
+		'limit' => 20,
+		'offset' => null,
+		'orderBy' => [],
+		'fields' => null,
+		'checkPermissions' => true
+	];
 	
 }
 
