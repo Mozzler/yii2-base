@@ -275,7 +275,7 @@ class Model extends ActiveRecord {
     }
     
     /**
-	 * Add support for Rappsio internals
+	 * Add support for internals
 	 * 
 	 * @ignore
 	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
@@ -363,11 +363,195 @@ class Model extends ActiveRecord {
 	    foreach ($attributes as $key => $value) {
 		    $field = $this->getModelField($key);
 		    if ($field && $field->save) {
-			    $finalAttributes[$key] = $value;
+			    $finalAttributes[$key] = $field->setValue($value);
 		    }
 	    }
 	    
 	    return $finalAttributes;
+    }
+    
+    /**
+	 * Get related models
+	 *
+	 * @param	string	$attribute	Related field attribute to get (excluding `_id`)
+	 * @param	array	$filter		MongoDB filter to apply to the query
+	 * @param	int		$limit		Maximum number of results to return
+	 * @param	int		$offset		Offset position for results
+	 * @param	array	$orderBy	The columns (and the directions) to be ordered by. (eg `{_id: r.getConstant("db.SORT_ASC)}`)
+	 * @param	array	$fields		Array of fields to return. Returns all if empty array supplied (default).
+	 * @param	boolean	$checkPermissions	Whether to check permissions based on the logged in user when running the query
+	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
+	 */
+    public function getRelated($attribute, $filter=[], $limit=null, $offset=null, $orderBy=null, $fields=null, $checkPermissions=null) {
+	    $field = $this->getModelField($attribute);
+	    if ($field) {
+    		if ($field->type == 'RelateMany') {
+	    		$config = $field->relationDefaults;
+	    		foreach ($config as $k => $default) {
+		    		if ($$k !== null) {
+			    		$config[$k] = $$k;
+		    		}
+	    		}
+	    		
+    			return $this->getRelatedMany($field->relatedModel, $field->relatedField, $field->linkField, $config['filter'], $config['limit'], $config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+    		}
+    		else if ($field->type == 'RelateManyMany') {
+    			return $this->getRelatedManyMany($field->relatedModel, $field->relatedField, $field->linkField, $field->relatedFieldMany, $config['filter'], $config['limit'], $$config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+    		}
+    	}
+    	elseif ($this->getModelField($attribute.'Id')) {
+    		$attributeId = $attribute.'Id';
+    		
+    		// only try to fetch if there is a value set
+    		$field = $this->getModelField($attributeId);
+    		if ($field->type == 'RelateOne') {
+    			$relatedModelNamespace = $field->relatedModel;
+    			if (isset($field->relatedModelField)) {
+	    			// This may be a flexible field that can be related to multiple model types
+	    			$relatedModelField = $field->relatedModelField;
+
+	    			if ($this->$relatedModelField) {
+		    			$relatedModelNamespace = $this->$relatedModelField;
+		    		}
+    			}
+    		
+    			$result = $this->getRelatedOne($relatedModelNamespace, $attributeId, $checkPermissions);
+    			return $result;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    /**
+     *
+	 */
+    protected function getRelatedOne($modelClass, $fieldFrom, $checkPermissions=true) {
+        $query = $this->hasOne($modelClass, ['_id' => $fieldFrom]);
+        $query->checkPermissions = $checkPermissions;
+        return $query->one();
+    }
+    
+    /**
+	 * @todo Can this be protected?
+	 * @see getRelated()
+	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
+	 */
+    public function getRelatedMany($modelClass, $fieldFrom, $fieldTo, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[], $checkPermissions=true) {
+        $query = $this->hasMany($modelClass, [$fieldFrom => $fieldTo]);
+        $query->checkPermissions = $checkPermissions;
+
+		return $this->buildQuery($query, $filter, $limit, $offset, $orderBy, $fields)->all();
+    }
+    
+    /**
+	 * Add support for internals
+	 *
+	 * @ignore
+	 */
+	protected function getRelatedManyMany($modelClass, $fieldFrom, $fieldTo, $fieldToMany, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[], $checkPermissions=true) {
+		// get all related object ids without filtering OR
+		// use special parameter "$many" as filter
+		$manyFilter = [];
+		if (isset($filter['$many'])) {
+			$manyFilter = $filter['$many'];
+			unset($filter['$many']);
+		}
+		
+		$relatedObjects = $this->getRelatedMany($modelClass, $fieldFrom, $fieldTo, $manyFilter, null, null, [], [$fieldToMany], false);		
+		$ids = [];
+		foreach ($relatedObjects as $record)
+			$ids[] = (string) $record->$fieldToMany;
+		
+		if (sizeof($ids) == 0)
+			return [];
+		
+		// related class = many:many join collection
+		$relatedClass = \Yii::createObject($modelClass);
+		$relatedField = $relatedClass->getField($fieldToMany);
+		$relatedModel = \Yii::createObject($relatedField->relatedModel);
+		
+		if (!isset($filter['_id'])) {
+			$filter['_id'] = [
+				'$in' => $ids
+			];
+		}
+		
+		// find all related models, but this time apply filtering etc.
+		$query = $relatedModel->find($checkPermissions);
+		return $this->buildQuery($query, $filter, $limit, $offset, $orderBy, $fields)->all();
+	}
+	
+	/**
+	 * Add support for internals
+	 *
+	 * @ignore
+	 * @todo Restrict by fields!
+	 */
+	protected function buildQuery($query, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[]) {
+		if ($filter)
+	        $query->where = $filter;
+	    
+	    if ($limit)
+	    	$query->limit = $limit;
+	    
+	    if ($offset)
+	    	$query->offset = $offset;
+	    
+	    if ($orderBy)
+	    	$query->orderBy = $orderBy;
+	    
+	    return $query;
+	}
+	
+	/**
+     * Add support for permission checks
+     *
+     * @see \yii\base\Model::beforeSave()
+     * @param	boolean		$checkPermissions	Whether to check permissions based on the current logged in user.
+     */
+	public static function find($checkPermissions=true, $applyDefaultFilter=true) {
+		$query = \Yii::createObject('yii\mongodb\ActiveQuery', [get_called_class()]);
+		$query->checkPermissions = $checkPermissions;
+		
+		/*if (isset(static::$modelDefaultFilter) && $applyDefaultFilter) {
+			$query->defaultFilter = static::$modelDefaultFilter;
+		}*/
+		
+		return $query;
+    }
+    
+    /**
+     * Add support for permission checks
+     *
+     * @see \yii\base\Model::beforeSave()
+     * @param	boolean		$checkPermissions	Whether to check permissions based on the current logged in user.
+     */
+    public static function findOne($condition, $checkPermissions=true, $applyDefaultFilter=true) {
+        return static::findByCondition($condition, $checkPermissions, $applyDefaultFilter)->one();
+    }
+    
+    /**
+     * Add support for permission checks
+     *
+     * @ignore
+     * @see \yii\base\Model::beforeSave()
+     * @param	boolean		$checkPermissions	Whether to check permissions based on the current logged in user.
+     */
+    protected static function findByCondition($condition, $checkPermissions=true, $applyDefaultFilter=true) {
+        $query = static::find($checkPermissions, $applyDefaultFilter);
+
+        if (!ArrayHelper::isAssociative($condition)) {
+            // query by primary key
+            $primaryKey = static::primaryKey();
+            if (isset($primaryKey[0])) {
+                $condition = [$primaryKey[0] => $condition];
+            } else {
+                throw new InvalidConfigException('"' . get_called_class() . '" must have a primary key.');
+            }
+        }
+        
+        return $query->andWhere($condition);
     }
 	
 }
