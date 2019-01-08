@@ -1,9 +1,9 @@
 <?php
 namespace mozzler\base\fields;
 
-class RelateOne extends MongoId {
+class RelateMany extends MongoId {
 	
-	public $type = 'RelateOne';
+	public $type = 'RelateMany';
 	
 	/**
 	 * What model is this relationship linked to?
