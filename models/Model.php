@@ -49,7 +49,8 @@ class Model extends ActiveRecord {
 		}
 	}
 	
-	protected function modelConfig() {
+	protected function modelConfig()
+	{
 		return [
 			'label' => 'Base Model',
 			'labelPlural' => 'Base Models',
@@ -60,8 +61,14 @@ class Model extends ActiveRecord {
 		];
 	}
 	
-	protected function initModelConfig() {
+	protected function initModelConfig()
+	{
 		$this->modelConfig = $this->modelConfig();
+	}
+	
+	public static function modelIndexes()
+	{
+    	return [];
 	}
 	
 	public function scenarios()
