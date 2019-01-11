@@ -19,7 +19,7 @@ class Mozzler extends Component {
         'Password' => 'mozzler\base\fields\Password',
         'SingleSelect' => 'mozzler\base\fields\SingleSelect',
         'MultiSelect' => 'mozzler\base\fields\MultiSelect',
-        'Json' => 'mozzler\base\fields\Json'
+        'Json' => 'mozzler\base\fields\Json',
 	];
 	
 }
