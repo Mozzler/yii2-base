@@ -26,7 +26,7 @@ class FieldHelper {
 		$fieldTypes = \Yii::$app->mozzler->fieldTypes;
 		
 		if (!isset($fieldTypes[$type])) {
-			throw new \Exception("Field type not found (".$fieldTypes[$type].")");
+			throw new \Exception("Field type not found (".$type.")");
 		}
 		
 		$config['attribute'] = $fieldName;

@@ -15,7 +15,7 @@ class MongoId extends Base {
 		if (!$value)
 			return null;
 			
-		return new \MongoId($value);
+		return new \MongoDB\BSON\ObjectId($value);
 	}
 	
 }

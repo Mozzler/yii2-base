@@ -28,6 +28,7 @@ class FieldGridConfig {
 			'MongoId' => [],
 			'Password' => [],
 			'RelateOne' => [],
+			'RelateMany' => [],
 			'Text' => [],
 			'TextLarge' => [],
 			'Timestamp' => [

@@ -15,6 +15,7 @@ class Mozzler extends Component {
         'Boolean' => 'mozzler\base\fields\Boolean',
         'Email' => 'mozzler\base\fields\Email',
         'RelateOne' => 'mozzler\base\fields\RelateOne',
+        'RelateMany' => 'mozzler\base\fields\RelateMany',
         'Password' => 'mozzler\base\fields\Password',
         'SingleSelect' => 'mozzler\base\fields\SingleSelect',
         'MultiSelect' => 'mozzler\base\fields\MultiSelect',
