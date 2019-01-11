@@ -9,6 +9,8 @@ use yii\console\Controller;
 use yii\helpers\Console;
 use yii\console\ExitCode;
 
+use mozzler\base\helpers\IndexHelper;
+
 /*
     'uniqueMobileDeviceId' => [
 				'columns' => ['mobileDeviceId'],
@@ -47,16 +49,22 @@ class DeployController extends Controller
             'app\models\Device'
         ];
         
+        $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
+        
         foreach ($models as $className) {
             $this->stdout('Processing model: '.$className."\n", Console::FG_GREEN);
             
-            $indexes = $className::modelIndexes();
-            foreach ($indexes as $indexName => $indexConfig)
-            {
-                $this->stdout("Processing index $indexName\n");
-            }
+            $indexManager->syncModelIndexes($className);
+            $this->outputLogs($indexManager->logs);
         }
 
         return ExitCode::OK;
     }
+    
+    protected function outputLogs($logs) {
+        foreach ($logs as $entry) {
+            $this->stdout($entry['message']."\n", $entry['type'] == 'error' ? Console::FG_RED : null);
+        }
+    }
+    
 }
