@@ -24,7 +24,7 @@ class ModelIndexAction extends BaseModelAction
 				    ['class' => '\kartik\grid\ActionColumn']
 			    ],
 			    'panel' => [
-				    'before' => '{{ t.renderWidget("mozzler.base.widgets.model.FilterModel", {"filterModel": widget.filterModel}) }}',
+				    'before' => '{{ t.renderWidget("mozzler.base.widgets.model.FilterModel", {"model": widget.model}) }}',
 				    'heading' => '{{ widget.model.getModelConfig("labelPlural") }}'
 			    ],
 			    'toolbar' => [
@@ -42,27 +42,24 @@ class ModelIndexAction extends BaseModelAction
      */
     public function run()
     {   
-        $indexModel = $this->controller->data['model'];
-        $indexModel->setScenario($this->scenario);
+        $model = $this->controller->data['model'];
+        $model->setScenario($this->scenario);
         
-        $searchModel = $indexModel->generateSearchModel();
-        $dataProvider = $searchModel->search(\Yii::$app->request->get());
-		$columns = $this->buildColumns($indexModel);
+        $dataProvider = $model->search(\Yii::$app->request->get());
+		$columns = $this->buildColumns($model);
 		
 		$config = ArrayHelper::merge([
 			'gridViewConfig' => [
 				'dataProvider' => $dataProvider,
-				'filterModel' => $searchModel,
 				'columns' => $columns
 			]
 		], $this->config());
 		
-		$config['model'] = $indexModel;
-		$config['filterModel'] = $searchModel;
+		$config['model'] = $model;
 		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
         
         $this->controller->data['config'] = $config;
-        $this->controller->data['model'] = $indexModel;
+        $this->controller->data['model'] = $model;
         
         return parent::run();
     }

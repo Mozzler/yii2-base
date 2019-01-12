@@ -7,7 +7,7 @@ use yii\data\ActiveDataFilter;
 
 class SearchModel extends DynamicModel {
 	
-	protected $parentModel;
+	public $parentModel;
 	
 	/**
 	 * Build attributes for this dynamic model from the parent model

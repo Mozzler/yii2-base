@@ -42,6 +42,10 @@ class Base extends Component {
 		if (!isset($this->widgets['view'])) {
 			$this->widgets['view'] = 'mozzler\base\widgets\model\view\\'.$this->type.'Field';
 		}
+		
+		if (!isset($this->widgets['filter'])) {
+			$this->widgets['filter'] = 'mozzler\base\widgets\model\filter\\'.$this->type.'Field';
+		}
 	}
 	
 	/**
@@ -78,11 +82,6 @@ class Base extends Component {
 	// set stored value -- convert application value to db value
 	public function setValue($value) {
 		return $value;
-	}
-	
-	public function applySearchRules($searchModel) {
-		$searchModel->addRule($this->attribute, 'trim');
-		$searchModel->addRule($this->attribute, 'string');
 	}
 	
 }
