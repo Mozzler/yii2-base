@@ -37,6 +37,10 @@ class UpdateModel extends BaseWidget {
 		
 		foreach ($config['attributes'] as $attribute) {
 			$modelField = $config['model']->getModelField($attribute);
+			if (!$modelField) {
+				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ".$model->scenario." on ".$model->className());
+				continue;
+			}
 			
 			if ($modelField->hidden) {
 				$config['hiddenItems'][] = $attribute;
