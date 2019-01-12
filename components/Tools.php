@@ -108,4 +108,24 @@ class Tools extends Component {
 	public static function ensureId($id) {
 		return new \MongoDB\BSON\ObjectId($id);
 	}
+	
+	public static function trace($message, $location=null, $dump=false)
+	{
+    	\Yii::trace($dump ? print_r($message,true) : $message, $location);
+	}
+	
+	public static function warning($message, $location=null, $dump=false)
+	{
+    	\Yii::warning($dump ? print_r($message,true) : $message, $location);
+	}
+	
+	public static function info($message, $location=null, $dump=false)
+	{
+    	\Yii::info($dump ? print_r($message,true) : $message, $location);
+	}
+	
+	public static function error($message, $location=null, $dump=false)
+	{
+    	\Yii::error($dump ? print_r($message,true) : $message, $location);
+	}
 }
