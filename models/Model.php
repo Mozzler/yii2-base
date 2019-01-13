@@ -116,22 +116,18 @@ class Model extends ActiveRecord {
 			'createdUserId' => [
 				'type' => 'RelateOne',
 				'label' => 'Created user',
-				'config' => [
-					'relatedField' => '_id',
-					'relatedModel' => 'User'
-				]
+				'relatedField' => '_id',
+				'relatedModel' => 'app\models\User'
 			],
 			'updatedAt' => [
 				'type' => 'Timestamp',
-				'label' => 'Inserted'
+				'label' => 'Updated'
 			],
 			'updatedUserId' => [
 				'type' => 'RelateOne',
 				'label' => 'Updated user',
-				'config' => [
-					'relatedField' => '_id',
-					'relatedModel' => 'User'
-				]
+				'relatedField' => '_id',
+				'relatedModel' => 'app\models\User'
 			],
 		];
 	}
@@ -393,7 +389,6 @@ class Model extends ActiveRecord {
 	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
 	 */
     public function getRelated($attribute, $filter=[], $limit=null, $offset=null, $orderBy=null, $fields=null, $checkPermissions=null) {
-		
 		if ($this->getModelField($attribute)) {
 			$field = $this->getModelField($attribute);
 		} else {
@@ -428,6 +423,7 @@ class Model extends ActiveRecord {
 							$relatedModelNamespace = $this->$relatedModelField;
 						}
 					}
+
 					return $this->getRelatedOne($relatedModelNamespace, $attribute, $checkPermissions);
 					break;
 				
