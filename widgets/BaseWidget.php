@@ -27,6 +27,8 @@ class BaseWidget extends Widget {
 			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
 		}
 		
+		$config['id'] = $this->id;
+		
 		return $config;
 	}
 	
