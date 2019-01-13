@@ -6,3 +6,7 @@
     text-align: right;
     margin-bottom: 10px;
 }
+
+.widget-model-filter {
+    display: none;
+}
