@@ -3,7 +3,7 @@
 	    <{{ widget.buttonsContainer.tag }} {{ html.renderTagAttributes(widget.buttonsContainer.options) }}>
 	        <a href="#" class="btn btn-default btn-sm btn-filter" title="Filter the results"><span class="glyphicon glyphicon-filter"></span></a>
     		{% if widget.canCreateModel %}
-    			<a href="{{ widget.emptyModel.getUrl("create") }}" class="btn btn-primary btn-sm">Create {{ widget.model.modelConfig('label') }}</a>
+    			<a href="{{ widget.model.getUrl("create") }}" class="btn btn-primary btn-sm">Create {{ widget.model.modelConfig('label') }}</a>
     		{% endif %}
         </{{ widget.buttonsContainer.tag }}>
 		{{ t.renderWidget("mozzler.base.widgets.model.FilterModel", {"model": widget.model}) }}
