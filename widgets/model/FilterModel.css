@@ -1,0 +1,7 @@
+.widget-model-filter .panel-heading .buttons {
+    float: right;
+}
+
+.widget-model-filter .panel-heading .buttons .btn {
+    margin-top: -6px;
+}

@@ -27,6 +27,8 @@ class BaseWidget extends Widget {
 			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
 		}
 		
+		$config['id'] = $this->id;
+		
 		return $config;
 	}
 	
@@ -53,6 +55,7 @@ class BaseWidget extends Widget {
 	
 	public function html($config=[]) {
 		$this->outputCss();
+		$this->outputJs();
 		return $this->render($this->viewName, [
 			'widget' => $config
 		]);
@@ -84,6 +87,32 @@ class BaseWidget extends Widget {
 	    {
 		    $view->registerCss(file_get_contents($cssFile));
 	    }
+    }
+    
+    /**
+     * Output any javascript files associated with this widget
+     */
+    public function outputJs() {
+        $jsTypes = [
+            'ready' => WebView::POS_READY,
+            'begin' => WebView::POS_BEGIN,
+            'end' => WebView::POS_END,
+            'head' => WebView::POS_HEAD,
+            'load' => WebView::POS_LOAD
+        ];
+        
+        $view = \Yii::$app->controller->getView();
+	    $viewPath = $this->dirName . DIRECTORY_SEPARATOR . $this->viewName;
+        
+        foreach ($jsTypes as $name => $position) {
+            $jsFile = "$viewPath.$name.js";
+            if (file_exists($jsFile)) {
+                $jsContent = file_get_contents($jsFile);
+                $jsContent = "\n/* START: $jsFile*/\n$jsContent\n/* END: $jsFile */\n";
+                
+                $view->registerJs($jsContent, $position);
+            }
+        }
     }
 	
 }

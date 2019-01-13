@@ -15,7 +15,7 @@ class RenderFieldLayout extends BaseField {
 		    "attribute" => null,
 		    "content" => null,
 		    "emptyValue" => "-",
-		    "label" => [
+		    "labelConfig" => [
 		        "postFix" => ":"
 		    ],
 		    "tooltip" => [
@@ -23,11 +23,18 @@ class RenderFieldLayout extends BaseField {
 		        "placement" => "top",
 		        "content" => null
 		    ],
-		    "template" => "{{ widget.label }}\n{{ widget.content }}",
+		    "template" => "{{ widget.label }}{{ widget.label.postFix }}</label>\n{{ widget.value }}",
+		    "view" => [
+                "tag" => "div",
+                "options" => [
+                    "class" => "widget-model-field-view"
+                ],
+                "widgetConfig" => []
+            ]
 		]);
 	}
 	
-	public function config($templatify=true) {
+	public function config($templatify=false) {
 		$config = parent::config($templatify);
 		$config['field'] = $config['model']->getModelField($config['attribute']);
 		

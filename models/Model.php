@@ -9,6 +9,9 @@ use mozzler\rbac\mongodb\ActiveRecord as ActiveRecord;
 use mozzler\base\helpers\FieldHelper;
 use mozzler\base\helpers\ControllerHelper;
 
+use yii\data\ActiveDataProvider;
+use yii\data\ActiveDataFilter;
+
 class Model extends ActiveRecord {
 
 	public static $moduleClass = '\mozzler\base\Module';
@@ -376,7 +379,7 @@ class Model extends ActiveRecord {
 	    
 	    return $finalAttributes;
     }
-    
+
     /**
 	 * Get related models
 	 *
@@ -565,6 +568,58 @@ class Model extends ActiveRecord {
         }
         
         return $query->andWhere($condition);
+    }
+    
+    /**
+	 * Build a DataProvider that has a query filtering by the
+	 * data provided in $params
+	 */
+	public function search($params=[]) {
+		// create a query from the parent model
+		$query = $this->find();
+		
+		// load the parameters into this model and continue
+		// if the model validates
+		if ($this->load($params)) {
+			// iterate through the search attributes building a generic filter array
+			$filterParams = ['and' => []];
+			$attributeFilters = [];
+			foreach ($this->attributes() as $attribute) {
+    			$modelField = $this->getModelField($attribute);
+				if ($this->$attribute) {
+					$attributeFilters[] = $modelField->generateFilter($this, $attribute);
+				}
+			}
+			
+			// if we have filters to apply, build a filter condition that can
+			// be added to the query
+			if (sizeof($attributeFilters) > 0) {
+				$filterParams['and'] = $attributeFilters;
+			
+				$params = ['filter' => $filterParams];
+				$dataFilter = new ActiveDataFilter([
+					'searchModel' => $this
+				]);
+			
+				$filterCondition = null;
+				$dataFilter->load($params);
+		        if ($dataFilter->validate()) {
+		            $filterCondition = $dataFilter->build();
+		            
+		            // if we have a valid filter condition, add it to the query
+					if ($filterCondition !== null) {
+						$query->andWhere($filterCondition);
+					}
+		        } else {		        
+			        \Yii::warning('Search filter isn\'t valid: '.print_r($dataFilter->getErrors()['filter'],true));
+			        \Yii::warning(print_r($filterParams,true));
+			    }
+			}
+		}
+		
+		return new ActiveDataProvider([
+			'query' => $query,
+		]);
     }
 	
 }

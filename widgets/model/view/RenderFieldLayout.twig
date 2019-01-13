@@ -2,10 +2,15 @@
     {% set label %}
     <label {% if widget.tooltip.enabled %}data-toggle="tooltip" data-placement="{{ widget.tooltip.placement }}" title="{{ widget.tooltip.content }}"{% endif %}>{{ widget.field.label }}{{ widget.label.postFix }}</label>
     {% endset %}
+    {% set value %}
+        <{{ widget.view.tag }} {{ html.renderTagAttributes(widget.view.options) }}>
+            {{ widget.content }}
+        </{{ widget.view.tag }}>
+    {% endset %}
     {{ t.renderTwig(widget.template, {
 	    "widget": arrayhelper.merge(widget, {
             "label": label,
-            "value": widget.content
+            "value": value
         })
     }) }}
 </{{ widget.tag }}>

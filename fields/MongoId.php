@@ -18,6 +18,10 @@ class MongoId extends Base {
 		return new \MongoDB\BSON\ObjectId($value);
 	}
 	
+	public function generateFilter($model, $attribute) {
+    	return [$attribute => new \MongoDB\BSON\ObjectId($model->$attribute)];
+    }
+	
 }
 
 ?>
