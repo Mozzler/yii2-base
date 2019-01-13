@@ -390,41 +390,47 @@ class Model extends ActiveRecord {
 	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
 	 */
     public function getRelated($attribute, $filter=[], $limit=null, $offset=null, $orderBy=null, $fields=null, $checkPermissions=null) {
-	    $field = $this->getModelField($attribute);
-	    if ($field) {
-    		if ($field->type == 'RelateMany') {
-	    		$config = $field->relationDefaults;
-	    		foreach ($config as $k => $default) {
-		    		if ($$k !== null) {
-			    		$config[$k] = $$k;
-		    		}
-	    		}
-	    		
-    			return $this->getRelatedMany($field->relatedModel, $field->relatedField, $field->linkField, $config['filter'], $config['limit'], $config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
-    		}
-    		else if ($field->type == 'RelateManyMany') {
-    			return $this->getRelatedManyMany($field->relatedModel, $field->relatedField, $field->linkField, $field->relatedFieldMany, $config['filter'], $config['limit'], $$config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
-    		}
-    	}
-    	elseif ($this->getModelField($attribute.'Id')) {
-    		$attributeId = $attribute.'Id';
-    		
-    		// only try to fetch if there is a value set
-    		$field = $this->getModelField($attributeId);
-    		if ($field->type == 'RelateOne') {
-    			$relatedModelNamespace = $field->relatedModel;
-    			if (isset($field->relatedModelField)) {
-	    			// This may be a flexible field that can be related to multiple model types
-	    			$relatedModelField = $field->relatedModelField;
+		
+		if ($this->getModelField($attribute)) {
+			$field = $this->getModelField($attribute);
+		} else {
+			$attribute = $attribute.'Id';
+			$field = $this->getModelField($attribute.'Id');
+		}
 
-	    			if ($this->$relatedModelField) {
-		    			$relatedModelNamespace = $this->$relatedModelField;
-		    		}
-    			}
-    		
-    			$result = $this->getRelatedOne($relatedModelNamespace, $attributeId, $checkPermissions);
-    			return $result;
-    		}
+	    if ($field) {
+			switch ($field->type) {
+				case 'RelateMany':
+
+					$config = $field->relationDefaults;
+					foreach ($config as $k => $default) {
+						if ($$k !== null) {
+							$config[$k] = $$k;
+						}
+					}
+					return $this->getRelatedMany($field->relatedModel, $field->relatedField, $field->linkField, $config['filter'], $config['limit'], $config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+					break;
+
+    			case 'RelateManyMany':
+					return $this->getRelatedManyMany($field->relatedModel, $field->relatedField, $field->linkField, $field->relatedFieldMany, $config['filter'], $config['limit'], $$config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+					break;
+
+				case 'RelateOne':
+					$relatedModelNamespace = $field->relatedModel;
+					if (isset($field->relatedModelField)) {
+						// This may be a flexible field that can be related to multiple model types
+						$relatedModelField = $field->relatedModelField;
+
+						if ($this->$relatedModelField) {
+							$relatedModelNamespace = $this->$relatedModelField;
+						}
+					}
+					return $this->getRelatedOne($relatedModelNamespace, $attribute, $checkPermissions);
+					break;
+				
+				default:
+					return false;
+			}
     	}
     	
     	return false;
