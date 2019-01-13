@@ -32,6 +32,12 @@ class FilterModel extends BaseWidget {
                     "class" => "col-md-3"
                 ]
             ],
+            'buttonsContainer' => [
+				'tag' => 'div',
+				'options' => [
+					'class' => 'buttons'
+				]
+			],
             "row" => [
                 "tag" => "div",
                 "limit" => 4,
@@ -44,12 +50,24 @@ class FilterModel extends BaseWidget {
                 "options" => [
                     "class" => "btn btn-sm btn-default btn-clear"
                 ],
-                "url" => null,
+                "url" => "{{ widget.model.getUrl('index') }}",
                 "label" => "Clear"
+            ],
+            "submit" => [
+                "tag" => "button",
+                "options" => [
+                    "type" => 'submit',
+                    "class" => "btn btn-sm btn-primary btn-submit"
+                ],
+                "label" => "Search"
             ]
         ]);
 	}
 	
+	public function config($templatify=true)
+	{
+    	return parent::config($templatify);
+	}
 }
 
 ?>

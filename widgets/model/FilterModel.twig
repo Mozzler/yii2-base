@@ -1,4 +1,4 @@
-<{{ widget.tag }} id="{{ widget.id }}" {{ r.helpers.Html.renderTagAttributes(widget.options) }}>
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
     {% set form = t.getWidget("yii.widgets.ActiveForm") %}
     {% set form = form.begin({
         "id": "form-" ~ widget.id,
@@ -10,14 +10,17 @@
         <div class="panel panel-default" id="{{ widget.id }}" style="clear: both">
             <div class="panel-heading">
                 Filter {{ widget.model.getModelConfig("labelPlural") }}
-                <{{ widget.clear.tag }} href="{{ widget.clear.url }}" {{ r.helpers.Html.renderTagAttributes(widget.clear.options) }}>{{ widget.clear.label }}</{{ widget.clear.tag }}>
+                <{{ widget.buttonsContainer.tag }} {{ html.renderTagAttributes(widget.buttonsContainer.options) }}>
+                    <{{ widget.clear.tag }} href="{{ widget.clear.url }}" {{ html.renderTagAttributes(widget.clear.options) }}>{{ widget.clear.label }}</{{ widget.clear.tag }}>
+                    <{{ widget.submit.tag }} href="{{ widget.submit.url }}" {{ html.renderTagAttributes(widget.submit.options) }}>{{ widget.submit.label }}</{{ widget.submit.tag }}>
+                </{{ widget.buttonsContainer.tag }}>
             </div>
             <div class="panel-body">
                 {% for attribute in widget.model.activeAttributes() %}
                 {% if loop.index % widget.row.limit == 1 %}
-                <{{ widget.row.tag }} {{ r.helpers.Html.renderTagAttributes(widget.row.options) }}>
+                <{{ widget.row.tag }} {{ html.renderTagAttributes(widget.row.options) }}>
                 {% endif %}
-                    <{{ widget.container.tag }} {{ r.helpers.Html.renderTagAttributes(widget.container.options) }}>
+                    <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
                         {{ t.renderWidget('mozzler.base.widgets.model.filter.RenderField', {
             				'form': form,
             				'model': widget.model,

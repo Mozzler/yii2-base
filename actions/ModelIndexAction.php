@@ -24,15 +24,9 @@ class ModelIndexAction extends BaseModelAction
 				    ['class' => '\kartik\grid\ActionColumn']
 			    ],
 			    'panel' => [
-				    'before' => '{{ t.renderWidget("mozzler.base.widgets.model.FilterModel", {"model": widget.model}) }}',
 				    'heading' => '{{ widget.model.getModelConfig("labelPlural") }}'
 			    ],
 			    'toolbar' => [
-				    '{filterButton}',
-				    //'exportButton',
-			    ],
-			    'replaceTags' => [
-				    '{filterButton}' => '<a href="" class="btn btn-sm btn-default">Filter</a>',
 			    ]
 		    ],
 	    ]);

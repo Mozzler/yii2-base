@@ -15,7 +15,13 @@ class IndexHeader extends BaseWidget {
 			'container' => [
 				'tag' => 'div',
 				'options' => [
-					'class' => 'col-md-12 pull-right'
+					'class' => 'col-md-12'
+				]
+			],
+			'buttonsContainer' => [
+				'tag' => 'div',
+				'options' => [
+					'class' => 'col-md-12 buttons'
 				]
 			],
 		];
