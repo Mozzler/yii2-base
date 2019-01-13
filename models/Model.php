@@ -579,8 +579,9 @@ class Model extends ActiveRecord {
 			$filterParams = ['and' => []];
 			$attributeFilters = [];
 			foreach ($this->attributes() as $attribute) {
+    			$modelField = $this->getModelField($attribute);
 				if ($this->$attribute) {
-					$attributeFilters[] = [$attribute => $this->$attribute];
+					$attributeFilters[] = $modelField->generateFilter($this, $attribute);
 				}
 			}
 			
@@ -605,6 +606,7 @@ class Model extends ActiveRecord {
 					}
 		        } else {		        
 			        \Yii::warning('Search filter isn\'t valid: '.print_r($dataFilter->getErrors()['filter'],true));
+			        \Yii::warning(print_r($filterParams,true));
 			    }
 			}
 		}

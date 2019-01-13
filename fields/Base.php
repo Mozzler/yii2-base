@@ -13,7 +13,7 @@ class Base extends Component {
 	public $rules = [];
 	public $model;
 	public $attribute;
-	public $operator = "=";
+	public $filterType = "=";
 	public $default = null;
 	public $required = false;
 	public $widgets = [];
@@ -82,6 +82,21 @@ class Base extends Component {
 	// set stored value -- convert application value to db value
 	public function setValue($value) {
 		return $value;
+	}
+	
+	/**
+     * Helper method that generates a query filter based on the `$operator`
+     * property of this field
+     */
+	public function generateFilter($model, $attribute) {
+    	switch ($this->operator) {
+        	case '=':
+        	    return [$attribute => $model->$attribute];
+        	    break;
+        	case 'LIKE':
+        	    return [$attribute => ['like' => $model->$attribute]];
+        	    break;
+    	}
 	}
 	
 }
