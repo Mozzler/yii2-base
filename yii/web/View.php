@@ -54,5 +54,19 @@ class View extends WebView {
 
         return $path;
     }
+    
+    /**
+     * Handle any output buffer issues - not sure why this is needed exactly but
+     * it prevents {% set form = ... %} causing output from the action template
+     * at the top of the page before the HTML is rendered.
+     */
+    public function render($view, $params = [], $context = null)
+    {
+        ob_start();
+        ob_implicit_flush(false);
+		$output = parent::render($view, $params, $context);
+		$output = ob_get_clean() . $output;
+		return $output;
+    }
 	
 }
