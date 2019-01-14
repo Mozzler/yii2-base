@@ -22,6 +22,12 @@ class WebController extends Controller {
 	 */
 	public function render($template, $data=[]) {
 		$data = ArrayHelper::merge($this->data, $data);
+
+		if (\Yii::$app->request->isAjax) {
+			\Yii::$app->response->format = \Yii::$app->response::FORMAT_JSON;
+			\Yii::trace($data);
+			return $data;
+		}
 		return parent::render($template, $data);
 	}
 	
