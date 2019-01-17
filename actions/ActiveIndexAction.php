@@ -6,7 +6,16 @@ use mozzler\base\models\Model;
 class ActiveIndexAction extends \yii\rest\IndexAction
 {
 	
-	public $scenario = Model::SCENARIO_LIST;
+    public $scenario = Model::SCENARIO_LIST;
+   
+    public function init() {
+        parent::init();
+
+        $this->dataFilter = [
+            'class' => 'yii\data\ActiveDataFilter',
+            'searchModel' => $this
+        ];
+    }
 	
     public function findModel($id)
     {
