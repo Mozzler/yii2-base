@@ -46,12 +46,15 @@ class DeployController extends Controller
     {
         // find all the models
         $models = [
-            'app\models\Device'
+            // 'app\models\Device',
+            'app\models\Config'
         ];
         
         $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
         
         foreach ($models as $className) {
+            $indexManager->logs = [];
+
             $this->stdout('Processing model: '.$className."\n", Console::FG_GREEN);
             
             $indexManager->syncModelIndexes($className);
