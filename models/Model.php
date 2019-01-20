@@ -23,11 +23,13 @@ class Model extends ActiveRecord {
 	
 	const SCENARIO_CREATE = 'create';
 	const SCENARIO_UPDATE = 'update';
+	const SCENARIO_DELETE = 'delete';
 	const SCENARIO_LIST = 'list';
 	const SCENARIO_VIEW = 'view';
 	const SCENARIO_SEARCH = 'search';
 	const SCENARIO_EXPORT = 'export';
-	
+	const SCENARIO_DEFAULT = 'default';
+
 	const SCENARIO_CREATE_API = 'create-api';
 	const SCENARIO_UPDATE_API = 'update-api';
 	const SCENARIO_LIST_API = 'list-api';
@@ -83,6 +85,7 @@ class Model extends ActiveRecord {
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => ['id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
+            self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
             self::SCENARIO_DEFAULT => array_keys($this->modelFields())
         ];
     }
