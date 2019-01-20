@@ -439,6 +439,7 @@ class Model extends ActiveRecord {
      *
 	 */
     protected function getRelatedOne($modelClass, $fieldFrom, $checkPermissions=true) {
+		\Yii::createObject($modelClass);
         $query = $this->hasOne($modelClass, ['_id' => $fieldFrom]);
         $query->checkPermissions = $checkPermissions;
         return $query->one();
@@ -450,6 +451,7 @@ class Model extends ActiveRecord {
 	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
 	 */
     public function getRelatedMany($modelClass, $fieldFrom, $fieldTo, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[], $checkPermissions=true) {
+		\Yii::createObject($modelClass);
         $query = $this->hasMany($modelClass, [$fieldFrom => $fieldTo]);
         $query->checkPermissions = $checkPermissions;
 
