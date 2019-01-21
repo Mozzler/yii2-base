@@ -16,35 +16,30 @@ class IndexManager
 		
 		foreach ($existingIndexes as $eIndex){
 			// Get the existingIndex Name
-			$indexName = array_keys($eIndex['key'])[0];
+			$indexName = $eIndex['name'];
 			
 			// Always skip the _id index by default this is index 
 			// amade by mongo nd we don't want to mess with it
-			if ($indexName == "_id") {
+			if ($indexName == "_id_") {
 				continue;
 			}
 
 			// Check if existingIndex is present or changed in modelIndexes
 			$existsFlag = false;
 			$changedFlag = false;
-			foreach ($modelIndexes as $mIndex => $mIndexConfig) {
-				if ($eIndex['key'] == $mIndexConfig['columns']) {
-					$existsFlag = true;
 
-					if (!isset($eIndex['unique']) || ArrayHelper::getValue($eIndex, 'unique') != $mIndexConfig['options']['unique']) {
-						$changedFlag = true;
-						break;
-					}
+			if (isset($modelIndexes[$indexName])) {
+				if ($eIndex['key'] == $modelIndexes[$indexName]['columns']) {
+					if (ArrayHelper::getValue($eIndex, 'unique') != $modelIndexes[$indexName]['options']['unique']) {
+						$this->handleUpdate($collection, $eIndex['key'], $indexName, $modelIndexes[$indexName]);
+					} 
+				} else {
+					$this->handleUpdate($collection, $eIndex['key'], $indexName, $modelIndexes[$indexName]);
 				}
+			} elseif (!isset($modelIndexes[$indexName])) {
+				$this->handleDelete($collection, $eIndex['key'], $indexName);
 			}
 
-			if ($existsFlag && $changedFlag) {
-				// if index  exists and with changes UPDATE the index
-				$this->handleUpdate($collection, $eIndex['key'], $mIndexConfig);
-			} elseif (!$existsFlag) {
-				// if index does not exists, DELETE it from collection
-				$this->handleDelete($collection, $eIndex['key']);
-			}
 			
     	}
         
@@ -54,12 +49,16 @@ class IndexManager
 	/**
      * Handle updating existing indexes if they have changed
      */
-	protected function handleUpdate($collection, $indexName, $indexConfig)
+	protected function handleUpdate($collection, $indexKey, $indexName, $indexConfig)
 	{
-        $collection->dropIndex($indexName);
-		$collection->createIndex($indexConfig['columns'], $indexConfig['options']);
+		$collection->dropIndex($indexKey);
+
+		$options = $indexConfig['options'];
+		$options['name'] = $indexName;
+
+		$collection->createIndex($indexConfig['columns'], $options);
 		
-        $this->addLog("Updated index: ".array_keys($indexName)[0]);
+        $this->addLog("Updated index: ".$indexName);
 	}
 	
 	/**
@@ -88,11 +87,11 @@ class IndexManager
 	/**
      * Handle deleting existing indexes if they have been removed
      */
-	protected function handleDelete($collection, $indexName)
+	protected function handleDelete($collection, $indexKey, $indexName)
 	{
 		$collection->dropIndex($indexName);
 		
-        $this->addLog("Deleted index: ".array_keys($indexName)[0]);
+        $this->addLog("Deleted index: ".$indexName);
 	}
 	
 	protected function getExistingIndexes($className)
