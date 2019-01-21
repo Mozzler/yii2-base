@@ -70,7 +70,10 @@ class IndexManager
     	foreach ($modelIndexes as $indexName => $indexConfig) {
         	if (!isset($existingIndexes[$indexName])) {
             	try {
-                	if ($collection->createIndex($indexConfig['columns'], $indexConfig['options'])) {
+					$options = $indexConfig['options'];
+					$options['name'] = $indexName;
+
+                	if ($collection->createIndex($indexConfig['columns'], $options)) {
                     	$this->addLog("Creating index: $indexName");
                 	} else {
                     	$this->addLog("Unable to create index: $indexName", 'error');
