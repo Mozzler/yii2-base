@@ -71,6 +71,27 @@ class Model extends ActiveRecord {
 		$this->modelConfig = $this->modelConfig();
 	}
 	
+	/**
+	 * Specifies the indexes of a Model.
+	 * 
+	 * Sample model class:
+	 * return ArrayHelper::merge(parent::modelIndexes(), [
+	 *		'nameUnique' => [
+	 *			'columns' => ['name' => 1],
+	 *			'options' => [
+	 *				'unique' => 0
+	 *			],
+	 *			'duplicateMessage' => ['Name already exists in the collection']
+	 *		]
+	 *	]); 
+	 * 
+	 * Indexes defined in the model class will be synced to MongoDB Collection
+	 * thru mozzler\base\components\IndexManager class
+	 * where it automatically detects:
+	 * 	- New indexes
+	 *  - Updated indexes
+	 *  - Deleted indexes
+	 */
 	public static function modelIndexes()
 	{
     	return [];
@@ -289,7 +310,7 @@ class Model extends ActiveRecord {
 	 * @ignore
 	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
 	 */
-	protected function resolveFields($fields=[], $expand=[]) {
+	protected function resolveFields(array $fields, array $expand) {
         $result = [];
 
         foreach ($this->modelFields as $field => $definition) {

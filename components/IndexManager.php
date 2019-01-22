@@ -116,6 +116,19 @@ class IndexManager
     	];
 	}
 
+	/**
+	 * Function takes a parameter $modelsPath
+	 * and extracts all valid PHP Class files (non-recursive)
+	 * and assigns them to model for return.
+	 * 
+	 * Return array looks:
+	 * [ 
+	 * 	   [0] => app\models\Config
+     *	   [1] => app\models\Device
+	 * ]
+	 * 
+	 * @param string $modelsPath - the directory where model resides
+	 */
 	public function buildModelClassList($modelsPath)
 	{
 		$files = FileHelper::findFiles(\Yii::getAlias($modelsPath), ['only'=>['*.php'], 'recursive'=>FALSE]);
