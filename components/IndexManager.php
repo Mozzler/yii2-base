@@ -2,6 +2,7 @@
 namespace mozzler\base\components;
 
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 
 class IndexManager
 {
@@ -113,6 +114,19 @@ class IndexManager
         	'message' => $message,
         	'type' => $type
     	];
+	}
+
+	public function buildModelClassList($modelsPath)
+	{
+		$files = FileHelper::findFiles(\Yii::getAlias($modelsPath), ['only'=>['*.php'], 'recursive'=>FALSE]);
+
+		$models = [];
+
+		foreach ($files as $file) {
+            $models[] = \str_replace("/", "\\", \substr($modelsPath, 1)) . \pathinfo($file, PATHINFO_FILENAME);
+        }
+		
+		return $models;
 	}
 	
 }
