@@ -44,6 +44,12 @@ class ActiveController extends BaseActiveController
      * @see \yii\base\Model::scenarios()
      */
     public $listScenario = Model::SCENARIO_VIEW;
+
+    /**
+     * @var string the scenario used for deleting models.
+     * @see \yii\base\Model::scenarios()
+     */
+    public $deleteScenario = Model::SCENARIO_DELETE;
     
     /**
 	 * Model class associated with this controller
@@ -84,6 +90,12 @@ class ActiveController extends BaseActiveController
                 'modelClass' => $this->modelClass,
                 'scenario' => $this->updateScenario,
                 'viewScenario' => $this->viewScenario
+            ],
+            'delete' => [
+                'class' => 'mozzler\base\actions\ActiveDeleteAction',
+                'modelClass' => $this->modelClass,
+                'scenario' => $this->deleteScenario,
+                'viewScenario' => $this->viewScenario
             ]
         ];
     }
@@ -121,7 +133,7 @@ class ActiveController extends BaseActiveController
 		            'grant' => true
 		        ],
 		        'delete' => [
-		            'grant' => true
+		            'grant' => false
 		        ]
 	        ]
 	    ];

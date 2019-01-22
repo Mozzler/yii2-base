@@ -17,7 +17,7 @@ class WidgetHelper extends \yii\base\Component {
 		
 		foreach ($config as $key => $value) {
 			// if we have a string that contains the twig {{ tag
-			if (is_string($value) && strpos($value,'{{')) {
+			if (is_string($value) && strpos($value,'{{') !== false) {
 				try {
 					$value = $t->renderTwig($value, $data, $twigConfig);
 				} catch (\Twig_Error_Syntax $e) {

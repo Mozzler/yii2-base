@@ -9,6 +9,9 @@ use mozzler\rbac\mongodb\ActiveRecord as ActiveRecord;
 use mozzler\base\helpers\FieldHelper;
 use mozzler\base\helpers\ControllerHelper;
 
+use yii\data\ActiveDataProvider;
+use yii\data\ActiveDataFilter;
+
 class Model extends ActiveRecord {
 
 	public static $moduleClass = '\mozzler\base\Module';
@@ -20,11 +23,13 @@ class Model extends ActiveRecord {
 	
 	const SCENARIO_CREATE = 'create';
 	const SCENARIO_UPDATE = 'update';
+	const SCENARIO_DELETE = 'delete';
 	const SCENARIO_LIST = 'list';
 	const SCENARIO_VIEW = 'view';
 	const SCENARIO_SEARCH = 'search';
 	const SCENARIO_EXPORT = 'export';
-	
+	const SCENARIO_DEFAULT = 'default';
+
 	const SCENARIO_CREATE_API = 'create-api';
 	const SCENARIO_UPDATE_API = 'update-api';
 	const SCENARIO_LIST_API = 'list-api';
@@ -80,6 +85,7 @@ class Model extends ActiveRecord {
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => ['id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
+            self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
             self::SCENARIO_DEFAULT => array_keys($this->modelFields())
         ];
     }
@@ -113,22 +119,18 @@ class Model extends ActiveRecord {
 			'createdUserId' => [
 				'type' => 'RelateOne',
 				'label' => 'Created user',
-				'config' => [
-					'relatedField' => '_id',
-					'relatedModel' => 'User'
-				]
+				'relatedField' => '_id',
+				'relatedModel' => 'app\models\User'
 			],
 			'updatedAt' => [
 				'type' => 'Timestamp',
-				'label' => 'Inserted'
+				'label' => 'Updated'
 			],
 			'updatedUserId' => [
 				'type' => 'RelateOne',
 				'label' => 'Updated user',
-				'config' => [
-					'relatedField' => '_id',
-					'relatedModel' => 'User'
-				]
+				'relatedField' => '_id',
+				'relatedModel' => 'app\models\User'
 			],
 		];
 	}
@@ -287,7 +289,7 @@ class Model extends ActiveRecord {
 	 * @ignore
 	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
 	 */
-	protected function resolveFields(array $fields, array $expand) {
+	protected function resolveFields($fields=[], $expand=[]) {
         $result = [];
 
         foreach ($this->modelFields as $field => $definition) {
@@ -376,7 +378,7 @@ class Model extends ActiveRecord {
 	    
 	    return $finalAttributes;
     }
-    
+
     /**
 	 * Get related models
 	 *
@@ -390,41 +392,47 @@ class Model extends ActiveRecord {
 	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
 	 */
     public function getRelated($attribute, $filter=[], $limit=null, $offset=null, $orderBy=null, $fields=null, $checkPermissions=null) {
-	    $field = $this->getModelField($attribute);
-	    if ($field) {
-    		if ($field->type == 'RelateMany') {
-	    		$config = $field->relationDefaults;
-	    		foreach ($config as $k => $default) {
-		    		if ($$k !== null) {
-			    		$config[$k] = $$k;
-		    		}
-	    		}
-	    		
-    			return $this->getRelatedMany($field->relatedModel, $field->relatedField, $field->linkField, $config['filter'], $config['limit'], $config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
-    		}
-    		else if ($field->type == 'RelateManyMany') {
-    			return $this->getRelatedManyMany($field->relatedModel, $field->relatedField, $field->linkField, $field->relatedFieldMany, $config['filter'], $config['limit'], $$config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
-    		}
-    	}
-    	elseif ($this->getModelField($attribute.'Id')) {
-    		$attributeId = $attribute.'Id';
-    		
-    		// only try to fetch if there is a value set
-    		$field = $this->getModelField($attributeId);
-    		if ($field->type == 'RelateOne') {
-    			$relatedModelNamespace = $field->relatedModel;
-    			if (isset($field->relatedModelField)) {
-	    			// This may be a flexible field that can be related to multiple model types
-	    			$relatedModelField = $field->relatedModelField;
+		if ($this->getModelField($attribute)) {
+			$field = $this->getModelField($attribute);
+		} else {
+			$attribute = $attribute.'Id';
+			$field = $this->getModelField($attribute.'Id');
+		}
 
-	    			if ($this->$relatedModelField) {
-		    			$relatedModelNamespace = $this->$relatedModelField;
-		    		}
-    			}
-    		
-    			$result = $this->getRelatedOne($relatedModelNamespace, $attributeId, $checkPermissions);
-    			return $result;
-    		}
+	    if ($field) {
+			switch ($field->type) {
+				case 'RelateMany':
+
+					$config = $field->relationDefaults;
+					foreach ($config as $k => $default) {
+						if ($$k !== null) {
+							$config[$k] = $$k;
+						}
+					}
+					return $this->getRelatedMany($field->relatedModel, $field->relatedField, $field->linkField, $config['filter'], $config['limit'], $config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+					break;
+
+    			case 'RelateManyMany':
+					return $this->getRelatedManyMany($field->relatedModel, $field->relatedField, $field->linkField, $field->relatedFieldMany, $config['filter'], $config['limit'], $$config['offset'], $config['orderBy'], $config['fields'], $config['checkPermissions']);
+					break;
+
+				case 'RelateOne':
+					$relatedModelNamespace = $field->relatedModel;
+					if (isset($field->relatedModelField)) {
+						// This may be a flexible field that can be related to multiple model types
+						$relatedModelField = $field->relatedModelField;
+
+						if ($this->$relatedModelField) {
+							$relatedModelNamespace = $this->$relatedModelField;
+						}
+					}
+
+					return $this->getRelatedOne($relatedModelNamespace, $attribute, $checkPermissions);
+					break;
+				
+				default:
+					return false;
+			}
     	}
     	
     	return false;
@@ -434,6 +442,7 @@ class Model extends ActiveRecord {
      *
 	 */
     protected function getRelatedOne($modelClass, $fieldFrom, $checkPermissions=true) {
+		\Yii::createObject($modelClass);
         $query = $this->hasOne($modelClass, ['_id' => $fieldFrom]);
         $query->checkPermissions = $checkPermissions;
         return $query->one();
@@ -560,6 +569,58 @@ class Model extends ActiveRecord {
         }
         
         return $query->andWhere($condition);
+    }
+    
+    /**
+	 * Build a DataProvider that has a query filtering by the
+	 * data provided in $params
+	 */
+	public function search($params=[]) {
+		// create a query from the parent model
+		$query = $this->find();
+		
+		// load the parameters into this model and continue
+		// if the model validates
+		if ($this->load($params)) {
+			// iterate through the search attributes building a generic filter array
+			$filterParams = ['and' => []];
+			$attributeFilters = [];
+			foreach ($this->attributes() as $attribute) {
+    			$modelField = $this->getModelField($attribute);
+				if ($this->$attribute) {
+					$attributeFilters[] = $modelField->generateFilter($this, $attribute);
+				}
+			}
+			
+			// if we have filters to apply, build a filter condition that can
+			// be added to the query
+			if (sizeof($attributeFilters) > 0) {
+				$filterParams['and'] = $attributeFilters;
+			
+				$params = ['filter' => $filterParams];
+				$dataFilter = new ActiveDataFilter([
+					'searchModel' => $this
+				]);
+			
+				$filterCondition = null;
+				$dataFilter->load($params);
+		        if ($dataFilter->validate()) {
+		            $filterCondition = $dataFilter->build();
+		            
+		            // if we have a valid filter condition, add it to the query
+					if ($filterCondition !== null) {
+						$query->andWhere($filterCondition);
+					}
+		        } else {		        
+			        \Yii::warning('Search filter isn\'t valid: '.print_r($dataFilter->getErrors()['filter'],true));
+			        \Yii::warning(print_r($filterParams,true));
+			    }
+			}
+		}
+		
+		return new ActiveDataProvider([
+			'query' => $query,
+		]);
     }
 	
 }

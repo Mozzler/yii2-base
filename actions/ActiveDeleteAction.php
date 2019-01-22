@@ -2,21 +2,25 @@
 namespace mozzler\base\actions;
 
 use mozzler\base\models\Model;
+use Yii;
+use yii\helpers\Url;
+use yii\web\ServerErrorHttpException;
 
-class ActiveIndexAction extends \yii\rest\IndexAction
+class ActiveDeleteAction extends \yii\rest\DeleteAction
 {
-	
-    public $scenario = Model::SCENARIO_LIST;
-   
-    /*public function init() {
-        parent::init();
+    public $scenario = Model::SCENARIO_DELETE;
+    public $viewScenario = Model::SCENARIO_DELETE;
 
-        $this->dataFilter = [
-            'class' => 'yii\data\ActiveDataFilter',
-            'searchModel' => $this
-        ];
-    }*/
-	
+    public function run($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model && $model->delete()) {
+            return true;
+        }
+        return parent::run();
+    }
+
     public function findModel($id)
     {
         $model = parent::findModel($id);

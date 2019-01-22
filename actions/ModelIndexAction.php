@@ -1,11 +1,11 @@
 <?php
 namespace mozzler\base\actions;
 
-use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 
 use mozzler\base\models\Model;
 use yii\helpers\Html;
+use mozzler\base\helpers\WidgetHelper;
 
 class ModelIndexAction extends BaseModelAction
 {
@@ -22,6 +22,11 @@ class ModelIndexAction extends BaseModelAction
 		    'gridViewConfig' => [
 			    'columns' => [
 				    ['class' => '\kartik\grid\ActionColumn']
+			    ],
+			    'panel' => [
+				    'heading' => '{{ widget.model.getModelConfig("labelPlural") }}'
+			    ],
+			    'toolbar' => [
 			    ]
 		    ],
 	    ]);
@@ -34,20 +39,8 @@ class ModelIndexAction extends BaseModelAction
         $model = $this->controller->data['model'];
         $model->setScenario($this->scenario);
         
-        // build data provider
-		$dataProvider = new ActiveDataProvider([
-			'query' => $model::find()
-		]);
-		
-		$base = \Yii::$app->getModule('mozzlerBase');
-		$fieldGridConfig = $base->fieldGridConfig;
-		$attributes = $model->activeAttributes();
-		$columns = [];
-		foreach ($attributes as $attribute) {
-			$field = $model->getModelField($attribute);
-			$customFieldConfig = [];
-			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
-		}
+        $dataProvider = $model->search(\Yii::$app->request->get());
+		$columns = $this->buildColumns($model);
 		
 		$config = ArrayHelper::merge([
 			'gridViewConfig' => [
@@ -55,10 +48,28 @@ class ModelIndexAction extends BaseModelAction
 				'columns' => $columns
 			]
 		], $this->config());
+		
+		$config['model'] = $model;
+		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
         
         $this->controller->data['config'] = $config;
         $this->controller->data['model'] = $model;
         
         return parent::run();
+    }
+    
+    protected function buildColumns($model) {
+	    $base = \Yii::$app->getModule('mozzlerBase');
+		$fieldGridConfig = $base->fieldGridConfig;
+		
+	    $attributes = $model->activeAttributes();
+		$columns = [];
+		foreach ($attributes as $attribute) {
+			$field = $model->getModelField($attribute);
+			$customFieldConfig = [];
+			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
+		}
+		
+		return $columns;
     }
 }

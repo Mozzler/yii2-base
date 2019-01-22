@@ -15,7 +15,13 @@ class IndexHeader extends BaseWidget {
 			'container' => [
 				'tag' => 'div',
 				'options' => [
-					'class' => 'col-md-12 pull-right'
+					'class' => 'col-md-12'
+				]
+			],
+			'buttonsContainer' => [
+				'tag' => 'div',
+				'options' => [
+					'class' => 'col-md-12 buttons'
 				]
 			],
 		];
@@ -24,8 +30,8 @@ class IndexHeader extends BaseWidget {
 	public function config($templatify=false) {
 		$config = parent::config($templatify);
 		
-		$config['emptyModel'] = \Yii::createObject($config['model']::className());
-		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['emptyModel'], 'create');
+		$config['model']->scenario = $config['model']::SCENARIO_SEARCH;
+		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'create');
 		
 		return $config;
 	}
