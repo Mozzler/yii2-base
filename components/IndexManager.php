@@ -14,7 +14,7 @@ class IndexManager
         
 		$collection = $this->getCollection($className);
 		
-		foreach ($existingIndexes as $eIndex){
+		foreach ($existingIndexes as $eIndex) {
 			// Get the existingIndex Name
 			$indexName = $eIndex['name'];
 			
@@ -25,19 +25,16 @@ class IndexManager
 			}
 
 			// Check if existingIndex is present or changed in modelIndexes
-			$existsFlag = false;
-			$changedFlag = false;
-
 			if (isset($modelIndexes[$indexName])) {
 				if ($eIndex['key'] == $modelIndexes[$indexName]['columns']) {
 					if (ArrayHelper::getValue($eIndex, 'unique') != $modelIndexes[$indexName]['options']['unique']) {
-						$this->handleUpdate($collection, $eIndex['key'], $indexName, $modelIndexes[$indexName]);
+						$this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
 					} 
 				} else {
-					$this->handleUpdate($collection, $eIndex['key'], $indexName, $modelIndexes[$indexName]);
+					$this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
 				}
-			} elseif (!isset($modelIndexes[$indexName])) {
-				$this->handleDelete($collection, $eIndex['key'], $indexName);
+			} else {
+				$this->handleDelete($collection, $indexName);
 			}
 
 			
@@ -49,9 +46,9 @@ class IndexManager
 	/**
      * Handle updating existing indexes if they have changed
      */
-	protected function handleUpdate($collection, $indexKey, $indexName, $indexConfig)
+	protected function handleUpdate($collection, $indexName, $indexConfig)
 	{
-		$collection->dropIndex($indexKey);
+		$collection->dropIndexes($indexName);
 
 		$options = $indexConfig['options'];
 		$options['name'] = $indexName;
@@ -87,9 +84,9 @@ class IndexManager
 	/**
      * Handle deleting existing indexes if they have been removed
      */
-	protected function handleDelete($collection, $indexKey, $indexName)
+	protected function handleDelete($collection, $indexName)
 	{
-		$collection->dropIndex($indexName);
+		$collection->dropIndexes($indexName);
 		
         $this->addLog("Deleted index: ".$indexName);
 	}
@@ -98,7 +95,6 @@ class IndexManager
 	{
     	$collection = $this->getCollection($className);
 		$indexes = $collection->listIndexes();
-		// $this->addLog(' existing indexes ---> ' . json_encode($indexes));
 		
 		return $indexes;
 	}
