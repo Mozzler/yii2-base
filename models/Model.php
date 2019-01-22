@@ -289,7 +289,7 @@ class Model extends ActiveRecord {
 	 * @ignore
 	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
 	 */
-	protected function resolveFields($fields=[], $expand=[]) {
+	protected function resolveFields(array $fields, array $expand) {
         $result = [];
 
         foreach ($this->modelFields as $field => $definition) {
