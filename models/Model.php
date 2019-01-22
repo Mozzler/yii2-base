@@ -445,6 +445,7 @@ class Model extends ActiveRecord {
 	 * @return	array	Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
 	 */
     public function getRelatedMany($modelClass, $fieldFrom, $fieldTo, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[], $checkPermissions=true) {
+		$relatedClass = \Yii::createObject($modelClass);
         $query = $this->hasMany($modelClass, [$fieldFrom => $fieldTo]);
         $query->checkPermissions = $checkPermissions;
 
