@@ -5,9 +5,9 @@ class ActiveUpdateAction extends \yii\rest\UpdateAction
 {
     public $viewScenario = Model::SCENARIO_VIEW;
     
-    public function run()
+    public function run($id)
     {
-	    $model = parent::run();
+	    $model = parent::run($id);
 
         $scenario = $this->viewScenario.'-api';
 
