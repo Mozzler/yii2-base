@@ -20,37 +20,7 @@ class ActiveController extends BaseActiveController
         'collectionEnvelope' => 'items',
         'itemEnvelope' => 'item'
     ];
-	
-	/**
-     * @var string the scenario used for updating a model.
-     * @see \yii\base\Model::scenarios()
-     */
-    public $updateScenario = Model::SCENARIO_UPDATE;
-    
-    /**
-     * @var string the scenario used for creating a model.
-     * @see \yii\base\Model::scenarios()
-     */
-    public $createScenario = Model::SCENARIO_CREATE;
-    
-    /**
-     * @var string the scenario used for viewing a model.
-     * @see \yii\base\Model::scenarios()
-     */
-    public $viewScenario = Model::SCENARIO_VIEW;
-    
-    /**
-     * @var string the scenario used for listng models.
-     * @see \yii\base\Model::scenarios()
-     */
-    public $listScenario = Model::SCENARIO_VIEW;
 
-    /**
-     * @var string the scenario used for deleting models.
-     * @see \yii\base\Model::scenarios()
-     */
-    public $deleteScenario = Model::SCENARIO_DELETE;
-    
     /**
 	 * Model class associated with this controller
 	 */
@@ -72,30 +42,23 @@ class ActiveController extends BaseActiveController
         return [
             'index' => [
                 'class' => 'mozzler\base\actions\ActiveIndexAction',
-                'modelClass' => $this->modelClass,
-                'scenario' => $this->listScenario
+                'modelClass' => $this->modelClass
             ],
             'view' => [
                 'class' => 'mozzler\base\actions\ActiveViewAction',
-                'modelClass' => $this->modelClass,
-                'scenario' => $this->viewScenario
+                'modelClass' => $this->modelClass
             ],
             'create' => [
                 'class' => 'mozzler\base\actions\ActiveCreateAction',
-                'modelClass' => $this->modelClass,
-                'scenario' => $this->createScenario
+                'modelClass' => $this->modelClass
             ],
             'update' => [
                 'class' => 'mozzler\base\actions\ActiveUpdateAction',
-                'modelClass' => $this->modelClass,
-                'scenario' => $this->updateScenario,
-                'viewScenario' => $this->viewScenario
+                'modelClass' => $this->modelClass
             ],
             'delete' => [
                 'class' => 'mozzler\base\actions\ActiveDeleteAction',
-                'modelClass' => $this->modelClass,
-                'scenario' => $this->deleteScenario,
-                'viewScenario' => $this->viewScenario
+                'modelClass' => $this->modelClass
             ]
         ];
     }

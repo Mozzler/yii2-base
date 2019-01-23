@@ -7,7 +7,7 @@ use yii\helpers\ArrayHelper;
 
 use mozzler\rbac\mongodb\ActiveRecord as ActiveRecord;
 use mozzler\base\helpers\FieldHelper;
-use mozzler\base\helpers\ControllerHelper;
+use mozzler\base\helpers\ModelHelper;
 
 use yii\data\ActiveDataProvider;
 use yii\data\ActiveDataFilter;
@@ -621,6 +621,13 @@ class Model extends ActiveRecord {
 		return new ActiveDataProvider([
 			'query' => $query,
 		]);
-    }
+	}
+	
+	/**
+	 * Set the scenario, but support an array of scenarios to check
+	 */
+	public function setScenario($scenario) {
+		parent::setScenario(ModelHelper::getModelScenario($this, $scenario));
+	}
 	
 }
