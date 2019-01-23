@@ -46,7 +46,11 @@ class Model extends ActiveRecord {
 			preg_match('/([^\\\\]*)$/i', $className, $matches);
 		
 			if (sizeof($matches) == 2) {
-				$this->controllerRoute = strtolower($matches[1]);
+				// transform Controller Name to be a valid URL form
+				// lowercase & hyphenated before an uppercase if camelCase
+				// e.g. User => user | SystemLog => system-log
+				// *Note: CamelCASE => camel-c-a-s-e
+				$this->controllerRoute = strtolower(preg_replace('/([a-zA-Z])(?=[A-Z])/', '$1-', $matches[1]));
 			}
 			else {
 				throw new \Exception('Unable to determine controller route for model '.$className);
@@ -327,7 +331,7 @@ class Model extends ActiveRecord {
      * @return	string	URL for the requested action on this model
      */
     public function getUrl($action='view', $params=[], $absolute=false) {
-	    $urlParams = ArrayHelper::merge([$this->controllerRoute.'/'.$action], $params);
+		$urlParams = ArrayHelper::merge([$this->controllerRoute.'/'.$action], $params);
 	    if (!isset($urlParams['id']) && $this->id) {
 		    $urlParams['id'] = $this->id;
 	    }
