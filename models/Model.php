@@ -79,7 +79,7 @@ class Model extends ActiveRecord {
 	 *		'nameUnique' => [
 	 *			'columns' => ['name' => 1],
 	 *			'options' => [
-	 *				'unique' => 1
+	 *				'unique' => 0
 	 *			],
 	 *			'duplicateMessage' => ['Name already exists in the collection']
 	 *		]
