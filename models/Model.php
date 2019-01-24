@@ -79,14 +79,14 @@ class Model extends ActiveRecord {
 	 *		'nameUnique' => [
 	 *			'columns' => ['name' => 1],
 	 *			'options' => [
-	 *				'unique' => 0
+	 *				'unique' => 1
 	 *			],
 	 *			'duplicateMessage' => ['Name already exists in the collection']
 	 *		]
 	 *	]); 
 	 * 
 	 * Indexes defined in the model class will be synced to MongoDB Collection
-	 * thru mozzler\base\components\IndexManager class
+	 * through mozzler\base\components\IndexManager class
 	 * where it automatically detects:
 	 * 	- New indexes
 	 *  - Updated indexes

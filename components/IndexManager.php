@@ -26,11 +26,20 @@ class IndexManager
 			}
 
 			// Check if existingIndex is present or changed in modelIndexes
+
+			$existingIndexOptions = [
+				'unique' => ArrayHelper::getValue($eIndex, 'unique'),
+			];
+
 			if (isset($modelIndexes[$indexName])) {
 				if ($eIndex['key'] == $modelIndexes[$indexName]['columns']) {
-					if (ArrayHelper::getValue($eIndex, 'unique') != $modelIndexes[$indexName]['options']['unique']) {
-						$this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
-					} 
+
+					foreach ($existingIndexOptions as $optionKey => $optionValue) {
+						if ($optionValue != ArrayHelper::getValue($modelIndexes[$indexName]['options'], $optionKey)) {
+							$this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
+						}
+					}
+
 				} else {
 					$this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
 				}
@@ -65,20 +74,30 @@ class IndexManager
 	protected function handleCreate($collection, $modelIndexes, $existingIndexes)
 	{
     	foreach ($modelIndexes as $indexName => $indexConfig) {
-        	if (!isset($existingIndexes[$indexName])) {
-            	try {
+
+			$addFlag = true;
+			foreach ($existingIndexes as $existingIndex) {
+
+				if ($existingIndex['name'] == $indexName) {
+					$addFlag = false;
+					break;
+				}
+			}
+
+			if ($addFlag) {
+				try {
 					$options = $indexConfig['options'];
 					$options['name'] = $indexName;
 
-                	if ($collection->createIndex($indexConfig['columns'], $options)) {
-                    	$this->addLog("Creating index: $indexName");
-                	} else {
-                    	$this->addLog("Unable to create index: $indexName", 'error');
-                	}
-                } catch (\Exception $e) {
-                    $this->addLog("Exception creating: $indexName (".$e->getMessage().")", 'error');
-                }
-        	}
+					if ($collection->createIndex($indexConfig['columns'], $options)) {
+						$this->addLog("Creating index: $indexName");
+					} else {
+						$this->addLog("Unable to create index: $indexName", 'error');
+					}
+				} catch (\Exception $e) {
+					$this->addLog("Exception creating: $indexName (".$e->getMessage().")", 'error');
+				}
+			}
     	}
 	}
 	
