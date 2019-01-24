@@ -42,12 +42,12 @@ class DeployController extends Controller
      *
      * @return int Exit code
      */
-    public function actionSync($modelsPath = '@app/models/')
+    public function actionSync()
     {   
         $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
 
         // find all the models
-        $models = $indexManager->buildModelClassList($modelsPath);
+        $models = $indexManager->buildModelClassList();
         
         foreach ($models as $className) {
             $indexManager->logs = [];

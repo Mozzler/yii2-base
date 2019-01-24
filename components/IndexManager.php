@@ -148,8 +148,10 @@ class IndexManager
 	 * 
 	 * @param string $modelsPath - the directory where model resides
 	 */
-	public function buildModelClassList($modelsPath)
+	public function buildModelClassList()
 	{
+		$modelsPath = '@app/models/';
+
 		$files = FileHelper::findFiles(\Yii::getAlias($modelsPath), ['only'=>['*.php'], 'recursive'=>FALSE]);
 
 		$models = [];
