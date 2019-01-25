@@ -8,8 +8,6 @@ use yii\web\ServerErrorHttpException;
 
 class ActiveDeleteAction extends \yii\rest\DeleteAction
 {
-    public $scenario = Model::SCENARIO_DELETE;
-    public $viewScenario = Model::SCENARIO_DELETE;
 
     public function run($id)
     {
@@ -20,20 +18,5 @@ class ActiveDeleteAction extends \yii\rest\DeleteAction
         }
         return parent::run();
     }
-
-    public function findModel($id)
-    {
-        $model = parent::findModel($id);
-        $scenario = $this->scenario.'-api';
-
-        // check for an "-api" scenario
-        if (in_array($scenario, $model->scenarios())) {
-            $model->scenario = $scenario;
-        } else {
-            $scenario = $this->scenario;
-            $model->scenario = $scenario;
-        }
-
-        return $model;
-    }
+    
 }
