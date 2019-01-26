@@ -31,7 +31,7 @@ class ConfigController extends Controller
     public function actionInit()
     {
         // set the model class
-        $modelClass = 'app\models\Config';
+        $modelClass = 'mozzler\base\models\Config';
 
         // Load the ConfigManager Class
         $configManager = \Yii::createObject('mozzler\base\components\ConfigManager');
