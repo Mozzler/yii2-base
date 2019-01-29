@@ -31,6 +31,8 @@ use mozzler\base\helpers\IndexHelper;
  */
 class DeployController extends Controller
 {
+    public $modelPaths = ['@app/models/'];
+
     /**
      * This command syncs all the indexes found in the application models.
      *
@@ -47,7 +49,7 @@ class DeployController extends Controller
         $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
 
         // find all the models
-        $models = $indexManager->buildModelClassList();
+        $models = $indexManager->buildModelClassList($this->modelPaths);
         
         foreach ($models as $className) {
             $indexManager->logs = [];

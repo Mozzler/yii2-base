@@ -6,7 +6,7 @@ use yii\helpers\FileHelper;
 
 class IndexManager
 {
-    
+
     public $logs = [];
 	
 	public function syncModelIndexes($className) {
@@ -136,8 +136,9 @@ class IndexManager
 	}
 
 	/**
-	 * Function takes a parameter $modelsPath
-	 * and extracts all valid PHP Class files (non-recursive)
+	 * Function takes a parameter $modelPaths array
+	 * and extracts all valid PHP Class files in each
+	 * directory (non-recursive)
 	 * and assigns them to model for return.
 	 * 
 	 * Return array looks:
@@ -146,20 +147,32 @@ class IndexManager
      *	   [1] => app\models\Device
 	 * ]
 	 * 
-	 * @param string $modelsPath - the directory where model resides
 	 */
-	public function buildModelClassList()
+	public function buildModelClassList($modelPaths)
 	{
-		$modelsPath = '@app/models/';
-
-		$files = FileHelper::findFiles(\Yii::getAlias($modelsPath), ['only'=>['*.php'], 'recursive'=>FALSE]);
-
 		$models = [];
 
-		foreach ($files as $file) {
-            $models[] = \str_replace("/", "\\", \substr($modelsPath, 1)) . \pathinfo($file, PATHINFO_FILENAME);
-        }
-		
+		foreach ($modelPaths as $modelPath) {
+
+			try {
+				$files = FileHelper::findFiles(\Yii::getAlias($modelPath), ['only'=>['*.php'], 'recursive'=>FALSE]);
+
+				foreach ($files as $file) {
+					// substr 		- remove @ from the beginning of the modelPath
+					// str_replace 	- substitute / (backward slash) with \ forward slash
+					// rtrim 		- if not exists, add forward slash to the path
+					$path = \rtrim(\str_replace("/", "\\", \substr($modelPath, 1)), '\\') . '\\';
+					$models[] = $path . \pathinfo($file, PATHINFO_FILENAME);
+				}
+
+			} catch (yii\base\InvalidArgumentException $e) {
+				// Catch if exception if dir argument not a directory
+				// continue and ignore the error
+				continue;
+			}
+
+		}
+
 		return $models;
 	}
 	
