@@ -61,8 +61,9 @@ class Config extends BaseModel
 	    $scenarios[self::SCENARIO_CREATE] = ['key_', 'value_'];
 	    $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
 	    $scenarios[self::SCENARIO_LIST] = ['key_', 'value_', 'createdAt'];
-	    $scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'createdAt'];
-	    
+		$scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'createdAt'];
+		$scenarios[self::SCENARIO_SEARCH] = ['key_', 'value_'];
+
         return $scenarios;
     }
     
