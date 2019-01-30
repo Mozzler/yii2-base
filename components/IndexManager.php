@@ -160,9 +160,17 @@ class IndexManager
 				foreach ($files as $file) {
 					// substr 		- remove @ from the beginning of the modelPath
 					// str_replace 	- substitute / (backward slash) with \ forward slash
-					// rtrim 		- if not exists, add forward slash to the path
-					$path = \rtrim(\str_replace("/", "\\", \substr($modelPath, 1)), '\\') . '\\';
-					$models[] = $path . \pathinfo($file, PATHINFO_FILENAME);
+					// rtrim 		- make sure that forward slash is present
+					// pathinfo 	- remove the extension name of PHP files
+					$path = \rtrim(\str_replace("/", "\\", \substr($modelPath, 1)), '\\') . '\\' . \pathinfo($file, PATHINFO_FILENAME);
+
+					// Create an Object base on path
+					$modelClass = \Yii::createObject($path);
+
+					// Test if the object consist `modelIndexes` method before adding to models
+					if (method_exists($modelClass, 'modelIndexes')) {
+						$models[] = $path ;
+					}
 				}
 
 			} catch (yii\base\InvalidArgumentException $e) {

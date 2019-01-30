@@ -31,7 +31,8 @@ use mozzler\base\helpers\IndexHelper;
  */
 class DeployController extends Controller
 {
-    public $modelPaths = ['@app/models/'];
+    // specify the default modelPaths to sync indexes
+    public $modelPaths = ['@app/models/', '@mozzler/base/models/'];
 
     /**
      * This command syncs all the indexes found in the application models.
