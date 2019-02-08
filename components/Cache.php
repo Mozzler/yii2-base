@@ -57,10 +57,11 @@ class Cache extends Component {
 	 * @ignore
 	 */
 	public function init() {
+	    $this->cacheCollection = \mozzler\base\models\Cache::collectionName();
 		$this->cache = new MozzlerCache([
 			'cacheCollection' => $this->cacheCollection
 		]);
-        $this->ensureIndexes();
+//        $this->ensureIndexes(); // Use the `./yii deploy/sync` CLI command instead
         $this->ensureRbacDisabled();
 	}
 
@@ -123,6 +124,7 @@ class Cache extends Component {
 	/**
 	 * @ignore
 	 * @deprecated
+     * Note: Use the `./yii deploy/sync` CLI command instead, which uses the \mozzler\base\models\Cache info
 	 */
 	public function ensureIndexes() {
 		$this->cache->ensureIndexes();

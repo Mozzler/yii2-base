@@ -19,7 +19,7 @@ class MozzlerCache extends MongoCache {
 	
 	public function ensureIndexes() {
 		$this->db->getCollection($this->cacheCollection)
-			->createIndex(["id" => 1, "expire" => 1], ["unique" => 1]);
+			->createIndex(["id" => 1], ["unique" => 1]);
 	}
 	
 }
