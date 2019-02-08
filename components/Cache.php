@@ -60,6 +60,7 @@ class Cache extends Component {
 		$this->cache = new MozzlerCache([
 			'cacheCollection' => $this->cacheCollection
 		]);
+        $this->ensureIndexes();
         $this->ensureRbacDisabled();
 	}
 
