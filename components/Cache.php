@@ -25,7 +25,7 @@ use yii\base\Component;
  * Usage example:
  *
  * ```
- * 
+ *
  * // Set a cache value
  * \Yii::$app->cache->set("mozzler.auth", "activeUserCount", 122);
  *
@@ -47,12 +47,12 @@ class Cache extends Component {
 	 * @ignore
 	 */
 	public $cacheCollection;
-	
+
 	/**
 	 * @ignore
 	 */
 	protected $cache;
-	
+
 	/**
 	 * @ignore
 	 */
@@ -60,18 +60,19 @@ class Cache extends Component {
 		$this->cache = new MozzlerCache([
 			'cacheCollection' => $this->cacheCollection
 		]);
+        $this->ensureRbacDisabled();
 	}
-	
+
 	public function get($namespace, $key) {
 		$this->cache->namespace = $namespace;
 		return $this->cache->get($key);
 	}
-	
+
 	public function exists($namespace, $key) {
 		$this->cache->namespace = $namespace;
 		return $this->cache->exists($key);
 	}
-	
+
 	/**
 	 * @ignore
 	 */
@@ -79,12 +80,12 @@ class Cache extends Component {
 		$this->cache->namespace = $namespace;
 		return $this->cache->mget($keys);
 	}
-	
+
 	public function set($namespace, $key, $value, $duration = 0, $dependency = null) {
 		$this->cache->namespace = $namespace;
 		return $this->cache->set($key, $value, $duration, $dependency);
 	}
-	
+
 	/**
 	 * @ignore
 	 */
@@ -92,7 +93,7 @@ class Cache extends Component {
 		$this->cache->namespace = $namespace;
 		return $this->cache->mset($items, $duration, $dependency);
 	}
-	
+
 	/**
 	 * @ignore
 	 */
@@ -100,24 +101,24 @@ class Cache extends Component {
 		$this->cache->namespace = $namespace;
 		return $this->cache->madd($items, $duration, $dependency);
 	}
-	
+
 	public function add($namespace, $key, $value, $duration = 0, $dependency = null) {
 		$this->cache->namespace = $namespace;
 		return $this->cache->add($key, $value, $duration, $dependency);
 	}
-	
+
 	public function delete($namespace, $key) {
 		$this->cache->namespace = $namespace;
 		return $this->cache->delete($key);
 	}
-	
+
 	/**
 	 * Clear all cache data from a specific namespace
 	 */
 	public function clear($namespace) {
 		$this->cache->clear($namespace);
 	}
-	
+
 	/**
 	 * @ignore
 	 * @deprecated
@@ -125,5 +126,14 @@ class Cache extends Component {
 	public function ensureIndexes() {
 		$this->cache->ensureIndexes();
 	}
-	
+
+    /**
+     * If RBAC is enabled, ignore the app.cache collection (especially as the model doesn't exist)
+     */
+    private function ensureRbacDisabled() {
+        if (isset(\Yii::$app->rbac)) {
+            \Yii::$app->rbac->ignoreCollection($this->cacheCollection);
+        }
+    }
+
 }
