@@ -66,6 +66,11 @@ class ModelIndexAction extends BaseModelAction
 		$columns = [];
 		foreach ($attributes as $attribute) {
 			$field = $model->getModelField($attribute);
+			if (!$field) {
+				\Yii::warning("Unable to locate field for requested attribute ($attribute)");
+				continue;
+			}
+			
 			$customFieldConfig = [];
 			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
 		}
