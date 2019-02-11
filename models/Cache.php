@@ -31,7 +31,7 @@ class Cache extends BaseModel
     {
         return ArrayHelper::merge(parent::modelIndexes(), [
             'cacheUniqueId' => [
-                'columns' => ['id' => 1, 'expire' => 1],
+                'columns' => ['id' => 1],
                 'options' => [
                     'unique' => 1
                 ],
