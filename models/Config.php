@@ -8,7 +8,7 @@ use yii\helpers\ArrayHelper;
 class Config extends BaseModel
 {
 
-    protected static $collectionName = 'viterra.config';
+    protected static $collectionName = 'app.config';
 	protected function modelConfig()
 	{
 		return [
