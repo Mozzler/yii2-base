@@ -25,6 +25,7 @@ class FieldGridConfig {
 			],
 			'Email' => [],
 			'Integer' => [],
+			'Double' => [],
 			'MongoId' => [],
 			'Password' => [],
 			'RelateOne' => [],
