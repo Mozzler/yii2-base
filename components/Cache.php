@@ -131,7 +131,7 @@ class Cache extends Component {
 	}
 
     /**
-     * If RBAC is enabled, ignore the app.cache collection (especially as the model doesn't exist)
+     * If RBAC is enabled, ignore the app.cache collection
      */
     private function ensureRbacDisabled() {
         if (isset(\Yii::$app->rbac)) {
