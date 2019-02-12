@@ -562,7 +562,22 @@ class Model extends ActiveRecord {
 		
 		return $query;
     }
-    
+
+
+    /**
+     * Returns all the found results, instead of the query itself
+     *
+     * @see \yii\base\Model::beforeSave()
+     * @param	array $condition The filtering to do
+     * @param	boolean		$checkPermissions	Whether to check permissions based on the current logged in user.
+     * @param	boolean		$applyDefaultFilter If the default filter should apply (RBAC)
+     * @return \mozzler\base\models\Model[] Returns an array containing the requested objects
+     */
+    public static function findAll($condition, $checkPermissions = true, $applyDefaultFilter = true)
+    {
+        return static::findByCondition($condition, $checkPermissions, $applyDefaultFilter)->all();
+    }
+
     /**
      * Add support for permission checks
      *
