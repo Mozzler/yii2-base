@@ -36,12 +36,12 @@ class TaskController extends Controller
      *
      * Expected the MongoDB objectId of the task to be run.
      *
+     * @throws \yii\base\InvalidConfigException
+     * @param $taskId string - The MongoDB Id of the task to run
      * @return int Exit code
      */
     public function actionRun($taskId)
     {
-//        \Yii::$app->taskManager->run();
-
         if (empty($taskId)) {
             $this->stderr("#### Error ####\nNo or invalid taskId provided", Console::FG_RED, Console::UNDERLINE);
         }
