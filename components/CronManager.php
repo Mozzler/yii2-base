@@ -5,6 +5,7 @@ namespace mozzler\base\components;
 use mozzler\base\cron\CronEntry;
 use mozzler\base\models\Task;
 use \yii\helpers\ArrayHelper;
+use \yii\base\Component;
 
 /**
  * To use the cron manager, add it to the `web.php` components:
@@ -30,7 +31,7 @@ use \yii\helpers\ArrayHelper;
  * ]
  * ```
  */
-class CronManager extends \yii\base\Component
+class CronManager extends Component
 {
 
     /**
@@ -126,14 +127,15 @@ class CronManager extends \yii\base\Component
 
         $taskConfig =
             [
-                'class' => Task::class,
                 'config' => $cronEntryObject->config,
                 'scriptClass' => $cronEntryObject->scriptClass,
                 'timeoutSeconds' => $cronEntryObject->timeoutSeconds,
                 'status' => Task::STATUS_PENDING,
                 'triggerType' => Task::TRIGGER_TYPE_INSTANT
             ];
-        $task = \Yii::createObject($taskConfig);
+        /** @var Task $task */
+        $task = \Yii::createObject(Task::class);
+        $task->load($taskConfig, '');
         $task->save(true, null, false); // Save without checking permissions
         return $task;
     }

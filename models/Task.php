@@ -56,7 +56,10 @@ class Task extends BaseModel
                 'type' => 'Json'
             ],
             'log' => [
-                'type' => 'Json' // Use addLog()
+                'type' => 'Json', // Use addLog(),
+                'rules' => [
+                    'default' => ['value' => []]
+                ]
             ],
             'timeoutSeconds' => [
                 'type' => 'Integer'
@@ -88,8 +91,11 @@ class Task extends BaseModel
      *
      * Expected types: 'warning', 'info', 'error'
      */
-    public function addLog($message, $type)
+    public function addLog($message, $type = 'info')
     {
+        if (empty($this->log)) {
+            $this->log = [];
+        }
         $this->log[] = [
             'timestamp' => time(),
             'message' => $message,
@@ -100,6 +106,9 @@ class Task extends BaseModel
     public function returnLogLines()
     {
         $logLines = '';
+        if (empty($this->log)) {
+            return $logLines;
+        }
         foreach ($this->log as $logIndex => $logEntry) {
             if ($logEntry['type'] === "error") {
                 $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$logEntry['message']}\n\"--------\n";

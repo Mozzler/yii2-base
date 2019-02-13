@@ -45,6 +45,7 @@ class TaskController extends Controller
     {
         if (empty($taskId)) {
             $this->stderr("#### Error ####\nNo or invalid taskId provided", Console::FG_RED, Console::UNDERLINE);
+            return ExitCode::USAGE;
         }
 
         // Check the MongoDB entry
@@ -52,9 +53,10 @@ class TaskController extends Controller
         /** @var Task $taskModel */
         $taskModel = \Yii::createObject(Task::class);
         /** @var Task $task */
-        $task = $taskModel->findOne(['_id' => new ObjectId($taskId));
+        $task = $taskModel->findOne(['_id' => new ObjectId($taskId)]);
         if (empty($task)) {
             $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
+            return ExitCode::USAGE;
         }
         set_time_limit($task->timeoutSeconds);
 
@@ -74,9 +76,16 @@ class TaskController extends Controller
             . "\n"
         );
         /** @var ScriptBase $script */
-        $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass()]));
-        $script->run($task); // Actually run the script (task)
+        $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
+        $scriptReturn = $script->run($task); // Actually run the script (task)
 
+
+        $this->stdout("The task is:\n". var_export($task->toArray(), true));
+        $this->stdout("\n---------------------\n  scriptReturn\n---------------------\n". var_export($scriptReturn, true));
+        if (!empty($scriptReturn)) {
+            // @TODO: Work out why this currently fails
+            $task->addLog($scriptReturn);
+        }
 
         // -- Unless the script set the status to error, then save this as complete
         if ($task->status !== Task::STATUS_ERROR) {
@@ -88,7 +97,7 @@ class TaskController extends Controller
 
         // -- Output the Log (if requested)
         if ($this->outputLog) {
-            $this->stdout($task->returnLogLines(). "\n");
+            $this->stdout($task->returnLogLines() . "\n");
         }
         $this->stdout("Task Processing Completed\n");
 
