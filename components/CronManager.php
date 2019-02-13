@@ -2,6 +2,8 @@
 
 namespace mozzler\base\components;
 
+use mozzler\base\cron\CronEntry;
+use mozzler\base\models\Task;
 use \yii\helpers\ArrayHelper;
 
 /**
@@ -31,7 +33,13 @@ use \yii\helpers\ArrayHelper;
 class CronManager extends yii\base\Component
 {
 
-    public static $gcPercent = 1;
+    /**
+     * @var int the probability (parts per million) that garbage collection (GC) should be performed
+     * when running the cron.
+     * Defaults to 10000, meaning 1% chance.
+     * This number should be between 0 and 1000000. A value 0 meaning no GC will be performed at all.
+     */
+    public static $gcProbability = 10000;
 
     public static $gcAgeDays = 30;
 
@@ -62,12 +70,26 @@ class CronManager extends yii\base\Component
                 // @todo: Error
             }
 
-            if ($cronEntry['class']) {
+            $cronObject = null;
+            if (!empty($cronEntry['class'])) {
                 // Grab the defaults from the class, but override them with the current
 
-                
+                $cronObject = \Yii::createObject($cronEntry);
+
+            } else if (!empty($cronEntry['scriptClass'])) {
+                // -- Creating a new object based on the generic class... Using the provided info
+                $cronEntry['class'] = CronEntry::class;
+                $cronObject = \Yii::createObject($cronEntry);
             }
+
+            if (empty($cronObject)) {
+                // @todo: Error
+                continue;
+            }
+            $task = $this->createTaskFromCronEntryObject($cronObject);
         }
+
+
         // Process the Entries Array
         // Instanciate the CronEntries
         //
@@ -75,9 +97,40 @@ class CronManager extends yii\base\Component
         self::gc();
     }
 
-    protected static function gc()
+    protected static function gc($force = false)
     {
-        // 1% of the time delete all records that are older than 30 days
+        if ($force || mt_rand(0, 1000000) < self::$gcProbability) {
+            // 1% of the time delete all Task records that are older than 30 days
+
+            // @todo: delete all Task records that are older than self::$gcAgeDays
+
+        }
+    }
+
+    /**
+     * @param $cronEntryObject CronEntry
+     * @return |null
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function createTaskFromCronEntryObject($cronEntryObject)
+    {
+
+        if (empty($cronEntryObject)) {
+            return null;
+        }
+
+        $taskConfig =
+            [
+                'class' => Task::class,
+                'config' => $cronEntryObject->config,
+                'scriptClass' => $cronEntryObject->scriptClass,
+                'timeoutSeconds' => $cronEntryObject->timeoutSeconds,
+                'status' => Task::STATUS_PENDING,
+                'triggerType' => Task::TRIGGER_TYPE_INSTANT
+            ];
+        $task = \Yii::createObject($taskConfig);
+        $task->save(true, null, false); // Save without checking permissions
+        return $task;
     }
 
 }

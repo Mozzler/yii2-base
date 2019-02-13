@@ -11,6 +11,14 @@ use yii\helpers\ArrayHelper;
 class Task extends BaseModel
 {
 
+    const TRIGGER_TYPE_INSTANT = 'instant';
+    const TRIGGER_TYPE_BACKGROUND = 'background';
+
+    const STATUS_PENDING = 'pending';
+    const STATUS_INPROGRESS = 'inProgress';
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_ERROR = 'error';
+
     protected static $collectionName = 'app.task';
 
     protected function modelConfig()
@@ -35,13 +43,13 @@ class Task extends BaseModel
             ],
             'status' => [
                 'type' => 'SingleSelect',
-                'options' => ['pending' => 'Pending', 'inProgress' => 'In Progress', 'complete' => 'Complete', 'error' => 'Error']
+                'options' => [self::STATUS_PENDING => 'Pending', self::STATUS_INPROGRESS => 'In Progress', self::STATUS_COMPLETE => 'Complete', self::STATUS_ERROR => 'Error']
             ],
             'triggerType' => [
 
                 'type' => 'SingleSelect',
-                'options' => ['instant' => 'Instant',
-                    'background' => 'Background' // Run by the background task manager
+                'options' => [self::TRIGGER_TYPE_INSTANT => 'Instant', // Run via the Command Line straight away (esp used by the Cron manager)
+                    self::TRIGGER_TYPE_BACKGROUND => 'Background' // Run by the background task manager (e.g If a user requests a large CSV file to be generated and emailed to them)
                 ],
             ],
             'config' => [
@@ -52,6 +60,8 @@ class Task extends BaseModel
             ],
             'timeoutSeconds' => [
                 'type' => 'Integer'
+                // Used by the TaskController command
+                // You can set to 0 if you want it to run indefinitely, but doing so could cause stuck processes which could cause the server to crash so would be a VERY bad idea
             ]
         ]);
     }
