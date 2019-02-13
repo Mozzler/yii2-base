@@ -97,4 +97,18 @@ class Task extends BaseModel
         ];
     }
 
+    public function returnLogLines()
+    {
+        $logLines = '';
+        foreach ($this->log as $logIndex => $logEntry) {
+            if ($logEntry['type'] === "error") {
+                $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$logEntry['message']}\n\"--------\n";
+            } else {
+
+                $logLines .= "{$logEntry['type']} - {$logEntry['message']} | " . date('r') . "\n";
+            }
+        }
+        return $logLines;
+    }
+
 }

@@ -86,7 +86,12 @@ class CronManager extends yii\base\Component
                 // @todo: Error
                 continue;
             }
+            // Create (and auto-save) the task
             $task = $this->createTaskFromCronEntryObject($cronObject);
+
+            // Use the Task Manager to Run the task immediately
+
+
         }
 
 
