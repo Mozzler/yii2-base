@@ -28,7 +28,7 @@ class CronRun extends BaseModel
             'timestampMinute' => [
                 'type' => 'Timestamp'
             ],
-            'summary' => [
+            'log' => [
                 'type' => 'TextLarge'
             ]
 		]);

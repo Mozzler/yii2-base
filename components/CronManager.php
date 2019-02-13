@@ -1,31 +1,33 @@
 <?php
+
 namespace mozzler\base\components;
+
+use \yii\helpers\ArrayHelper;
 
 /**
  * To use the cron manager, add it to the `web.php` components:
- * 
+ *
  * ```
  * 'components' => [
  *      'cronManager' => [
  *          'class' => 'mozzler\base\components\CronManager',
  *          'entries' => [
  *              'backgroundTasks' => [
- *                  'scriptClass' => 'mozzler\base\cron\BackgroundTask',
+ *                  'class' => 'mozzler\base\cron\BackgroundTask',
  *                  'config' => [],
- *                  'minutes' => '0,30',
+ *                  'minutes' => '*',
  *                  'hours' => '*'
  *                  'dayMonth' => '*'
  *                  'dayWeek' => '*',
  *                  'timezone' => 'Australia/Adelaide',
- *                  'active' => true
+ *                  'active' => true,
+ *
  *              ]
  *          ]
  *      ]
  * ]
  * ```
  */
-
-
 class CronManager extends yii\base\Component
 {
 
@@ -35,9 +37,40 @@ class CronManager extends yii\base\Component
 
     public $entries = [];
 
+
     public function run()
     {
-        // see code below
+
+        $defaultEntries = ['backgroundTasks' => [
+            'class' => 'mozzler\base\cron\BackgroundTasksCronEntry',
+            'config' => [],
+            'minutes' => '*',
+            'hours' => '*',
+            'dayMonth' => '*',
+            'dayWeek' => '*',
+            'timezone' => 'Australia/Adelaide',
+            'active' => true,
+
+        ]
+        ];
+
+        $this->entries = ArrayHelper::merge($defaultEntries, $this->entries);
+
+        foreach ($this->entries as $cronEntryName => $cronEntry) {
+
+            if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
+                // @todo: Error
+            }
+
+            if ($cronEntry['class']) {
+                // Grab the defaults from the class, but override them with the current
+
+                
+            }
+        }
+        // Process the Entries Array
+        // Instanciate the CronEntries
+        //
 
         self::gc();
     }
@@ -46,7 +79,7 @@ class CronManager extends yii\base\Component
     {
         // 1% of the time delete all records that are older than 30 days
     }
-    
+
 }
 
 /*
@@ -77,6 +110,7 @@ class CronManager extends yii\base\Component
     // execute scripts as admin background tasks
     for (var s in sortedScripts.execute) {
         var script = sortedScripts.execute[s];
+        // Task Manager
         r.createTask(script.script, script.config, true);
         cronMessage += script.name+" ("+script.script+") ";
     }

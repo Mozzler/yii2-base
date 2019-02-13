@@ -2,7 +2,7 @@
 
 namespace mozzler\base\cron;
 
-class BackgroundTasks extends CronEntry
+class BackgroundTasksCronEntry extends CronEntry
 {
 
     public $scriptClass = "mozzler\base\scripts\BackgroundTasks";

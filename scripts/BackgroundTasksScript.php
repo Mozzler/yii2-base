@@ -5,7 +5,7 @@ namespace mozzler\base\scripts;
 /**
  * Script that locates all pending background tasks and executes them
  */
-class BackgroundTasks extends ScriptBase
+class BackgroundTasksScript extends ScriptBase
 {
 
     // limit how many background tasks will be processed at one time

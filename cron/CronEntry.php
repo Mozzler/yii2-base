@@ -23,4 +23,5 @@ class CronEntry extends yii\base\Component
 
     public $active = false;
 
+    public $timeoutSeconds = 120; // In seconds
 }

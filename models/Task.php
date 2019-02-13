@@ -12,21 +12,24 @@ class Task extends BaseModel
 {
 
     protected static $collectionName = 'app.task';
-	protected function modelConfig()
-	{
-		return [
-			'label' => 'Task',
-			'labelPlural' => 'Tasks'
-		];
-    }
-    
-    public static function modelIndexes() {
-		return ArrayHelper::merge(parent::modelIndexes(), [
-		]);
+
+    protected function modelConfig()
+    {
+        return [
+            'label' => 'Task',
+            'labelPlural' => 'Tasks'
+        ];
     }
 
-    protected function modelFields() {
-		return ArrayHelper::merge(parent::modelFields(),  [
+    public static function modelIndexes()
+    {
+        return ArrayHelper::merge(parent::modelIndexes(), [
+        ]);
+    }
+
+    protected function modelFields()
+    {
+        return ArrayHelper::merge(parent::modelFields(), [
             'scriptClass' => [
                 'type' => 'Text'
             ],
@@ -34,12 +37,25 @@ class Task extends BaseModel
                 'type' => 'SingleSelect',
                 'options' => ['pending' => 'Pending', 'inProgress' => 'In Progress', 'complete' => 'Complete', 'error' => 'Error']
             ],
+            'triggerType' => [
+
+                'type' => 'SingleSelect',
+                'options' => ['instant' => 'Instant',
+                    'background' => 'Background' // Run by the background task manager
+                ],
+            ],
             'config' => [
                 'type' => 'Json'
+            ],
+            'log' => [
+                'type' => 'json' // Support AddLog
+            ],
+            'timeoutSeconds' => [
+                'type' => 'Integer'
             ]
-		]);
+        ]);
     }
-    
+
     /**
      * @return array the validation rules.
      */
@@ -51,9 +67,24 @@ class Task extends BaseModel
 
     public function scenarios()
     {
-	    $scenarios = parent::scenarios();
-	    
+        $scenarios = parent::scenarios();
+
         return $scenarios;
     }
-    
+
+    /**
+     * @param $message
+     * @param $type
+     *
+     * Expected types: 'warning', 'info', 'error'
+     */
+    public function addLog($message, $type)
+    {
+        $this->log[] = [
+            'timestamp' => time(),
+            'message' => $message,
+            'type' => $type
+        ];
+    }
+
 }

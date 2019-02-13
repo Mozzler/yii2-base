@@ -24,8 +24,14 @@ class TaskManager extends yii\base\Component
 
     public static $gcAgeDays = 30;
 
-    public static function schedule($taskClassName, $taskConfig=[])
+    /**
+     * @param $taskClassName
+     * @param array $taskConfig
+     * @param bool $runNow if true then trigger the CLI TaskController command striaght away
+     */
+    public static function schedule($taskClassName, $taskConfig=[], $runNow = false)
     {
+
         // create a new instance of a mozzler\base\models\Task
         // populate the task
         // save the task
