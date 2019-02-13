@@ -96,11 +96,13 @@ class Task extends BaseModel
         if (empty($this->log)) {
             $this->log = [];
         }
-        $this->log[] = [
+        $log = $this->log; // Trying to avoid the "Indirect modification of overloaded property has no effect" issue as per https://stackoverflow.com/questions/10454779/php-indirect-modification-of-overloaded-property
+        $log[] = [
             'timestamp' => time(),
             'message' => $message,
             'type' => $type
         ];
+        $this->log = $log;
     }
 
     public function returnLogLines()
