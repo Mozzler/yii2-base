@@ -2,6 +2,7 @@
 
 namespace mozzler\base\commands;
 
+use MongoDB\BSON\ObjectId;
 use mozzler\base\models\Task;
 use mozzler\base\scripts\ScriptBase;
 use Yii;
@@ -51,9 +52,9 @@ class TaskController extends Controller
         /** @var Task $taskModel */
         $taskModel = \Yii::createObject(Task::class);
         /** @var Task $task */
-        $task = $taskModel->findOne($taskId);
+        $task = $taskModel->findOne(['_id' => new ObjectId($taskId));
         if (empty($task)) {
-            $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId), Console::FG_RED, Console::BOLD);
+            $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
         }
         set_time_limit($task->timeoutSeconds);
 
@@ -70,6 +71,7 @@ class TaskController extends Controller
             . "Trigger Type: {$task->triggerType}\n"
             . "Status: {$task->status}\n"
             . "Config: " . json_encode($task->config) . "\n"
+            . "\n"
         );
         /** @var ScriptBase $script */
         $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass()]));
@@ -86,9 +88,9 @@ class TaskController extends Controller
 
         // -- Output the Log (if requested)
         if ($this->outputLog) {
-            $this->stdout($task->returnLogLines());
+            $this->stdout($task->returnLogLines(). "\n");
         }
-        $this->stdout("Task Processing Completed");
+        $this->stdout("Task Processing Completed\n");
 
         return true === $saved ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
     }

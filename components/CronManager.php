@@ -30,7 +30,7 @@ use \yii\helpers\ArrayHelper;
  * ]
  * ```
  */
-class CronManager extends yii\base\Component
+class CronManager extends \yii\base\Component
 {
 
     /**

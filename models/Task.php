@@ -50,13 +50,13 @@ class Task extends BaseModel
                 'type' => 'SingleSelect',
                 'options' => [self::TRIGGER_TYPE_INSTANT => 'Instant', // Run via the Command Line straight away (esp used by the Cron manager)
                     self::TRIGGER_TYPE_BACKGROUND => 'Background' // Run by the background task manager (e.g If a user requests a large CSV file to be generated and emailed to them)
-                ],
+                ]
             ],
             'config' => [
                 'type' => 'Json'
             ],
             'log' => [
-                'type' => 'json' // Support AddLog
+                'type' => 'Json' // Use addLog()
             ],
             'timeoutSeconds' => [
                 'type' => 'Integer'
