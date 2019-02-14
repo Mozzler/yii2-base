@@ -19,7 +19,7 @@ class SingleSelect extends Base {
 
 	public function rules() {
 		return ArrayHelper::merge(parent::rules(), [
-			'in' => ['range' => $this->options, 'message' => 'Invalid option specified for '.$this->label]
+			'in' => ['range' => array_keys($this->options), 'message' => 'Invalid option specified for '.$this->label]
 		]);
 	}
 	
