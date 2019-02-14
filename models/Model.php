@@ -63,6 +63,7 @@ class Model extends ActiveRecord {
 		return [
 			'label' => 'Base Model',
 			'labelPlural' => 'Base Models',
+			'searchAttribute' => 'name'
 			// FUTURE: Support quick binding of behaviors, instead of overriding behaviors()
 			/*'behaviors' => [
 				'UserSetNameBehavior'
