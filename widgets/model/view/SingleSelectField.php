@@ -10,18 +10,12 @@ class SingleSelectField extends BaseField {
 		$config = parent::config();
 		$modelField = $config['model']->getModelField($config['attribute']);
 		$attribute = $config['attribute'];
-		
-		if (!isset($modelField->options[$config['model']->$attribute]))
-		{
-    		\Yii::warning("Unable to locate option ".$config['model']->$attribute." for field ".$attribute);
-		}
-		else
-		{
-    		$config['displayValue'] = $modelField->options[$config['model']->$attribute];
-		}
+        
+		$labels = $modelField->getOptionLabels($config['model']->$attribute);
+		$config['displayValue'] = join(", ",$labels);
 		
 		return $config;
-	}
+    }
 	
 }
 
