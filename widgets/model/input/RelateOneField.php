@@ -8,31 +8,16 @@ use yii\helpers\Html;
 use mozzler\base\components\Tools;
 
 class Select2 extends BaseSelect2 {
-	// quick and dirty hack to deal with values being strings
-	// TODO: do bug report or work around in a cleaner way
+	// Deal with values being strings
 	public function init()
     {
-        $this->pluginOptions['theme'] = $this->theme;
-        \kartik\base\InputWidget::init();
-        if (ArrayHelper::getValue($this->pluginOptions, 'tags', false)) {
-            $this->options['multiple'] = true;
-        }
-        if ($this->hideSearch) {
-            $css = ArrayHelper::getValue($this->pluginOptions, 'dropdownCssClass', '');
-            $css .= ' kv-hide-search';
-            $this->pluginOptions['dropdownCssClass'] = $css;
-        }
-        $this->initPlaceholder();
+        parent::init();
+
         if (!isset($this->data)) {
             $key = empty($this->value) ? '' : (string)$this->value;
             $val = empty($this->initValueText) ? $key : $this->initValueText;
             $this->data = [$key => $val];
         }
-        Html::addCssClass($this->options, 'form-control');
-        Html::addCssStyle($this->options, 'width:100%', false);
-        $this->initLanguage();
-        $this->registerAssets();
-        $this->renderInput();
     }
 }
 
@@ -43,12 +28,6 @@ class RelateOneField extends BaseField
 	{
 		return [
             'widgetConfig' => []
-			/*'widgetConfig' => [
-				'options' => ['placeholder' => 'Select {{ widget.model.getModelField(widget.attribute).labelPlural }} ...'],
-				'pluginOptions' => [
-					'allowClear' => true
-				]
-            ]*/
 		];
     }
     
@@ -157,8 +136,10 @@ class RelateOneField extends BaseField
         $this->_field = $field;*/
         
         $field = $form->field($model, $attribute);
-        return $field->widget(Select2::className(), $config['widgetConfig']);
+        $output = $field->widget(Select2::className(), $config['widgetConfig']);
 
+        \Yii::trace($output);
+        return $output;
 	}
 	
 }
