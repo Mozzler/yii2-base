@@ -13,9 +13,9 @@ class CronEntry extends Component
 
     // These only accept '*' or a comma separated set of numbers e.g '0,1,3,5,10,15,20,50'
     // No support for ranges like '1-5' or '*/2' But update the intervalMatch function if you want them to work
-    public $minutes = "*"; // Accepts 0-60
+    public $minutes = "*"; // Accepts 0-59
 
-    public $hours = "*"; // Accepts 0-24
+    public $hours = "*"; // Accepts 0-23
 
     public $dayMonth = "*"; // Accepts 1-31
 
