@@ -1,6 +1,8 @@
 <?php
 namespace mozzler\base\fields;
 
+use yii\helpers\ArrayHelper;
+
 class SingleSelect extends Base {
 	
 	public $type = 'SingleSelect';
@@ -13,6 +15,12 @@ class SingleSelect extends Base {
 				'max' => 255
 			]
 		];
+	}
+
+	public function rules() {
+		return ArrayHelper::merge(parent::rules(), [
+			'in' => ['range' => $this->options, 'message' => 'Invalid option specified for '.$this->label]
+		]);
 	}
 	
 	/**
