@@ -12,7 +12,7 @@ class CronEntry extends Component
     public $config = [];
 
     // These only accept '*' or a comma separated set of numbers e.g '0,1,3,5,10,15,20,50'
-    // ranges like '1-5' or '*/2' aren't currently supported. But update the intervalMatch function if you want them to
+    // No support for ranges like '1-5' or '*/2' But update the intervalMatch function if you want them to work
     public $minutes = "*"; // Accepts 0-60
 
     public $hours = "*"; // Accepts 0-24
@@ -47,7 +47,7 @@ class CronEntry extends Component
             $utcUnixTimestamp = time();
         }
 
-        // -- Round to current time
+        // Round to the start of the current minute
         $nearestMinuteTimestamp = round(floor($utcUnixTimestamp / 60) * 60);
 
         // -- Deal with the timezone issues
@@ -55,7 +55,7 @@ class CronEntry extends Component
         $date = new \DateTime(null === $nearestMinuteTimestamp ? "@" . time() : "@" . $nearestMinuteTimestamp); // Timestamp is always parsed as UTC
         $date->setTimezone($dateTimeZone); // Convert to specified timezone
 
-        // Test interval matches for all intervals
+        // -- Test interval matches for all intervals
         $match = "OK";
         if (!$this->intervalMatch($this->minutes, $date, "i")) {
             $match = "minute";
@@ -72,12 +72,6 @@ class CronEntry extends Component
         if ("OK" === $match) {
             return true;
         }
-        \Codeception\Util\Debug::debug("The shouldRunCronAtTime() is false because the {$match} is incorrect. Using " . var_export([
-                'utcUnixTimestamp' => $utcUnixTimestamp,
-                '$date' => $date,
-                '$dateTimeZone' => $dateTimeZone,
-                'CronEntry' => $this,
-            ], true));
         \Yii::debug("The shouldRunCronAtTime() is false because the {$match} is incorrect");
         return false;
     }
@@ -99,7 +93,6 @@ class CronEntry extends Component
             $intervalValues[$intervalIndex] = intval($interval); // Ensure it's a whole number
         }
         $currentInterval = intval($date->format($intervalFormat));
-        \Codeception\Util\Debug::debug("intervalMatch() currentInterval: $currentInterval = " . json_encode(in_array($currentInterval, $intervalValues)) . ", based on intervalValues: " . json_encode($intervalValues) . ", using the format: " . $intervalFormat . ' based on the date: '. $date->format('r'));
         return in_array($currentInterval, $intervalValues);
     }
 }
