@@ -266,15 +266,26 @@ class Model extends ActiveRecord {
 		$rules = [];
 		$fields = $this->modelFields;
 		
-		foreach ($fields as $fieldKey => $field) {
+		foreach ($fields as $fieldName => $field) {
 			foreach ($field->rules() as $validator => $fieldRules) {
-				$rule = [$fieldKey, $validator];
-				$rule = array_merge($rule, $fieldRules);
-			}
-			
-			if (isset($rule)) {
-				$rules[] = $rule;
-			}
+				if (is_array($fieldRules)) {
+					if (isset($fieldRules[0])) {
+						foreach ($fieldRules as $newRule) {
+							$rule = array_merge([$fieldName, $validator], $newRule);
+							$rules[] = $rule;
+						}
+					}
+					else {
+						$rule = array_merge([$fieldName, $validator], $fieldRules);
+						$rules[] = $rule;
+					}
+				}
+				else {
+					// fieldRules is actually a custom validator, so just add to the rules
+					$rule = [$fieldName, $fieldRules];
+					$rules[] = $rule;
+				}
+			}	
 		}
 		
 		return $rules;
