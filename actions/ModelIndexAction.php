@@ -37,7 +37,7 @@ class ModelIndexAction extends BaseModelAction
      */
     public function run()
     {   
-        $model = $this->controller->data['model'];
+        $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
         
         $dataProvider = $model->search(\Yii::$app->request->get());
@@ -57,8 +57,12 @@ class ModelIndexAction extends BaseModelAction
 		$config['model'] = $model;
 		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
         
-        $this->controller->data['config'] = $config;
-        $this->controller->data['model'] = $model;
+        $this->controller->templateData['config'] = $config;
+		$this->controller->templateData['model'] = $model;
+
+		if ($this->controller->jsonRequested) {
+			$this->controller->data['items'] = $dataProvider->getModels();
+		}
         
         return parent::run();
     }
