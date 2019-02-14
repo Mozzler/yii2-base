@@ -1,14 +1,15 @@
 <?php
+
 namespace mozzler\base\scripts;
 
 /**
  * Script that locates all pending background tasks and executes them
  */
-class BackgroundTasks implements ScriptBase
+class BackgroundTasksScript extends ScriptBase
 {
 
     // limit how many background tasks will be processed at one time
-    $limit = 10;
+    public $limit = 10;
 
     public function run()
     {

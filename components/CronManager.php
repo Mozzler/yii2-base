@@ -1,52 +1,145 @@
 <?php
+
 namespace mozzler\base\components;
+
+use mozzler\base\cron\CronEntry;
+use mozzler\base\models\Task;
+use \yii\helpers\ArrayHelper;
+use \yii\base\Component;
 
 /**
  * To use the cron manager, add it to the `web.php` components:
- * 
+ *
  * ```
  * 'components' => [
  *      'cronManager' => [
  *          'class' => 'mozzler\base\components\CronManager',
  *          'entries' => [
  *              'backgroundTasks' => [
- *                  'scriptClass' => 'mozzler\base\cron\BackgroundTask',
+ *                  'class' => 'mozzler\base\cron\BackgroundTask',
  *                  'config' => [],
- *                  'minutes' => '0,30',
+ *                  'minutes' => '*',
  *                  'hours' => '*'
  *                  'dayMonth' => '*'
  *                  'dayWeek' => '*',
  *                  'timezone' => 'Australia/Adelaide',
- *                  'active' => true
+ *                  'active' => true,
+ *
  *              ]
  *          ]
  *      ]
  * ]
  * ```
  */
-
-
-class CronManager extends yii\base\Component
+class CronManager extends Component
 {
 
-    public static $gcPercent = 1;
+    /**
+     * @var int the probability (parts per million) that garbage collection (GC) should be performed
+     * when running the cron.
+     * Defaults to 10000, meaning 1% chance.
+     * This number should be between 0 and 1000000. A value 0 meaning no GC will be performed at all.
+     */
+    public static $gcProbability = 10000;
 
     public static $gcAgeDays = 30;
 
     public $entries = [];
 
+
     public function run()
     {
-        // see code below
+
+        $defaultEntries = ['backgroundTasks' => [
+            'class' => 'mozzler\base\cron\BackgroundTasksCronEntry',
+            'config' => [],
+            'minutes' => '*',
+            'hours' => '*',
+            'dayMonth' => '*',
+            'dayWeek' => '*',
+            'timezone' => 'Australia/Adelaide',
+            'active' => true,
+
+        ]
+        ];
+
+        $this->entries = ArrayHelper::merge($defaultEntries, $this->entries);
+
+        foreach ($this->entries as $cronEntryName => $cronEntry) {
+
+            if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
+                // @todo: Error
+            }
+
+            $cronObject = null;
+            if (!empty($cronEntry['class'])) {
+                // Grab the defaults from the class, but override them with the current
+
+                $cronObject = \Yii::createObject($cronEntry);
+
+            } else if (!empty($cronEntry['scriptClass'])) {
+                // -- Creating a new object based on the generic class... Using the provided info
+                $cronEntry['class'] = CronEntry::class;
+                $cronObject = \Yii::createObject($cronEntry);
+            }
+
+            if (empty($cronObject)) {
+                // @todo: Error
+                continue;
+            }
+            // Create (and auto-save) the task
+            $task = $this->createTaskFromCronEntryObject($cronObject);
+
+            // Use the Task Manager to Run the task immediately
+
+
+        }
+
+
+        // Process the Entries Array
+        // Instanciate the CronEntries
+        //
 
         self::gc();
     }
 
-    protected static function gc()
+    protected static function gc($force = false)
     {
-        // 1% of the time delete all records that are older than 30 days
+        if ($force || mt_rand(0, 1000000) < self::$gcProbability) {
+            // 1% of the time delete all Task records that are older than 30 days
+
+            // @todo: delete all Task records that are older than self::$gcAgeDays
+
+        }
     }
-    
+
+    /**
+     * @param $cronEntryObject CronEntry
+     * @return |null
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function createTaskFromCronEntryObject($cronEntryObject)
+    {
+
+        if (empty($cronEntryObject)) {
+            return null;
+        }
+
+        $taskConfig =
+            [
+                'config' => $cronEntryObject->config,
+                'scriptClass' => $cronEntryObject->scriptClass,
+                'timeoutSeconds' => $cronEntryObject->timeoutSeconds,
+                'status' => Task::STATUS_PENDING,
+                'triggerType' => Task::TRIGGER_TYPE_INSTANT
+            ];
+        /** @var Task $task */
+        $task = \Yii::createObject(Task::class);
+        $task->load($taskConfig, '');
+        $task->save(true, null, false); // Save without checking permissions
+        return $task;
+    }
+
 }
 
 /*
@@ -77,6 +170,7 @@ class CronManager extends yii\base\Component
     // execute scripts as admin background tasks
     for (var s in sortedScripts.execute) {
         var script = sortedScripts.execute[s];
+        // Task Manager
         r.createTask(script.script, script.config, true);
         cronMessage += script.name+" ("+script.script+") ";
     }

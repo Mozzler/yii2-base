@@ -1,8 +1,8 @@
 <?php
 
 namespace mozzler\base\cron;
-
-class CronEntry extends yii\base\Component
+use \yii\base\Component;
+class CronEntry extends Component
 {
 
     public $scriptClass;
@@ -11,11 +11,11 @@ class CronEntry extends yii\base\Component
 
     public $minutes = "*";
 
-    public $hour = "*";
+    public $hours = "*";
 
     public $dayMonth = "*";
 
-    public $month = "*";
+    public $months = "*";
 
     public $dayWeek = "*";
 
@@ -23,4 +23,5 @@ class CronEntry extends yii\base\Component
 
     public $active = false;
 
+    public $timeoutSeconds = 120; // In seconds
 }

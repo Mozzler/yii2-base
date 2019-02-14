@@ -11,35 +11,64 @@ use yii\helpers\ArrayHelper;
 class Task extends BaseModel
 {
 
+    const TRIGGER_TYPE_INSTANT = 'instant';
+    const TRIGGER_TYPE_BACKGROUND = 'background';
+
+    const STATUS_PENDING = 'pending';
+    const STATUS_INPROGRESS = 'inProgress';
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_ERROR = 'error';
+
     protected static $collectionName = 'app.task';
-	protected function modelConfig()
-	{
-		return [
-			'label' => 'Task',
-			'labelPlural' => 'Tasks'
-		];
-    }
-    
-    public static function modelIndexes() {
-		return ArrayHelper::merge(parent::modelIndexes(), [
-		]);
+
+    protected function modelConfig()
+    {
+        return [
+            'label' => 'Task',
+            'labelPlural' => 'Tasks'
+        ];
     }
 
-    protected function modelFields() {
-		return ArrayHelper::merge(parent::modelFields(),  [
+    public static function modelIndexes()
+    {
+        return ArrayHelper::merge(parent::modelIndexes(), [
+        ]);
+    }
+
+    protected function modelFields()
+    {
+        return ArrayHelper::merge(parent::modelFields(), [
             'scriptClass' => [
                 'type' => 'Text'
             ],
             'status' => [
                 'type' => 'SingleSelect',
-                'options' => ['pending' => 'Pending', 'inProgress' => 'In Progress', 'complete' => 'Complete', 'error' => 'Error']
+                'options' => [self::STATUS_PENDING => 'Pending', self::STATUS_INPROGRESS => 'In Progress', self::STATUS_COMPLETE => 'Complete', self::STATUS_ERROR => 'Error']
+            ],
+            'triggerType' => [
+
+                'type' => 'SingleSelect',
+                'options' => [self::TRIGGER_TYPE_INSTANT => 'Instant', // Run via the Command Line straight away (esp used by the Cron manager)
+                    self::TRIGGER_TYPE_BACKGROUND => 'Background' // Run by the background task manager (e.g If a user requests a large CSV file to be generated and emailed to them)
+                ]
             ],
             'config' => [
                 'type' => 'Json'
+            ],
+            'log' => [
+                'type' => 'Json', // Use addLog(),
+                'rules' => [
+                    'default' => ['value' => []]
+                ]
+            ],
+            'timeoutSeconds' => [
+                'type' => 'Integer'
+                // Used by the TaskController command
+                // You can set to 0 if you want it to run indefinitely, but doing so could cause stuck processes which could cause the server to crash so would be a VERY bad idea
             ]
-		]);
+        ]);
     }
-    
+
     /**
      * @return array the validation rules.
      */
@@ -51,9 +80,46 @@ class Task extends BaseModel
 
     public function scenarios()
     {
-	    $scenarios = parent::scenarios();
-	    
+        $scenarios = parent::scenarios();
+
         return $scenarios;
     }
-    
+
+    /**
+     * @param $message
+     * @param $type
+     *
+     * Expected types: 'warning', 'info', 'error'
+     */
+    public function addLog($message, $type = 'info')
+    {
+        if (empty($this->log)) {
+            $this->log = [];
+        }
+        $log = $this->log; // Trying to avoid the "Indirect modification of overloaded property has no effect" issue as per https://stackoverflow.com/questions/10454779/php-indirect-modification-of-overloaded-property
+        $log[] = [
+            'timestamp' => time(),
+            'message' => $message,
+            'type' => $type
+        ];
+        $this->log = $log;
+    }
+
+    public function returnLogLines()
+    {
+        $logLines = '';
+        if (empty($this->log)) {
+            return $logLines;
+        }
+        foreach ($this->log as $logIndex => $logEntry) {
+            if ($logEntry['type'] === "error") {
+                $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$logEntry['message']}\n\"--------\n";
+            } else {
+
+                $logLines .= "{$logEntry['type']} - {$logEntry['message']} | " . date('r') . "\n";
+            }
+        }
+        return $logLines;
+    }
+
 }
