@@ -82,7 +82,7 @@ class ModelViewAction extends BaseModelAction
 	        $this->controller->data['model'] = $model;
         }
         
-        $this->controller->data['config'] = $this->config();
+        $this->controller->templateData['config'] = $this->config();
 
         return parent::run();
     }

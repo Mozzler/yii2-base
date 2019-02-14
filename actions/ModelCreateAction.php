@@ -27,7 +27,7 @@ class ModelCreateAction extends BaseModelAction
     public function run()
     {
         /* @var $model \yii\db\ActiveRecord */
-        $model = $this->controller->data['model'];
+        $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
 
 		// load default values

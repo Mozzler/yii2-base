@@ -9,12 +9,6 @@ class ModelController extends WebController {
 	public $modelClass;
 	public static $moduleClass = 'mozzler\base\Module';
 	
-	public function init() {
-		parent::init();
-		
-		$this->data['model'] = $this->getModel();
-	}
-	
 	public function actions() {
 		return ArrayHelper::merge(parent::actions(), [
 			'create' => [

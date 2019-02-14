@@ -28,15 +28,16 @@ class CreateModel extends BaseWidget {
 	// take $config and process it to generate final config
 	public function code() {
 		$config = $this->config();
+		$model = $config['model'];
 		$t = new \mozzler\base\components\Tools;
 		
-		$config['attributes'] = $config['model']->activeAttributes();
+		$config['attributes'] = $model->activeAttributes();
 		$config['items'] = [];
 		$config['hiddenItems'] = [];
 		$hasFileUpload = false;
 		
 		foreach ($config['attributes'] as $attribute) {
-			$modelField = $config['model']->getModelField($attribute);
+			$modelField = $model->getModelField($attribute);
 			if (!$modelField) {
 				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ".$model->scenario." on ".$model->className());
 				continue;
