@@ -95,6 +95,14 @@ class ModelIndexAction extends BaseModelAction
 			$template .= ' {view}';
 		}
 
+		if (\Yii::$app->rbac->canAccessModel($model, 'update')) {
+			$template .= ' {update}';
+		}
+
+		if (\Yii::$app->rbac->canAccessModel($model, 'delete')) {
+			$template .= ' {delete}';
+		}
+
 		// TODO: Support update and delete
 
 		$config['gridViewConfig']['columns'][$columnsCount-1]['template'] = $template;
