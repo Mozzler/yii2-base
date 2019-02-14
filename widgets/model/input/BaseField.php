@@ -3,6 +3,14 @@ namespace mozzler\base\widgets\model\input;
 
 use mozzler\base\widgets\BaseWidget;
 
-class BaseField extends BaseWidget {}
+class BaseField extends BaseWidget
+{
+
+    public function defaultConfig()
+	{
+        return [];
+    }
+
+}
 
 ?>
