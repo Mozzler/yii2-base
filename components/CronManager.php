@@ -46,9 +46,31 @@ class CronManager extends Component
 
     public $entries = [];
 
+    /**
+     * @var array
+     * Any base entries which should be scheduled automatically.
+     * The backgroundTasks is set to run every minute to process any tasks which have been created
+     * but are scheduled for later. Most likely using \Yii::$app->taskManager->schedule or simply creating a Task set to TRIGGER_TYPE_BACKGROUND
+     * E.g If an admin user requests a large CSV report get produced and emailed to them you would schedule that in the background.
+     *
+     * Where as a report that's sent at midnight every night would be scheduled using a cron entry in the config/console.php file
+     */
+    public $defaultEntries = [
+        'backgroundTasks' => [
+            'class' => 'mozzler\base\cron\BackgroundTasksCronEntry',
+            'config' => [],
+            'minutes' => '*',
+            'hours' => '*',
+            'dayMonth' => '*',
+            'dayWeek' => '*',
+            'timezone' => 'Australia/Adelaide',
+            'active' => true,
+        ]];
 
     public function run()
     {
+
+        $stats = ['Entries' => 0, 'Entries Run' => 0, 'Entries Skipped' => 0, 'Entries Already Running' => 0, 'Errors' => 0, 'Tasks Run' => []];
 
         $defaultEntries = ['backgroundTasks' => [
             'class' => 'mozzler\base\cron\BackgroundTasksCronEntry',
@@ -64,17 +86,22 @@ class CronManager extends Component
         ];
 
         $this->entries = ArrayHelper::merge($defaultEntries, $this->entries);
+        $stats['Entries'] = count($this->entries);
+        /** @var TaskManager $taskManager */
+        $taskManager = \Yii::$app->taskManager; // Need to trigger running a task using this.
 
         foreach ($this->entries as $cronEntryName => $cronEntry) {
 
             if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
-                // @todo: Error
+                $stats['Errors']++;
+                \Yii::error("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true));
             }
 
+
+            /** @var CronEntry $cronObject */
             $cronObject = null;
             if (!empty($cronEntry['class'])) {
                 // Grab the defaults from the class, but override them with the current
-
                 $cronObject = \Yii::createObject($cronEntry);
 
             } else if (!empty($cronEntry['scriptClass'])) {
@@ -84,23 +111,49 @@ class CronManager extends Component
             }
 
             if (empty($cronObject)) {
-                // @todo: Error
+                \Yii::error("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true));
+                $stats['Errors']++;
                 continue;
             }
+
+
+            if (!$cronObject->shouldRunCronAtTime()) {
+                // Skip
+                \Yii::info("Skipping the running of the Cron as it shouldn't be run at this time. Cron: " . var_export($cronObject, true));
+                $stats['Entries Skipped']++;
+            }
+
             // Create (and auto-save) the task
             $task = $this->createTaskFromCronEntryObject($cronObject);
 
+            // -- Check there isn't already an existing task for this cron entry:
+            $taskModel = \Yii::createObject(Task::class);
+            $existingTask = $taskModel->findOne([
+                'scriptClass' => $task->scriptClass,
+                'timeoutSeconds' => $task->timeoutSeconds,
+                'name' => $task->name, // This is the specifically unique field which could be all we need to check on
+                'triggerType' => $task->triggerType]);
+
+            if (!empty($existingTask)) {
+                \Yii::error("There's already an existing task for {$task->name} so skipping it. This likely means there's another CronManager running on another server.");
+                $stats['Entries Already Running']++;
+                continue;
+            }
+
+            $task->save(true, null, false); // Save without checking user permissions
             // Use the Task Manager to Run the task immediately
+            $taskManager->run($task, true); //The important bit. Actually run the task! Without this it all is for naught
 
-
+            $stats['Entries Run']++;
+            \Yii::info("Started running the cron task: {$task->name}");
+            $stats['Tasks Run'][] = $task->name;
         }
 
+        $gcRan = self::gc();
+        $stats['Garbage Collection Ran'] = json_encode($gcRan);
 
-        // Process the Entries Array
-        // Instanciate the CronEntries
-        //
-
-        self::gc();
+        \Yii::info("The Cron Manager run stats are: " . print_r($stats, true));
+        return $stats;
     }
 
     protected static function gc($force = false)
@@ -110,7 +163,10 @@ class CronManager extends Component
 
             // @todo: delete all Task records that are older than self::$gcAgeDays
 
+
+            return true;
         }
+        return false;
     }
 
     /**
@@ -124,152 +180,20 @@ class CronManager extends Component
         if (empty($cronEntryObject)) {
             return null;
         }
-
+        $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
         $taskConfig =
             [
                 'config' => $cronEntryObject->config,
                 'scriptClass' => $cronEntryObject->scriptClass,
                 'timeoutSeconds' => $cronEntryObject->timeoutSeconds,
                 'status' => Task::STATUS_PENDING,
+                'name' => "{$unixTimestampMinuteStarted}-Cron-{$cronEntryObject->scriptClass}", // It's important that this be complex enough that we can detect other tasks aren't already running with the same instance
                 'triggerType' => Task::TRIGGER_TYPE_INSTANT
             ];
         /** @var Task $task */
         $task = \Yii::createObject(Task::class);
         $task->load($taskConfig, '');
-        $task->save(true, null, false); // Save without checking permissions
         return $task;
     }
 
 }
-
-/*
- *  Rappsio code
- * 
- * library.run = function(cronJobs) {
-    // current timestamp
-    var timestamp = Math.floor(Date.now() / 1000);
-    
-    // timestamp to the nearest minute
-    var timestampMinute = parseInt(timestamp/60)*60;
-    
-    // TODO: Make sure cron hasn't already been run for this timestamp
-    var cronRun = r.createModel("rappsio.application.cronrun", {
-        "timestamp": timestampMinute,
-        "summary": "Running cron commenced"
-    })
-    
-    // Log that cron is being run for this timestamp
-    if (!cronRun.save()) {
-        r.log("trace", "Cron has already been executed for this time interval ("+timestampMinute+")");
-        return false;
-    }
-    
-    var sortedScripts = this.sortScripts(cronJobs, timestampMinute);
-    var cronMessage = "Executed: " + (sortedScripts.execute.length == 0 ? "None " : "");
-    
-    // execute scripts as admin background tasks
-    for (var s in sortedScripts.execute) {
-        var script = sortedScripts.execute[s];
-        // Task Manager
-        r.createTask(script.script, script.config, true);
-        cronMessage += script.name+" ("+script.script+") ";
-    }
-    
-    cronMessage += "\nSkipped: " + (sortedScripts.skip.length == 0 ? "None" : "");
-    for (var s in sortedScripts.skip) {
-        var script = sortedScripts.skip[s][0];
-        var reason = sortedScripts.skip[s][1];
-        cronMessage += script.name+" ("+script.script+") due to "+reason+".\n";
-    }
-    
-    // Log that cron has been completed for this timestamp
-    // Include names of executed scripts and names of skipped scripts
-    cronRun.summary = cronMessage;
-    cronRun.save();
-    
-    return cronRun;
-}
-
-/*
- * Get an array of all the scripts that should be executed
- * 
- * Cron entry should be in the format:
- * {
-        "name": "",
-        "script": "",
-        "config": {},
-        "minutes": "",
-        "hour": "",
-        "day_month": "",
-        "month": "",
-        "day_week": "",
-        "timezone": "Australia/Adelaide"
- * }
- *
-library.sortScripts = function(cronEntries, timestamp) {
-    var scriptsExecute = [];
-    var scriptsSkipped = [];
-    for (var c in cronEntries) {
-        var cron = cronEntries[c];
-        var cronName = c;
-        var timezone = r.php().instantiate("DateTimezone", [cron.timezone]);
-        var phpDate = r.php().DateTime(null, timezone);
-        phpDate.setTimestamp(timestamp);
-        
-        if (cron.active !== true) {
-            continue;
-        }
-        
-        // Test interval matches for all intervals
-        var match = "ok";
-        if (!this.intervalMatch(cron.minutes, phpDate, "i")) match = "minute";
-        if (!this.intervalMatch(cron.hour, phpDate, "h")) match = "hour";
-        if (!this.intervalMatch(cron["day_month"], phpDate, "d")) match = "day_month";
-        if (!this.intervalMatch(cron.month, phpDate, "m")) match = "month";
-        if (!this.intervalMatch(cron["day_week"], phpDate, "w")) match = "day_week";
-        
-        cron.name = cronName;
-        
-        if (match == "ok") {
-            scriptsExecute.push(cron);
-        } else {
-            r.log("trace", "Skipped as match failed: "+match);
-            scriptsSkipped.push([cron, match]);
-        }
-    }
-    
-    return {
-        "execute": scriptsExecute,
-        "skip": scriptsSkipped
-    }
-}
-
-library.intervalMatch = function(intervals, phpDate, intervalFormat) {
-    if (intervals == "*") {
-        return true;
-    }
-    
-    // If we have a comma separated string, split into array
-    if (typeof(intervals) == "string") {
-        if (intervals.match(",")) {
-            intervals = intervals.split(",");
-        }
-    }
-    
-    // Ensure we have an array
-    if (!Array.isArray(intervals)) {
-        intervals = [intervals];
-    }
-    
-    // force integers
-    for (var i in intervals) {
-        intervals[i] = parseInt(intervals[i]);
-    }
-
-    var currentInterval = parseInt(phpDate.format(intervalFormat));
-
-    // return true if the interval is found
-    return (intervals.indexOf(currentInterval) > -1);
-}
- * 
- */

@@ -6,7 +6,7 @@ use Yii;
 use yii\console\Controller;
 use yii\helpers\Console;
 use yii\console\ExitCode;
- 
+
 /**
  * This class offers easy way to implement `config` collection.
  */
@@ -19,7 +19,10 @@ class CronController extends Controller
      */
     public function actionRun()
     {
-        \Yii::$app->cronManager->run();
+        /** @var \mozzler\base\components\CronManager $cronManager */
+        $cronManager = \Yii::$app->cronManager;
+        $cronStats = $cronManager->run();
+        $this->stdout("Cron Run\n---------------\n" . print_r($cronStats, true));
 
         return ExitCode::OK;
     }
