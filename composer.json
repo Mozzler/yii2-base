@@ -12,7 +12,10 @@
     "require": {
         "yiisoft/yii2": "~2.0.14",
         "kartik-v/yii2-grid": "dev-master",
-        "kartik-v/yii2-widget-select2": "dev-master"
+        "kartik-v/yii2-widget-select2": "dev-master",
+        "kartik-v/yii2-datecontrol": "^1.9",
+        "kartik-v/yii2-widget-datepicker": "^1.4",
+        "kartik-v/yii2-widget-datetimepicker": "^1.4"
     },
     "autoload": {
         "psr-4": {

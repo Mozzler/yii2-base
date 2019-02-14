@@ -4,7 +4,6 @@ namespace mozzler\base\fields;
 class Date extends Base {
 	
 	public $type = 'Date';
-	public $operator = '<>';
 	
 	/**
 	 * Force a given time value to be midnight on the requested date in the
