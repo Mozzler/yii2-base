@@ -31,7 +31,7 @@ class IndexHeader extends BaseWidget {
 		$config = parent::config($templatify);
 		
 		$config['model']->scenario = $config['model']::SCENARIO_SEARCH;
-		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'create');
+		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'insert');
 		
 		return $config;
 	}

@@ -28,7 +28,8 @@ class ModelIndexAction extends BaseModelAction
 			    ],
 			    'toolbar' => [
 			    ]
-		    ],
+			],
+			'applyRbacToActionColumn' => true
 	    ]);
     }
 
@@ -48,6 +49,10 @@ class ModelIndexAction extends BaseModelAction
 				'columns' => $columns
 			]
 		], $this->config());
+
+		if ($config['applyRbacToActionColumn']) {
+			$config = $this->applyRbacToActionColumn($config, $model);
+		}
 		
 		$config['model'] = $model;
 		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
@@ -76,5 +81,19 @@ class ModelIndexAction extends BaseModelAction
 		}
 		
 		return $columns;
-    }
+	}
+	
+	protected function applyRbacToActionColumn($config, $model) {
+		$columnsCount = sizeof($config['gridViewConfig']['columns']);
+
+		$template = '';
+		if (\Yii::$app->rbac->canAccessModel($model, 'find')) {
+			$template .= ' {view}';
+		}
+
+		// TODO: Support update and delete
+
+		$config['gridViewConfig']['columns'][$columnsCount-1]['template'] = $template;
+		return $config;
+	}
 }
