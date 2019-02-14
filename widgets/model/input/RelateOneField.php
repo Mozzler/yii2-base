@@ -61,16 +61,16 @@ class RelateOneField extends BaseField
         $field = $config['form']->field($config['model'], $config['attribute']);
         $modelField = $config['model']->getModelField($attribute);
 
-        $baseAttribute = substr($attribute,0,-3);
+        $baseAttribute = $attribute; //substr($attribute,0,-2);
         $relatedModel = $model->getRelated($baseAttribute);
         
         if (!$relatedModel) {
             $modelField = $config['model']->getModelField($attribute);
             $relatedModelNamespace = $modelField->relatedModel;
 
-            if (isset($modelField->relatedField)) {
+            if (isset($modelField->relatedModelField)) {
                 // This may be a flexible field that can be related to multiple model types
-                $relatedModelField = $modelField->relatedField;
+                $relatedModelField = $modelField->relatedModelField;
 
                 if ($model->$relatedModelField) {
                     $relatedModelNamespace = $model->$relatedModelField;
