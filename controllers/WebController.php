@@ -13,8 +13,40 @@ use mozzler\rbac\filters\RbacFilter;
 class WebController extends Controller {
 
 	public static $moduleClass = 'mozzler\base\Module';
+
+	/**
+	 * Raw data (returned as Json or sent to HTML template)
+	 */
 	public $data = [];
+
+	/**
+	 * Data for the HTML template (merged with `$data`)
+	 */
+	public $templateData = [];
 	
+	/**
+	 * Has the client requested a Json response?
+	 */
+	public $jsonRequested = false;
+	
+	/**
+	 * Before running any action, check if we need to be returning Json
+	 */
+	public function init()
+	{
+		$this->on(self::EVENT_BEFORE_ACTION, [$this, 'checkJsonRequested']);
+	}
+
+	/**
+	 * Check if we need to return a Json response
+	 */
+	public function checkJsonRequested() {
+		$contentTypes = \Yii::$app->request->getAcceptableContentTypes();
+        if (isset($contentTypes['application/json'])) {
+            $this->jsonRequested = true;
+        }
+	}
+
 	/**
 	 * Support defining $this->data for establishing what data should be sent to view templates
 	 *
@@ -22,6 +54,7 @@ class WebController extends Controller {
 	 */
 	public function render($template, $data=[]) {
 		$data = ArrayHelper::merge($this->data, $data);
+		$data = ArrayHelper::merge($this->data, $this->templateData);
 		return parent::render($template, $data);
 	}
 	

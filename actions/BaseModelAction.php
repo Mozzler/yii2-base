@@ -7,7 +7,21 @@ class BaseModelAction extends BaseAction
 {
 	public $id = 'model';
 	
-	public $findModel;
+    public $findModel;
+    
+    /**
+     * Return data as JSON if accept content type is set to `application/json`
+     */
+    public function run() {
+        if ($this->controller->jsonRequested) {
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            // TODO: Test this return $this->controller->asJson($this->controller->data);
+
+            return $this->controller->data;
+        }
+
+        return parent::run();
+    }
 	
 	/**
      * Returns the data model based on the primary key given.
