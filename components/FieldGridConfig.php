@@ -4,6 +4,7 @@ namespace mozzler\base\components;
 use yii\helpers\ArrayHelper;
 
 use Yii;
+use yii\helpers\Html;
 
 class FieldGridConfig {
 	
@@ -28,7 +29,20 @@ class FieldGridConfig {
 			'Double' => [],
 			'MongoId' => [],
 			'Password' => [],
-			'RelateOne' => [],
+			'RelateOne' => [
+				'class' => \yii\grid\DataColumn::className(),
+				'format' => 'html',
+				'value' => function ($model, $key, $index, $column) {
+					//$attribute = substr($column->attribute,0,-3);
+					$relatedModel = $model->getRelated($column->attribute);
+					if (!$relatedModel) {
+						return "";
+					}
+					$searchAttribute = $relatedModel->getModelConfig('searchAttribute');
+					
+					return Html::a($relatedModel->$searchAttribute, $relatedModel->getUrl('view'));
+				}
+			],
 			'RelateMany' => [],
 			'Text' => [],
 			'TextLarge' => [],
