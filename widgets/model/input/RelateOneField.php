@@ -138,7 +138,6 @@ class RelateOneField extends BaseField
         $field = $form->field($model, $attribute);
         $output = $field->widget(Select2::className(), $config['widgetConfig']);
 
-        \Yii::trace($output);
         return $output;
 	}
 	
