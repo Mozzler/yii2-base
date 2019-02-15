@@ -103,8 +103,6 @@ class ModelIndexAction extends BaseModelAction
 			$template .= ' {delete}';
 		}
 
-		// TODO: Support update and delete
-
 		$config['gridViewConfig']['columns'][$columnsCount-1]['template'] = $template;
 		return $config;
 	}
