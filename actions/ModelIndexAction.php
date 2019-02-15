@@ -87,25 +87,25 @@ class ModelIndexAction extends BaseModelAction
 		return $columns;
 	}
 	
+	/**
+	 * Toggle the display of view, update, delete buttons
+	 * depending on if the current user has access to perform
+	 * those operations on the model.
+	 */
 	protected function applyRbacToActionColumn($config, $model) {
 		$columnsCount = sizeof($config['gridViewConfig']['columns']);
 
-		$template = '';
-		if (\Yii::$app->rbac->canAccessModel($model, 'find')) {
-			$template .= ' {view}';
-		}
-
-		if (\Yii::$app->rbac->canAccessModel($model, 'update')) {
-			$template .= ' {update}';
-		}
-
-		if (\Yii::$app->rbac->canAccessModel($model, 'delete')) {
-			$template .= ' {delete}';
-		}
-
-		// TODO: Support update and delete
-
-		$config['gridViewConfig']['columns'][$columnsCount-1]['template'] = $template;
+		$config['gridViewConfig']['columns'][$columnsCount-1]['visibleButtons'] = [
+			'view' => function($model, $key, $index) {
+				return \Yii::$app->rbac->canAccessModel($model, 'find');
+			},
+			'update' => function($model, $key, $index) {
+				return \Yii::$app->rbac->canAccessModel($model, 'update');
+			},
+			'delete' => function($model, $key, $index) {
+				return \Yii::$app->rbac->canAccessModel($model, 'delete');
+			}
+		];
 		return $config;
 	}
 }
