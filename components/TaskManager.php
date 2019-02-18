@@ -77,7 +77,7 @@ class TaskManager extends \yii\base\Component
             exec($runCommand);
         }
 
-        // @todo: Create a version of this which runs individually
+        // @todo: Create a version of this which runs serially (and the output is returned instead of discarded).
 
         self::gc();
     }

@@ -64,8 +64,14 @@ class TaskController extends Controller
         }
         set_time_limit($task->timeoutSeconds);
 
+
+        if (Task::STATUS_PENDING !== $task->status) {
+            $this->stderr("## Error: Task isn't in pending status. Can't run it.\nTask Id: {$task->_id}\nTask Name: {$task->name}\nTask State: {$task->status}\n", Console::FG_RED, Console::BOLD);
+            return ExitCode::USAGE;
+        }
+
         $task->status = $task::STATUS_INPROGRESS;
-        $task->save(true, null, false);  // Save without checking permissions
+        $task->save(true, null, false);  // Save without checking user permissions
 
 
         // ---------------------------------
@@ -84,10 +90,12 @@ class TaskController extends Controller
         $scriptReturn = $script->run($task); // Actually run the script (task)
 
 
-        $this->stdout("The task is:\n". var_export($task->toArray(), true));
-        $this->stdout("\n---------------------\n  scriptReturn\n---------------------\n". var_export($scriptReturn, true));
+        // -- Check the results
+        $taskWithoutLogs = $task->toArray();
+        unset($taskWithoutLogs['logs']);
+        $this->stdout("The task is:\n" . print_r($taskWithoutLogs, true));
+        $this->stdout("\n---------------------\n  scriptReturn\n---------------------\n" . var_export($scriptReturn, true). "\n");
         if (!empty($scriptReturn)) {
-            // @TODO: Work out why this currently fails
             $task->addLog($scriptReturn);
         }
 
@@ -95,16 +103,17 @@ class TaskController extends Controller
         if ($task->status !== Task::STATUS_ERROR) {
             $task->status = Task::STATUS_COMPLETE;
         } else {
-            $this->stderr("#### Task Errored ####\n", Console::FG_RED, Console::BOLD);
+            $this->stderr("#### Task Errored ####\nTask Id: {$task->_id}\nTask Name: {$task->name}\n", Console::FG_RED, Console::BOLD);
         }
         $saved = $task->save(true, null, false); // Save without checking permissions
 
         // -- Output the Log (if requested)
         if ($this->outputLog) {
-            $this->stdout($task->returnLogLines() . "\n");
+            $this->stdout("\n\n=======================================\n==   Log Entries\n=======================================\n{$task->returnLogLines()}\n");
         }
-        $this->stdout("Task Processing Completed\n");
 
+        // -- Done
+        $this->stdout("Task Processing Completed\n");
         return true === $saved ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
     }
 }
