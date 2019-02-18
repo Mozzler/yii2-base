@@ -5,3 +5,8 @@
 .widget-model-filter .panel-heading .buttons .btn {
     margin-top: -6px;
 }
+
+.form-group {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
