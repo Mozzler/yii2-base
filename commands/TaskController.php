@@ -12,7 +12,11 @@ use yii\helpers\Console;
 use yii\console\ExitCode;
 
 /**
- * This is used to run a specific task from the command line. Allowing for multiple processes to be run in parallel
+ * This is the task manager which works in concert with the cron manager.
+ *
+ * This is used to run a specific task from the command line.
+ * Allowing for multiple processes to be run in parallel if triggered asynchronously.
+ *
  */
 class TaskController extends Controller
 {
@@ -31,11 +35,11 @@ class TaskController extends Controller
 
 
     /**
-     * This command runs the specified task.
+     * This command runs the specified task. Usually called by cron/run. Needs the TaskId
      *
      * Usually triggered by the cronManager
      *
-     * Expected the MongoDB objectId of the task to be run.
+     * Expects the MongoDB objectId of the task to be run.
      *
      * @throws \yii\base\InvalidConfigException
      * @param $taskId string - The MongoDB Id of the task to run
