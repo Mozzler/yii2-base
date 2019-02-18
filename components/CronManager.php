@@ -156,14 +156,26 @@ class CronManager extends Component
         return $stats;
     }
 
-    protected static function gc($force = false)
+    /**
+     * Garbage Collection
+     *
+     * @param bool $force
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     *
+     * Deletes all Task records that are older than self::$gcAgeDays
+     */
+    public static function gc($force = false)
     {
         if ($force || mt_rand(0, 1000000) < self::$gcProbability) {
             // 1% of the time delete all Task records that are older than 30 days
 
-            // @todo: delete all Task records that are older than self::$gcAgeDays
-
-
+            /** @var Task $taskModel */
+            $taskModel = \Yii::createObject(Task::class);
+            $unixTimeOfGC = time() - (self::$gcAgeDays * 86400);
+            \Yii::$app->rbac->ignoreCollection(Task::collectionName()); // Get around RBAC issues
+            $taskModel->deleteAll(['<', 'createdAt', $unixTimeOfGC]);
+            \Yii::$app->rbac->dontIgnoreCollection(Task::collectionName());
             return true;
         }
         return false;
