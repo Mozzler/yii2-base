@@ -146,7 +146,7 @@ class CronManager extends Component
 
             $stats['Entries Run']++;
             \Yii::info("Started running the cron task: {$task->name}");
-            $stats['Tasks Run'][] = $task->name;
+            $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->_id}";
         }
 
         $gcRan = self::gc();
