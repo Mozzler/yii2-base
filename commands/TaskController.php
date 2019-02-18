@@ -96,7 +96,6 @@ class TaskController extends Controller
         $this->stdout("The task is:\n" . print_r($taskWithoutLogs, true));
         $this->stdout("\n---------------------\n  scriptReturn\n---------------------\n" . var_export($scriptReturn, true). "\n");
         if (!empty($scriptReturn)) {
-            // @TODO: Work out why this currently fails
             $task->addLog($scriptReturn);
         }
 
