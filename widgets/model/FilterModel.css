@@ -6,7 +6,7 @@
     margin-top: -6px;
 }
 
-.form-group {
-    margin-right: 0 !important;
-    margin-left: 0 !important;
+.widget-model-filter .form-group {
+    margin-right: auto;
+    margin-left: auto;
 }
