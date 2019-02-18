@@ -23,13 +23,14 @@ class ModelCreateAction extends BaseModelAction
      * Creates a new model.
      * @return \yii\db\ActiveRecordInterface the model newly created
      * @throws ServerErrorHttpException if there is any error when creating the model
+     * @throws ForbiddenHttpException if insert permission is not found
      */
     public function run()
     {
         /* @var $model \yii\db\ActiveRecord */
         $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
-
+        
 		// load default values
 		$model->loadDefaultValues();
 
@@ -38,15 +39,20 @@ class ModelCreateAction extends BaseModelAction
 		
 		// populate the model with any POST data
 		if ($model->load(\Yii::$app->request->post())) {
-	        if ($model->save()) {
-	            $response = \Yii::$app->getResponse();
-	            $response->setStatusCode(201);
-	            $id = implode(',', array_values($model->getPrimaryKey(true)));
-	            
-	            return $this->controller->redirect([$this->viewAction, 'id' => $id]);
-	        } elseif (!$model->hasErrors()) {
-	            throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
-	        }
+            try {
+                 if ($model->save()) {
+                    $response = \Yii::$app->getResponse();
+                    $response->setStatusCode(201);
+                    $id = implode(',', array_values($model->getPrimaryKey(true)));
+                    
+                    return $this->controller->redirect([$this->viewAction, 'id' => $id]);
+                } elseif (!$model->hasErrors()) {
+                    throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
+                }
+            } catch (\mozzler\rbac\PermissionDeniedException $e) {
+                throw new \yii\web\ForbiddenHttpException('No permission to perform insert.');
+            }
+	       
         }
         
         $this->controller->data['model'] = $model;
