@@ -32,6 +32,13 @@ class Task extends BaseModel
     public static function modelIndexes()
     {
         return ArrayHelper::merge(parent::modelIndexes(), [
+            'uniqueName' => [
+                'columns' => ['name' => 1],
+                'options' => [
+                    'unique' => 1
+                ],
+                'duplicateMessage' => ['That task already exists']
+            ]
         ]);
     }
 
@@ -119,7 +126,7 @@ class Task extends BaseModel
             } else {
                 $message = json_encode($logEntry['message']); // Sometimes a boolean or something else
             }
-            
+
             if ($logEntry['type'] === "error") {
                 $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n";
             } else {
