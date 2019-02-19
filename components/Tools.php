@@ -231,6 +231,16 @@ class Tools extends Component {
         // return result
         return $result;
 	}
+
+    /**
+     * @param $exception \Throwable
+     * @return string
+     */
+    public static function returnExceptionAsString($exception)
+    {
+        /** @var $exception \Exception */
+        return "#### EXCEPTION ####\nMessage: {$exception->getMessage()}\nCode: {$exception->getCode()}\nTrace\n--------\n{$exception->getTraceAsString()}";
+    }
 	
 	/**
 	 * Ensure an ID is a proper MongoDB ID object.

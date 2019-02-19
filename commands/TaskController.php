@@ -3,6 +3,7 @@
 namespace mozzler\base\commands;
 
 use MongoDB\BSON\ObjectId;
+use mozzler\base\components\Tools;
 use mozzler\base\models\Task;
 use mozzler\base\scripts\ScriptBase;
 use Yii;
@@ -85,18 +86,27 @@ class TaskController extends Controller
             . "Config: " . json_encode($task->config) . "\n"
             . "\n"
         );
-        /** @var ScriptBase $script */
-        $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
-        $scriptReturn = $script->run($task); // Actually run the script (task)
+
+        try {
+
+            /** @var ScriptBase $script */
+            $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
+            $scriptReturn = $script->run($task); // Actually run the script (task)
+        } catch (\Throwable $exception) {
+            $this->stderr(Tools::returnExceptionAsString($exception), Console::FG_RED, Console::BOLD);
+            $task->status = Task::STATUS_ERROR;
+//            $task->save(true, null, false);
+//            $this->stdout("✘ Task Errored");
+//            return ExitCode::SOFTWARE;
+        }
 
 
         // -- Check the results
         $taskWithoutLogs = $task->toArray();
         unset($taskWithoutLogs['logs']);
         $this->stdout("The task is:\n" . print_r($taskWithoutLogs, true));
-        $this->stdout("\n---------------------\n  scriptReturn\n---------------------\n" . var_export($scriptReturn, true). "\n");
         if (!empty($scriptReturn)) {
-            $task->addLog($scriptReturn);
+            $task->addLog("Script returned\n-----------------------\n" . var_export($scriptReturn, true));
         }
 
         // -- Unless the script set the status to error, then save this as complete
@@ -114,6 +124,6 @@ class TaskController extends Controller
 
         // -- Done
         $this->stdout("Task Processing Completed\n");
-        return true === $saved ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
+        return Task::STATUS_ERROR === $task->status ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
     }
 }
