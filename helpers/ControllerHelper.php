@@ -81,8 +81,8 @@ class ControllerHelper {
 	 * ie: mozzler\auth\UserControler has module=auth and controller=user
 	 */
 	public static function getControllerName($className) {
-		preg_match('/mozzler\\\\(.*)\\\\controllers\\\\([^\\\\]*)Controller$/i', $className, $matches);
-		
+		preg_match('/^(.*)\\\\controllers\\\\([^\\\\]*)Controller$/i', $className, $matches);
+
 		if (sizeof($matches) == 3) {
 			return strtolower($matches[2]);
 		}
@@ -100,5 +100,30 @@ class ControllerHelper {
 		return strtolower($parts[sizeof($parts)-1]);
 	}
 	
+	/**
+	 * Build a `yii\web\Controller` object from supplied parameters.
+	 * 
+	 * Example 1: Build the `User` controller in the `apiv1 module by specifying all the details:
+	 * 
+	 * `$controller = buildController('apiv1\controllers\UserController', 'apiv1', 'user');`
+	 * 
+	 * Example 2: Build the User controller by just specifying the controller class name. This assumes
+	 * the controller is in the `app` module and the controller `id` is lower case version
+	 * of the name (`user1).
+	 * 
+	 * `$controller = buildController('app\controllers\UserController');`
+	 * 
+	 * @param	$controllerClass	string	Full path of the controller class
+	 * @param	$module				string	Module the controller belongs to (ie: `app` or `apiv1`)
+	 * @param	$id					string	Id of the controller, will automatically build from the controller class if not supplied
+	 */
+	public static function buildController($controllerClass, $module='app', $id=null)
+	{
+		if (!$id) {
+			$id = self::getControllerName($controllerClass);
+		}
+
+		return \Yii::createObject(['class' => $controllerClass], [$id, $module]);
+	}
 }	
 	
