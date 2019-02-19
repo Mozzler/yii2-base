@@ -112,7 +112,14 @@ class Task extends BaseModel
             return $logLines;
         }
         foreach ($this->log as $logIndex => $logEntry) {
-            $message = json_encode($logEntry['message']); // Sometimes an array or something is given
+            if (is_string($logEntry['message'])) {
+                $message = $logEntry['message'];
+            } else if (is_array($logEntry['message'])) {
+                $message = print_r($logEntry['message'], true); // Sometimes an array given
+            } else {
+                $message = json_encode($logEntry['message']); // Sometimes a boolean or something else
+            }
+            
             if ($logEntry['type'] === "error") {
                 $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n";
             } else {
