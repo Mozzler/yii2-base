@@ -98,6 +98,16 @@ class Tools extends Component {
 		$model = static::createModel($className);
 		return $model->findOne($filter, $checkPermissions);
 	}
+
+    /**
+     * @param $exception \Throwable
+     * @return string
+     */
+    public static function returnExceptionAsString($exception)
+    {
+        /** @var $exception \Exception */
+        return "#### EXCEPTION ####\nMessage: {$exception->getMessage()}\nCode: {$exception->getCode()}\nTrace\n--------\n{$exception->getTraceAsString()}";
+    }
 	
 	/**
 	 * Ensure an ID is a proper MongoDB ID object.
