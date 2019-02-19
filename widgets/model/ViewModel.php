@@ -22,7 +22,13 @@ class ViewModel extends BaseWidget {
 			'panelConfig' => [
 				'heading' => [
 					'title' => [
-						'content' => '<div class="pull-right"><a href="{{ widget.model.getUrl("update") }}" class="btn btn-success btn-sm">Edit {{ widget.model.getModelConfig(\'label\') }}</a></div>{{ widget.model.getModelConfig("label") }}'
+						'content' => 
+						'{% if t.app.rbac.canAccessModel(widget.model, "update") %}
+							<div class="pull-right">
+								<a href="{{ widget.model.getUrl("update") }}" class="btn btn-success btn-sm">Edit {{ widget.model.getModelConfig(\'label\') }}</a>
+							</div>
+						{% endif %}
+						{{ widget.model.getModelConfig("label") }}'
 					]
 				],
 				'body' => [],
