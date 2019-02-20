@@ -69,23 +69,22 @@ class CronManager extends Component
 
     public function run()
     {
+        $cronRun = $this->generateCronRun();
+        
+        // Cron has already been run for this inverval, so do nothing
+        if (!$cronRun) {
+            return;
+        }
 
-        $stats = ['Entries' => 0, 'Entries Run' => 0, 'Entries Skipped' => 0, 'Entries Already Running' => 0, 'Errors' => 0, 'Tasks Run' => []];
-
-        $defaultEntries = ['backgroundTasks' => [
-            'class' => 'mozzler\base\cron\BackgroundTasksCronEntry',
-            'config' => [],
-            'minutes' => '*',
-            'hours' => '*',
-            'dayMonth' => '*',
-            'dayWeek' => '*',
-            'timezone' => 'Australia/Adelaide',
-            'active' => true,
-
+        $stats = [
+            'Entries' => 0,
+            'Entries Run' => 0,
+            'Entries Skipped' => 0,
+            'Entries Already Running' => 0,
+            'Errors' => 0
         ]
-        ];
 
-        $this->entries = ArrayHelper::merge($defaultEntries, $this->entries);
+        $this->entries = ArrayHelper::merge($this->defaultEntries, $this->entries);
         $stats['Entries'] = count($this->entries);
         /** @var TaskManager $taskManager */
         $taskManager = \Yii::$app->taskManager; // Need to trigger running a task using this.
@@ -94,9 +93,8 @@ class CronManager extends Component
 
             if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
                 $stats['Errors']++;
-                \Yii::error("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true));
+                $cronRun->addLog("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true),'error');
             }
-
 
             /** @var CronEntry $cronObject */
             $cronObject = null;
@@ -111,48 +109,32 @@ class CronManager extends Component
             }
 
             if (empty($cronObject)) {
-                \Yii::error("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true));
+                $cronRun->addLog("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true),'error');
                 $stats['Errors']++;
                 continue;
             }
 
+            if ($cronEntry->shouldRunCronAtTime()) {
+                $task = \Yii::$app->taskManager->schedule($cronEntry->scriptClass, $cronEntry->config, $cronEntry->timeoutSeconds, true);
 
-            if (!$cronObject->shouldRunCronAtTime()) {
-                // Skip
-                \Yii::info("Skipping the running of the Cron as it shouldn't be run at this time. Cron: " . var_export($cronObject, true));
+                $stats['Entries Run']++;
+                $cronRun->addLog("Script scheduled ({$cronEntry->scriptClass}) with taskId: {$task->id}", 'info');
+            } else {
                 $stats['Entries Skipped']++;
             }
-
-            // Create (and auto-save) the task
-            $task = $this->createTaskFromCronEntryObject($cronObject);
-
-            // -- Check there isn't already an existing task for this cron entry:
-            $taskModel = \Yii::createObject(Task::class);
-            $existingTask = $taskModel->findOne([
-                'scriptClass' => $task->scriptClass,
-                'timeoutSeconds' => $task->timeoutSeconds,
-                'name' => $task->name, // This is the specifically unique field which could be all we need to check on
-                'triggerType' => $task->triggerType]);
-
-            if (!empty($existingTask)) {
-                \Yii::error("There's already an existing task for {$task->name} so skipping it. This likely means there's another CronManager running on another server.");
-                $stats['Entries Already Running']++;
-                continue;
-            }
-
-            $task->save(true, null, false); // Save without checking user permissions
-            // Use the Task Manager to Run the task immediately
-            $taskManager->run($task, true); //The important bit. Actually run the task! Without this it all is for naught
-
-            $stats['Entries Run']++;
-            \Yii::info("Started running the cron task: {$task->name}");
-            $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->_id}";
         }
+
+        // TODO: look at gc into a Trait
 
         $gcRan = self::gc();
         $stats['Garbage Collection Ran'] = json_encode($gcRan);
 
-        \Yii::info("The Cron Manager run stats are: " . print_r($stats, true));
+        $cronRun->stats = $stats;
+        $cronRun->status = 'complete';
+        if (!$cronRun->save()) {
+            $cronRun->addLog('TODO: Shit!!', 'error');
+        }
+
         return $stats;
     }
 
@@ -188,7 +170,7 @@ class CronManager extends Component
      */
     protected function createTaskFromCronEntryObject($cronEntryObject)
     {
-
+/*
         if (empty($cronEntryObject)) {
             return null;
         }
@@ -205,7 +187,35 @@ class CronManager extends Component
         /** @var Task $task */
         $task = \Yii::createObject(Task::class);
         $task->load($taskConfig, '');
-        return $task;
+        return $task;*/
     }
 
+    protected function createCronRun() {
+        $nearestMinuteTimestamp = round(floor($utcUnixTimestamp / 60) * 60);
+
+        $cronRun = \Yii::createObject('mozzler\base\models\CronRun');
+        $cronRun->load([
+            'timestamp' => $nearestMinuteTimestamp
+            'stats' => []
+        ],"");
+
+        if (!$cronRun->save()) {
+            // Unable to save cron due to an entry already existing for this
+            // timestamp minute interval
+            return;
+        }
+    }
+
+}
+
+
+ar cronRun = r.createModel("rappsio.application.cronrun", {
+    "timestamp": timestampMinute,
+    "summary": "Running cron commenced"
+})
+
+// Log that cron is being run for this timestamp
+if (!cronRun.save()) {
+    r.log("trace", "Cron has already been executed for this time interval ("+timestampMinute+")");
+    return false;
 }

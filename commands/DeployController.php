@@ -29,7 +29,7 @@ use mozzler\base\helpers\IndexHelper;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-class DeployController extends Controller
+class DeployController extends BaseController
 {
     // specify the default modelPaths to sync indexes
     public $modelPaths = ['@app/models/', '@mozzler/base/models/'];

@@ -10,7 +10,7 @@ use yii\console\ExitCode;
 /**
  * This class offers easy way to implement `config` collection.
  */
-class CronController extends Controller
+class CronController extends BaseController
 {
     /**
      * This command runs cron for a given minute interval

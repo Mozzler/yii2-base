@@ -84,7 +84,6 @@ class CronEntry extends Component
      */
     public function intervalMatch($intervalValue, $date, $intervalFormat)
     {
-
         if ($intervalValue === "*") {
             return true;
         }

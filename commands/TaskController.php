@@ -19,7 +19,7 @@ use yii\console\ExitCode;
  * Allowing for multiple processes to be run in parallel if triggered asynchronously.
  *
  */
-class TaskController extends Controller
+class TaskController extends BaseController
 {
 
     public $outputLog = true;
@@ -122,65 +122,16 @@ class TaskController extends Controller
         }
         set_time_limit($task->timeoutSeconds);
 
+        $task = \Yii::$app->taskManager->runTask($task);
 
-        if (Task::STATUS_PENDING !== $task->status) {
-            $this->stderr("## Error: Task isn't in pending status. Can't run it.\nTask Id: {$task->_id}\nTask Name: {$task->name}\nTask State: {$task->status}\n", Console::FG_RED, Console::BOLD);
-            return ExitCode::USAGE;
+        if ($task->hasErrors()) {
+            $this->stderr("#### Error ####\nCouldn't save the taskId of " . json_encode($taskId) . "\n" . json_encode($task->getErrors()), Console::FG_RED, Console::BOLD);
+            return ExitCode::UNSPECIFIED_ERROR;
         }
-
-        $task->status = $task::STATUS_INPROGRESS;
-        $task->save(true, null, false);  // Save without checking user permissions
-
-
-        // ---------------------------------
-        //   Run the Script
-        // ---------------------------------
-        $this->stdout(
-            "Running Task: {$task->scriptClass}\n"
-            . "Timeout: {$task->timeoutSeconds} seconds\n"
-            . "Trigger Type: {$task->triggerType}\n"
-            . "Status: {$task->status}\n"
-            . "Config: " . json_encode($task->config) . "\n"
-            . "\n"
-        );
-
-        try {
-
-            /** @var ScriptBase $script */
-            $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
-            $scriptReturn = $script->run($task); // Actually run the script (task)
-        } catch (\Throwable $exception) {
-            $this->stderr(Tools::returnExceptionAsString($exception), Console::FG_RED, Console::BOLD);
-            $task->status = Task::STATUS_ERROR;
-//            $task->save(true, null, false);
-//            $this->stdout("✘ Task Errored");
-//            return ExitCode::SOFTWARE;
+        else {
+            $this->stdout("Task Processing Completed\n");
+            return Task::STATUS_ERROR === $task->status ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
         }
-
-
-        // -- Check the results
-        $taskWithoutLogs = $task->toArray();
-        unset($taskWithoutLogs['logs']);
-        $this->stdout("The task is:\n" . print_r($taskWithoutLogs, true));
-        if (!empty($scriptReturn)) {
-            $task->addLog("Script returned\n-----------------------\n" . var_export($scriptReturn, true));
-        }
-
-        // -- Unless the script set the status to error, then save this as complete
-        if ($task->status !== Task::STATUS_ERROR) {
-            $task->status = Task::STATUS_COMPLETE;
-        } else {
-            $this->stderr("#### Task Errored ####\nTask Id: {$task->_id}\nTask Name: {$task->name}\n", Console::FG_RED, Console::BOLD);
-        }
-        $saved = $task->save(true, null, false); // Save without checking permissions
-
-        // -- Output the Log (if requested)
-        if ($this->outputLog) {
-            $this->stdout("\n\n=======================================\n==   Log Entries\n=======================================\n{$task->returnLogLines()}\n");
-        }
-
-        // -- Done
-        $this->stdout("Task Processing Completed\n");
-        return Task::STATUS_ERROR === $task->status ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
+        
     }
 }
