@@ -146,90 +146,26 @@ class Tools extends Component {
 	 * @param	string	$subject	Email subject.
 	 * @param	string	$template	Name of template to use for rendering the email (eg: `user/welcome.twig`). Email templates are all prefixed by `emails/`, but this doesn't need to be included when specifying the template name.
 	 * @param	array	$data		Data to send to the email template.
-	 * @param	array	$config		Config for sending the email such as; setting `replyTo`, `from`, or custom SMTP settings.
+	 * @param	array	$config		Config for sending the email such as; setting `replyTo` or `from` which is merged with `$params['config']`
 	 */
 	public static function sendEmail($to, $subject, $template, $data=[], $config=[]) {
 		$mailer = \Yii::$app->mailer;
-		$canSetFromAddress = false;
-		
-        if (isset($config['smtpSettings'])) {
-        	$transport = $mailer->getTransport();
-        	$smtpSettings = $config['smtpSettings'];
-        	$smtpSettings['class'] = 'Swift_SmtpTransport';
-        	$smtpSettings['plugins'] = [
-	        	['class' => 'Openbuildings\Swiftmailer\CssInlinerPlugin']
-        	];
-        	$canSetFromAddress = true;
-			$mailer->setTransport($smtpSettings);
-        }
-        
-        // merge config with application defaults
-        $defaultConfig = self::getConfig("rappsio.application.emails");
-        $mergedConfig = ArrayHelper::merge($defaultConfig, $config);
-        
-        if (isset($mergedConfig['messageConfig'])) {
-	        $oldMessageConfig = $mailer->messageConfig;
-	        $mailer->messageConfig = $mergedConfig['messageConfig'];
-        }
-        
         $message = $mailer->compose($template, $data)
         	->setTo($to)
 			->setSubject($subject);
 		
-		if (isset($mergedConfig['replyTo']['email']) && isset($mergedConfig['replyTo']['name'])) {
-			$message->setReplyTo([$mergedConfig['replyTo']['email'] => $mergedConfig['replyTo']['name']]);
+		$config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], $config);
+
+		if (isset($config['from'])) {
+			\Yii::trace(print_r($config['from'],true));
+			$message->setFrom($config['from']);
+		}
+
+		if (isset($config['replyTo'])) {
+			$message->setReplyTo($config['replyTo']);
 		}
         
-        $useDefaultFrom = true;
-        if ($canSetFromAddress) {
-        	// user has custom smtpSettings, so can specify their own from address
-        	if (isset($config['from'])) {
-        		// use from address from config
-        		$from = $config['from'];
-        		if (isset($from['email']) && isset($from['name'])) {
-			        $message->setFrom([$from['email'] => $from['name']]);
-					$useDefaultFrom = false;
-				}
-				else {
-					\Yii::warning("Invalid from address supplied: ".print_r($from,true));
-				}
-        	}
-	        else {
-		        $from = isset($defaultConfig['from']) ? $defaultConfig['from'] : [];
-		        if ($from) {
-		        	if (isset($from['email']) && isset($from['name'])) {
-				        $message->setFrom([$from['email'] => $from['name']]);
-						$useDefaultFrom = false;
-					}
-					else {
-						\Yii::warning("Invalid from address supplied: ".print_r($from,true));
-					}
-		        }
-	        }
-        }
-        
-        if ($useDefaultFrom) {
-        	// user hasn't (or can't) specify a custom from address
-        	// so use the rappsio application default
-        	$from = \Yii::$app->params['emailDefaults']['from'];
-        	$message->setFrom([$from['email'] => $from['name']]);
-        } 
-        
-        $result = $message->send();
-        \Yii::$app->getModule("rappsio")->logUsage("email");
-        
-        if (isset($config['smtpSettings'])) {
-        	// set transport back to original value
-        	$mailer->setTransport($transport);
-        }
-        
-        if (isset($config['messageConfig'])) {
-        	// set message config back to original value
-	        $mailer->messageConfig = $oldMessageConfig;
-        }
-        
-        // return result
-        return $result;
+        return $message->send();
 	}
 
     /**

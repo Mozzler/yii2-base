@@ -15,7 +15,8 @@
         "kartik-v/yii2-widget-select2": "dev-master",
         "kartik-v/yii2-datecontrol": "^1.9",
         "kartik-v/yii2-widget-datepicker": "^1.4",
-        "kartik-v/yii2-widget-datetimepicker": "^1.4"
+        "kartik-v/yii2-widget-datetimepicker": "^1.4",
+        "openbuildings/swiftmailer-css-inliner": "^0.5.2"
     },
     "autoload": {
         "psr-4": {
