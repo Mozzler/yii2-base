@@ -34,8 +34,63 @@ class TaskController extends Controller
         return ['o' => 'outputLog'];
     }
 
+    public function actionRedo($taskId)
+    {
 
-    // @todo: Add task/requeue (changes status back to pending) and task/view (views logs and info)
+        if (empty($taskId)) {
+            $this->stderr("#### Error ####\nNo or invalid taskId provided", Console::FG_RED, Console::UNDERLINE);
+            return ExitCode::USAGE;
+        }
+
+        // Check the MongoDB entry
+        // Get the timeoutSeconds and set the local timeout to that
+        /** @var Task $taskModel */
+        $taskModel = \Yii::createObject(Task::class);
+        /** @var Task $task */
+        $task = $taskModel->findOne(['_id' => new ObjectId($taskId)]);
+        if (empty($task)) {
+            $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
+            return ExitCode::USAGE;
+        }
+
+        $task->status = Task::STATUS_PENDING;
+        $task->save(true, null, false);
+
+        return $this->actionRun($taskId);
+    }
+
+    public function actionView($taskId)
+    {
+
+        if (empty($taskId)) {
+            $this->stderr("#### Error ####\nNo or invalid taskId provided", Console::FG_RED, Console::UNDERLINE);
+            return ExitCode::USAGE;
+        }
+
+        // Check the MongoDB entry
+        // Get the timeoutSeconds and set the local timeout to that
+        /** @var Task $taskModel */
+        $taskModel = \Yii::createObject(Task::class);
+        /** @var Task $task */
+        $task = $taskModel->findOne(['_id' => new ObjectId($taskId)]);
+        if (empty($task)) {
+            $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
+            return ExitCode::USAGE;
+        }
+
+        $this->stdout(
+            "Task Name: {$task->name}\n"
+            . "Script: {$task->scriptClass}\n"
+            . "Timeout: {$task->timeoutSeconds} seconds\n"
+            . "Trigger Type: {$task->triggerType}\n"
+            . "Status: {$task->status}\n"
+            . "Config: " . json_encode($task->config) . "\n"
+            . "\n"
+        );
+        $this->stdout("=======================================\n==   Log Entries\n=======================================\n{$task->returnLogLines()}\n");
+        return ExitCode::OK;
+    }
+
 
     /**
      * This command runs the specified task. Usually called by cron/run. Needs the TaskId
