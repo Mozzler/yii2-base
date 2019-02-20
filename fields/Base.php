@@ -38,6 +38,10 @@ class Base extends Component {
 		if (!isset($this->widgets['input'])) {
 			$this->widgets['input'] = 'mozzler\base\widgets\model\input\\'.$this->type.'Field';
 		}
+
+		if ($this->hidden) {
+			$this->widgets['input'] = 'mozzler\base\widgets\model\input\\HiddenField';
+		}
 		
 		if (!isset($this->widgets['view'])) {
 			$this->widgets['view'] = 'mozzler\base\widgets\model\view\\'.$this->type.'Field';
