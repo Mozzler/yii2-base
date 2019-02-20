@@ -94,9 +94,67 @@ class Tools extends Component {
 		return $model;
 	}
 	
+	/**
+	 * Get a model from the database
+	 */
 	public static function getModel($className, $filter=[], $checkPermissions=true) {
 		$model = static::createModel($className);
 		return $model->findOne($filter, $checkPermissions);
+	}
+
+	/**
+	 * Get existing models from the database.
+	 *
+	 * Example usage:
+	 * 
+	 * ```
+	 * // get all models, but limit to 10 results sorted by inserted DESC and ignore RBAC
+	 * $models = Tools::getModels('app\models\BlogPost', [], [
+	 * 	'limit' => 10
+	 * 	'offset' => 0,
+	 * 	'orderBy' => ['inserted' => SORT_DESC],
+	 * 	'checkPermissions' => false
+	 * ]);
+	 *
+	 * // get models using a filter
+	 * $models = Tools::getModels('app\models\BlogPost', [
+	 * 	"status" => "draft"
+	 * ]);
+	 *
+	 * @param	string	$className	Class name of the model to get
+	 * @param	array	$filter		MongoDB filter to apply to the query
+	 * @param	array	$options
+	 * @return	array	Returns an array of found models. If none found, returns an empty array.
+	 */
+	public static function getModels($className, $filter=[], $options=[]) {
+		$options = ArrayHelper::merge([
+			'limit' => 20,
+			'offset' => null,
+			'orderBy' => [],
+			'checkPermissions' => true
+		], $options);
+
+		$limit = $options['limit'];
+		$offset = $options['offset'];
+		$orderBy = $options['orderBy'];
+		$checkPermissions = $options['checkPermissions'];
+
+		$model = static::createModel($className);
+		$query = $model->find($checkPermissions);
+		
+		if ($filter)
+	        $query->where = $filter;
+	    
+	    if ($limit)
+	    	$query->limit = $limit;
+	    
+	    if ($offset)
+	    	$query->offset = $offset;
+	    
+	    if ($orderBy)
+	    	$query->orderBy = $orderBy;
+		
+		return $query->all();
 	}
 
 	/**
