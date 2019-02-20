@@ -3,7 +3,6 @@
 namespace mozzler\base\commands;
 
 use Yii;
-use yii\console\Controller;
 use yii\helpers\Console;
 use yii\console\ExitCode;
 

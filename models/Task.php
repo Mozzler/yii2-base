@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
  */
 class Task extends BaseModel
 {
-    use LoggableModelTrait;
+    use traits\LoggableModelTrait;
 
     const TRIGGER_TYPE_INSTANT = 'instant';
     const TRIGGER_TYPE_BACKGROUND = 'background';

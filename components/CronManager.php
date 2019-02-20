@@ -3,6 +3,7 @@
 namespace mozzler\base\components;
 
 use mozzler\base\cron\CronEntry;
+use mozzler\base\models\CronRun;
 use mozzler\base\models\Task;
 use \yii\helpers\ArrayHelper;
 use \yii\base\Component;
@@ -69,20 +70,20 @@ class CronManager extends Component
 
     public function run()
     {
-        $cronRun = $this->generateCronRun();
+        $cronRun = $this->createCronRun();
         
-        // Cron has already been run for this inverval, so do nothing
+        // Cron has already been run for this interval, so do nothing
         if (!$cronRun) {
-            return;
+            return false;
         }
 
         $stats = [
             'Entries' => 0,
             'Entries Run' => 0,
             'Entries Skipped' => 0,
-            'Entries Already Running' => 0,
+            'Tasks Run' => [],
             'Errors' => 0
-        ]
+        ];
 
         $this->entries = ArrayHelper::merge($this->defaultEntries, $this->entries);
         $stats['Entries'] = count($this->entries);
@@ -96,6 +97,7 @@ class CronManager extends Component
                 $cronRun->addLog("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true),'error');
             }
 
+            // -- Create the Cron Entry
             /** @var CronEntry $cronObject */
             $cronObject = null;
             if (!empty($cronEntry['class'])) {
@@ -114,11 +116,12 @@ class CronManager extends Component
                 continue;
             }
 
-            if ($cronEntry->shouldRunCronAtTime()) {
-                $task = \Yii::$app->taskManager->schedule($cronEntry->scriptClass, $cronEntry->config, $cronEntry->timeoutSeconds, true);
+            if ($cronObject->shouldRunCronAtTime()) {
+                $task = \Yii::$app->taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true);
 
                 $stats['Entries Run']++;
-                $cronRun->addLog("Script scheduled ({$cronEntry->scriptClass}) with taskId: {$task->id}", 'info');
+                $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
+                $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->getId()}";
             } else {
                 $stats['Entries Skipped']++;
             }
@@ -133,6 +136,7 @@ class CronManager extends Component
         $cronRun->status = 'complete';
         if (!$cronRun->save()) {
             $cronRun->addLog('TODO: Shit!!', 'error');
+            $stats['Errors']++;
         }
 
         return $stats;
@@ -164,58 +168,26 @@ class CronManager extends Component
     }
 
     /**
-     * @param $cronEntryObject CronEntry
-     * @return |null
+     * @return CronRun|boolean
      * @throws \yii\base\InvalidConfigException
      */
-    protected function createTaskFromCronEntryObject($cronEntryObject)
-    {
-/*
-        if (empty($cronEntryObject)) {
-            return null;
-        }
-        $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
-        $taskConfig =
-            [
-                'config' => $cronEntryObject->config,
-                'scriptClass' => $cronEntryObject->scriptClass,
-                'timeoutSeconds' => $cronEntryObject->timeoutSeconds,
-                'status' => Task::STATUS_PENDING,
-                'name' => "{$unixTimestampMinuteStarted}-Cron-{$cronEntryObject->scriptClass}", // It's important that this be complex enough that we can detect other tasks aren't already running with the same instance
-                'triggerType' => Task::TRIGGER_TYPE_INSTANT
-            ];
-        /** @var Task $task */
-        $task = \Yii::createObject(Task::class);
-        $task->load($taskConfig, '');
-        return $task;*/
-    }
-
     protected function createCronRun() {
-        $nearestMinuteTimestamp = round(floor($utcUnixTimestamp / 60) * 60);
+        $nearestMinuteTimestamp = round(floor(time() / 60) * 60);
 
+        /** @var CronRun $cronRun */
         $cronRun = \Yii::createObject('mozzler\base\models\CronRun');
         $cronRun->load([
-            'timestamp' => $nearestMinuteTimestamp
-            'stats' => []
+            'timestamp' => $nearestMinuteTimestamp,
+            'stats' => [],
         ],"");
 
+        // @todo: try/catch this and gracefully deal with the Exception 'yii\mongodb\Exception' example message: 'E11000 duplicate key error collection: viterra.app.cronRun index: timestampUniqueId dup key: { : 1550638500 }'
         if (!$cronRun->save()) {
             // Unable to save cron due to an entry already existing for this
             // timestamp minute interval
-            return;
+            return false;
         }
+        return $cronRun;
     }
 
-}
-
-
-ar cronRun = r.createModel("rappsio.application.cronrun", {
-    "timestamp": timestampMinute,
-    "summary": "Running cron commenced"
-})
-
-// Log that cron is being run for this timestamp
-if (!cronRun.save()) {
-    r.log("trace", "Cron has already been executed for this time interval ("+timestampMinute+")");
-    return false;
 }

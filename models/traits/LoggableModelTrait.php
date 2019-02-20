@@ -1,5 +1,5 @@
 <?php
-namespace mozzler\base\models;
+namespace mozzler\base\models\traits;
 
 trait LoggableModelTrait
 {

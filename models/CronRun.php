@@ -9,11 +9,11 @@ use yii\helpers\ArrayHelper;
  * Class CronRun
  * @package mozzler\base\models
  *
- * 
+ *
  */
 class CronRun extends BaseModel
 {
-    use LoggableModelTrait;
+    use traits\LoggableModelTrait;
 
     protected static $collectionName = 'app.cronRun';
 
@@ -63,8 +63,10 @@ class CronRun extends BaseModel
                     'processing' => 'Processing',
                     'error' => 'Error',
                     'complete' => 'Complete'
+                ],
+                'rules' => [
+                    'default' => ['value' => 'processing']
                 ]
-                'default' => 'processing'
             ],
 
         ]);
@@ -72,12 +74,13 @@ class CronRun extends BaseModel
 
     public function scenarios()
     {
-        return [
-            'update' => 'timestamp',
-            'view' => ['timestamp', 'summary'],
-            'list' => 'timestamp',
-            'export' => ['timestamp', 'summary']
-        ];
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE] = ['timestamp', 'stats', 'status', 'log'];
+        $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
+        $scenarios[self::SCENARIO_LIST] = ['timestamp', 'status'];
+        $scenarios[self::SCENARIO_VIEW] = ['timestamp', 'stats', 'status', 'log'];
+
+        return $scenarios;
     }
 
 }

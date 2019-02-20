@@ -2,6 +2,8 @@
 
 namespace mozzler\base\components;
 
+use mozzler\base\models\Task;
+use mozzler\base\scripts\ScriptBase;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -30,7 +32,7 @@ class TaskManager extends \yii\base\Component
      * @param array $taskConfig
      * @param bool $runNow if true then trigger the CLI TaskController command striaght away
      */
-    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout=60, $runNow = false)
+    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = false)
     {
         $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
         $taskConfig =
@@ -39,10 +41,11 @@ class TaskManager extends \yii\base\Component
                 'scriptClass' => $scriptClassName,
                 'timeoutSeconds' => $scriptTimeout,
                 'status' => Task::STATUS_PENDING,
+                'name' => "{$unixTimestampMinuteStarted}-" . ($runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND) . "-{$scriptClassName}",
                 'triggerType' => $runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND
             ];
-        
-        if ($taskConfig->triggerType == Task::TRIGGER_TYPE_BACKGROUND) {
+
+        if (Task::TRIGGER_TYPE_BACKGROUND === $taskConfig['triggerType']) {
             throw new \yii\base\NotSupportedException("Background task scheduling is not yet supported, sorry :(");
         }
 
@@ -50,16 +53,20 @@ class TaskManager extends \yii\base\Component
         $task = \Yii::createObject(Task::class);
         $task->load($taskConfig, '');
         if (!$task->save()) {
-            throw new \Exception("Unable to save a task for execution: ".json_encode($task->getErrors()));
+            throw new \Exception("Unable to save a task for execution: " . json_encode($task->getErrors()));
         }
 
-        if ($task->triggerType == Task::TRIGGER_TYPE_INSTANT) {
-            self::trigger($task);
+        if (Task::TRIGGER_TYPE_INSTANT === $task->triggerType) {
+            self::triggerTask($task);
         }
 
         return $task;
     }
 
+    /**
+     * @param $task Task
+     * @return mixed
+     */
     public static function runTask($task)
     {
         if (Task::STATUS_PENDING !== $task->status) {
@@ -74,7 +81,7 @@ class TaskManager extends \yii\base\Component
         try {
             /** @var ScriptBase $script */
             $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
-            $scriptReturn = $script->run($task); // Actually run the script (task)
+            $scriptReturn = $script->run($task); // !! Actually run the script (task)
         } catch (\Throwable $exception) {
             $task->status = Task::STATUS_ERROR;
             $task->addLog(Tools::returnExceptionAsString($exception), 'error');
@@ -86,25 +93,25 @@ class TaskManager extends \yii\base\Component
         if ($task->status !== Task::STATUS_ERROR) {
             $task->status = Task::STATUS_COMPLETE;
         }
-        
+
         $task->save();
         return $task;
     }
 
     /**
      * Trigger a task to be fired via the command line.
-     * 
+     * Called by the schedule command
+     *
      * @param $taskObject \mozzler\base\models\Task - An instance of a task which should have the
      * @throws \yii\base\InvalidConfigException
      * @return boolean
      */
-    protected static function trigger($taskObject)
+    protected static function triggerTask($taskObject)
     {
         if (empty($taskObject)) {
             \Yii::error("Given an empty taskObject: " . var_export($taskObject, true));
             return false;
         }
-
         $taskId = $taskObject->getId();
 
         // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
@@ -127,9 +134,6 @@ class TaskManager extends \yii\base\Component
             \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
             exec($runCommand);
         }
-
-        // @todo: Create a version of this which runs serially (and the output is returned instead of discarded).
-
         self::gc();
     }
 

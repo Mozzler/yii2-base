@@ -42,8 +42,7 @@ class TaskController extends BaseController
             return ExitCode::USAGE;
         }
 
-        // Check the MongoDB entry
-        // Get the timeoutSeconds and set the local timeout to that
+        // -- Check the MongoDB entry
         /** @var Task $taskModel */
         $taskModel = \Yii::createObject(Task::class);
         /** @var Task $task */
@@ -67,8 +66,7 @@ class TaskController extends BaseController
             return ExitCode::USAGE;
         }
 
-        // Check the MongoDB entry
-        // Get the timeoutSeconds and set the local timeout to that
+        // -- Check the MongoDB entry
         /** @var Task $taskModel */
         $taskModel = \Yii::createObject(Task::class);
         /** @var Task $task */
@@ -110,8 +108,7 @@ class TaskController extends BaseController
             return ExitCode::USAGE;
         }
 
-        // Check the MongoDB entry
-        // Get the timeoutSeconds and set the local timeout to that
+        // -- Check the MongoDB entry
         /** @var Task $taskModel */
         $taskModel = \Yii::createObject(Task::class);
         /** @var Task $task */
@@ -120,6 +117,8 @@ class TaskController extends BaseController
             $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
             return ExitCode::USAGE;
         }
+
+        // Get the timeoutSeconds and set the local timeout to that
         set_time_limit($task->timeoutSeconds);
 
         $task = \Yii::$app->taskManager->runTask($task);

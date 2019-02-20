@@ -1,7 +1,9 @@
 <?php
-namespace mozzzler\base\commands;
+namespace mozzler\base\commands;
 
-class BaseController {
+use Yii;
+use yii\console\Controller;
+class BaseController extends Controller {
 
     /**
      * Disable permission system so commands have unrestricted access to the system
