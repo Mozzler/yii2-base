@@ -30,29 +30,80 @@ class TaskManager extends \yii\base\Component
      * @param array $taskConfig
      * @param bool $runNow if true then trigger the CLI TaskController command striaght away
      */
-    public static function schedule($taskClassName, $taskConfig = [], $runNow = false)
+    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout=60, $runNow = false)
     {
+        $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
+        $taskConfig =
+            [
+                'config' => $scriptConfig,
+                'scriptClass' => $scriptClassName,
+                'timeoutSeconds' => $scriptTimeout,
+                'status' => Task::STATUS_PENDING,
+                'triggerType' => $runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND
+            ];
+        
+        if ($taskConfig->triggerType == Task::TRIGGER_TYPE_BACKGROUND) {
+            throw new \yii\base\NotSupportedException("Background task scheduling is not yet supported, sorry :(");
+        }
 
-        // create a new instance of a mozzler\base\models\Task
-        // populate the task
-        // save the task
-        // (background task cron job will execute any pending tasks)
+        /** @var Task $task */
+        $task = \Yii::createObject(Task::class);
+        $task->load($taskConfig, '');
+        if (!$task->save()) {
+            throw new \Exception("Unable to save a task for execution: ".json_encode($task->getErrors()));
+        }
+
+        if ($task->triggerType == Task::TRIGGER_TYPE_INSTANT) {
+            self::trigger($task);
+        }
+
+        return $task;
     }
 
+    public static function runTask($task)
+    {
+        if (Task::STATUS_PENDING !== $task->status) {
+            $task->addLog("Refusing to re-run task as it is not in a pending state", 'error');
+            $task->save();
+            return $task;
+        }
+
+        $task->status = $task::STATUS_INPROGRESS;
+        $task->save();
+
+        try {
+            /** @var ScriptBase $script */
+            $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
+            $scriptReturn = $script->run($task); // Actually run the script (task)
+        } catch (\Throwable $exception) {
+            $task->status = Task::STATUS_ERROR;
+            $task->addLog(Tools::returnExceptionAsString($exception), 'error');
+            $task->save();
+            return $task;
+        }
+
+        // -- Unless the script set the status to error, then save this as complete
+        if ($task->status !== Task::STATUS_ERROR) {
+            $task->status = Task::STATUS_COMPLETE;
+        }
+        
+        $task->save();
+        return $task;
+    }
 
     /**
+     * Trigger a task to be fired via the command line.
+     * 
      * @param $taskObject \mozzler\base\models\Task - An instance of a task which should have the
-     * @param $async boolean - If we should return straight away or wait until the command has been run
      * @throws \yii\base\InvalidConfigException
      * @return boolean
      */
-    public static function run($taskObject, $async = true)
+    protected static function trigger($taskObject)
     {
         if (empty($taskObject)) {
             \Yii::error("Given an empty taskObject: " . var_export($taskObject, true));
             return false;
         }
-
 
         $taskId = $taskObject->getId();
 

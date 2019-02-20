@@ -63,16 +63,6 @@ class Cache extends BaseModel
         ]);
     }
 
-    /**
-     * @return array the validation rules.
-     */
-    public function rules()
-    {
-        return [
-            [['id', 'data'], 'required']
-        ];
-    }
-
     public function scenarios()
     {
         $scenarios = parent::scenarios();

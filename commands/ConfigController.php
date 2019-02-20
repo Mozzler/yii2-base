@@ -21,7 +21,7 @@ use yii\console\ExitCode;
 /**
  * This class offers easy way to implement `config` collection.
  */
-class ConfigController extends Controller
+class ConfigController extends BaseController
 {
     /**
      * This command preloads the config collection with defined default values
