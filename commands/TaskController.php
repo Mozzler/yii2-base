@@ -35,6 +35,8 @@ class TaskController extends BaseController
     }
 
 
+    // @todo: Add task/requeue (changes status back to pending) and task/view (views logs and info)
+
     /**
      * This command runs the specified task. Usually called by cron/run. Needs the TaskId
      *

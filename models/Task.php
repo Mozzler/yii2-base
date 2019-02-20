@@ -33,6 +33,13 @@ class Task extends BaseModel
     public static function modelIndexes()
     {
         return ArrayHelper::merge(parent::modelIndexes(), [
+            'uniqueName' => [
+                'columns' => ['name' => 1],
+                'options' => [
+                    'unique' => 1
+                ],
+                'duplicateMessage' => ['That task already exists']
+            ]
         ]);
     }
 
