@@ -108,23 +108,22 @@ class Tools extends Component {
 	 * Example usage:
 	 * 
 	 * ```
-	 * // get all models, but limit to 10 results sorted by inserted DESC
-	 * var models = r.getModels("rappsio.blog.post", {}, 10, 0, {"inserted": r.getConstant("db.SORT_DESC)});
+	 * // get all models, but limit to 10 results sorted by inserted DESC and ignore RBAC
+	 * $models = Tools::getModels('app\models\BlogPost', [], [
+	 * 	'limit' => 10
+	 * 	'offset' => 0,
+	 * 	'orderBy' => ['inserted' => SORT_DESC],
+	 * 	'checkPermissions' => false
+	 * ]);
 	 *
 	 * // get models using a filter
-	 * var models = r.getModels("rappsio.blog.post", {
-	 * 	"status": "draft"
-	 * });
-	 *
-	 * // get models even if the current logged in user doesn't have permission to access them
-	 * var models = r.getModels("rappsio.blog.post", {}, null, null, null, false);
+	 * $models = Tools::getModels('app\models\BlogPost', [
+	 * 	"status" => "draft"
+	 * ]);
 	 *
 	 * @param	string	$className	Class name of the model to get
 	 * @param	array	$filter		MongoDB filter to apply to the query
-	 * @param	int		$limit		Maximum number of results to return
-	 * @param	int		$offset		Offset position for results
-	 * @param	array	$orderBy	The columns (and the directions) to be ordered by. (eg `['_id' => SORT_ASC]`)
-	 * @param	boolean	$checkPermissions	Whether to check permissions based on the logged in user when running the query
+	 * @param	array	$options
 	 * @return	array	Returns an array of found models. If none found, returns an empty array.
 	 */
 	public static function getModels($className, $filter=[], $options=[]) {
