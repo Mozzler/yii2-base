@@ -94,9 +94,68 @@ class Tools extends Component {
 		return $model;
 	}
 	
+	/**
+	 * Get a model from the database
+	 */
 	public static function getModel($className, $filter=[], $checkPermissions=true) {
 		$model = static::createModel($className);
 		return $model->findOne($filter, $checkPermissions);
+	}
+
+	/**
+	 * Get existing models from the database.
+	 *
+	 * Example usage:
+	 * 
+	 * ```
+	 * // get all models, but limit to 10 results sorted by inserted DESC
+	 * var models = r.getModels("rappsio.blog.post", {}, 10, 0, {"inserted": r.getConstant("db.SORT_DESC)});
+	 *
+	 * // get models using a filter
+	 * var models = r.getModels("rappsio.blog.post", {
+	 * 	"status": "draft"
+	 * });
+	 *
+	 * // get models even if the current logged in user doesn't have permission to access them
+	 * var models = r.getModels("rappsio.blog.post", {}, null, null, null, false);
+	 *
+	 * @param	string	$className	Class name of the model to get
+	 * @param	array	$filter		MongoDB filter to apply to the query
+	 * @param	int		$limit		Maximum number of results to return
+	 * @param	int		$offset		Offset position for results
+	 * @param	array	$orderBy	The columns (and the directions) to be ordered by. (eg `['_id' => SORT_ASC]`)
+	 * @param	boolean	$checkPermissions	Whether to check permissions based on the logged in user when running the query
+	 * @return	array	Returns an array of found models. If none found, returns an empty array.
+	 */
+	public static function getModels($className, $filter=[], $options=[]) {
+		$options = ArrayHelper::merge([
+			'limit' => 20,
+			'offset' => null,
+			'orderBy' => [],
+			'checkPermissions' => true
+		], $options);
+
+		$limit = $options['limit'];
+		$offset = $options['offset'];
+		$orderBy = $options['orderBy'];
+		$checkPermissions = $options['checkPermissions'];
+
+		$model = static::createModel($className);
+		$query = $model->find($checkPermissions);
+		
+		if ($filter)
+	        $query->where = $filter;
+	    
+	    if ($limit)
+	    	$query->limit = $limit;
+	    
+	    if ($offset)
+	    	$query->offset = $offset;
+	    
+	    if ($orderBy)
+	    	$query->orderBy = $orderBy;
+		
+		return $query->all();
 	}
 
 	/**
