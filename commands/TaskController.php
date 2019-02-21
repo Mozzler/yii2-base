@@ -55,7 +55,11 @@ class TaskController extends BaseController
         $task->status = Task::STATUS_PENDING;
         $task->save(true, null, false);
 
-        return $this->actionRun($taskId);
+        // -- Run then view the logs
+        $exitCode = $this->actionRun($taskId);
+        $this->actionView($taskId);
+        
+        return $exitCode;
     }
 
     public function actionView($taskId)
@@ -126,11 +130,10 @@ class TaskController extends BaseController
         if ($task->hasErrors()) {
             $this->stderr("#### Error ####\nCouldn't save the taskId of " . json_encode($taskId) . "\n" . json_encode($task->getErrors()), Console::FG_RED, Console::BOLD);
             return ExitCode::UNSPECIFIED_ERROR;
-        }
-        else {
+        } else {
             $this->stdout("Task Processing Completed\n");
             return Task::STATUS_ERROR === $task->status ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
         }
-        
+
     }
 }
