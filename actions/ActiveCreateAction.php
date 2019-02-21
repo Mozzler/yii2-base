@@ -18,8 +18,10 @@ class ActiveCreateAction extends \yii\rest\CreateAction
         /* @var $model \yii\db\ActiveRecord */
         $model = new $this->modelClass();
         $model->scenario = $this->scenario;
+        $model->loadDefaultValues();
 
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+
         if ($model->save()) {
             $response = Yii::$app->getResponse();
             $response->setStatusCode(201);
