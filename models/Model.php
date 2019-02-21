@@ -25,6 +25,7 @@ class Model extends ActiveRecord {
 	const SCENARIO_UPDATE = 'update';
 	const SCENARIO_DELETE = 'delete';
 	const SCENARIO_LIST = 'list';
+	const SCENARIO_SUBPANEL = 'subpanel';
 	const SCENARIO_VIEW = 'view';
 	const SCENARIO_SEARCH = 'search';
 	const SCENARIO_EXPORT = 'export';
