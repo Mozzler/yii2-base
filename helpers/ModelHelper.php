@@ -14,8 +14,19 @@ class ModelHelper {
 			return;
 		}
 
+		// Have a string, work out if its a comma separated list
+		// of scenarios or just one
 		if (is_string($scenarios)) {
-			$scenarios = [$scenarios];
+			if (strstr($scenarios,',')) {
+				// if the scenario contains a comma, split into multiple
+				// scenarios based on the comma
+				$scenarios = explode(',',$scenarios);
+			} else {
+				// We have a single scenario, so turn it into an array
+				// so the search code still works
+				$scenarios = [$scenarios];
+			}
+			
 		}
 
 		$modelScenarios = array_keys($model->scenarios());
