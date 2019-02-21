@@ -1,4 +1,4 @@
-<div class="page-model-view">
-    {{ t.renderWidget("mozzler.base.widgets.model.IndexHeader", arrayhelper.merge(config.headerConfig, {"model": model})) }}
-    {{ t.renderWidget('kartik.grid.GridView', config.gridViewConfig, false) }}
-</div>
+{{ t.renderWidget('mozzler.base.widgets.model.IndexModel', {
+	'model': model,
+    'dataProvider': dataProvider
+}) }}

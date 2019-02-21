@@ -1,0 +1,15 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
+        <{{ widget.header.tag }} {{ html.renderTagAttributes(widget.header.options) }}>
+            <{{ widget.header.heading.tag }} {{ html.renderTagAttributes(widget.header.heading.options) }}>
+                {{ widget.header.heading.content }}
+            </{{ widget.header.heading.tag }}>
+            <{{ widget.header.buttons.tag }} {{ html.renderTagAttributes(widget.header.buttons.options) }}>
+            {% for button in widget.header.buttons.items %}
+                {{ button }}
+            {% endfor %}
+            </{{ widget.header.buttons.tag }}>
+        </{{ widget.header.buttons.tag }}>
+        {{ t.renderWidget('kartik.grid.GridView', widget.gridViewConfig, false) }}
+    </{{ widget.container.tag }}>
+</{{ widget.tag }}>

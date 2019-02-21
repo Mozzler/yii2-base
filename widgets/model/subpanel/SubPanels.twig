@@ -1,0 +1,18 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    {% set attributes = widget.model.activeAttributes() %}
+    {% for attribute in attributes %}
+        {% set field = widget.model.getModelField(attribute) %}
+        {% if (field.type == "RelateMany" or field.type == "RelateManyMany") %}
+            {% set relatePanelConfig = arrayhelper.merge(widget.panelConfig, arrayhelper.merge({
+                    "model": widget.model,
+                    "relationAttribute": attribute,
+                    "scenario": widget.scenario
+                }, (widget.relateConfigs[attribute] ? widget.relateConfigs[attribute] : {}))) %}
+            {% if (relatePanelConfig._customWidget) %}
+                {{ t.renderWidget(relatePanelConfig._customWidget, relatePanelConfig) }}
+            {% else %}
+                {{ t.renderWidget("mozzler.base.widgets.model.subpanel.SubPanel", relatePanelConfig) }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</{{ widget.tag }}>
