@@ -10,7 +10,7 @@ class ConfigManager
 
     public $logs = [];
 
-    public $runGetLatestParamConfigsOnInit = true; // Set to false when running the syncDefaultConfig
+    public $runGetLatestParamConfigsOnInit = true; // Set to false if you want the original params contents not the updated DB ones
     public $className = 'mozzler\base\models\Config';
 
     public function init()

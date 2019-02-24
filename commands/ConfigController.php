@@ -32,15 +32,13 @@ class ConfigController extends BaseController
      * @throws \yii\base\InvalidConfigException
      * @return int Exit code
      */
-    public function actionInit($useConfigDbDefaults = true)
+    public function actionInit()
     {
         // set the model class
         $modelClass = 'mozzler\base\models\Config';
 
         // Load the ConfigManager Class
-        $configManager = \Yii::createObject([
-            'class' => 'mozzler\base\components\ConfigManager',
-            'runGetLatestParamConfigsOnInit' => $useConfigDbDefaults]);
+        $configManager = \Yii::createObject(['class' => 'mozzler\base\components\ConfigManager']);
 
         // execute the configManager->syncDefaultValues
         $configManager->syncDefaultConfig($modelClass);
