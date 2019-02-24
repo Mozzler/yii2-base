@@ -4,7 +4,6 @@ namespace mozzler\base\components;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
-use Codeception\Util\Debug;
 
 class ConfigManager
 {
@@ -16,7 +15,6 @@ class ConfigManager
 
     public function init()
     {
-        Debug::debug(__METHOD__ . " init is running");
         if ($this->runGetLatestParamConfigsOnInit) {
             \Yii::$app->params['config'] = $this->getLatestParamConfigs($this->className);
             \Yii::$app->params['configManagerHasInitialised'] = true;
@@ -100,7 +98,6 @@ class ConfigManager
         foreach ($existingDbConfigs as $existingDbConfigIndex => $existingDbConfig) {
             $existingDbEntries[$existingDbConfig->key_] = $existingDbConfig->value_;
         }
-        Debug::debug(__METHOD__ . " is about to apply the existingDbEntries " . json_encode($existingDbEntries));
         return ArrayHelper::merge(\Yii::$app->params['config'], $existingDbEntries);
     }
 
