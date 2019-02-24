@@ -16,7 +16,7 @@ use yii\console\ExitCode;
 //         ]
 //     ]
 // ];
- 
+
 /**
  * This class offers easy way to implement `config` collection.
  */
@@ -25,15 +25,22 @@ class ConfigController extends BaseController
     /**
      * This command preloads the config collection with defined default values
      *
+     * By default it will pull the existing DB entries first so you are only adding any new unset entries
+     * However if you have $useConfigDbDefaults as false then you will overwrite the database with what's in the params['config'] array
+     *
+     * @param bool $useConfigDbDefaults
+     * @throws \yii\base\InvalidConfigException
      * @return int Exit code
      */
-    public function actionInit()
+    public function actionInit($useConfigDbDefaults = true)
     {
         // set the model class
         $modelClass = 'mozzler\base\models\Config';
 
         // Load the ConfigManager Class
-        $configManager = \Yii::createObject('mozzler\base\components\ConfigManager');
+        $configManager = \Yii::createObject([
+            'class' => 'mozzler\base\components\ConfigManager',
+            'runGetLatestParamConfigsOnInit' => $useConfigDbDefaults]);
 
         // execute the configManager->syncDefaultValues
         $configManager->syncDefaultConfig($modelClass);
@@ -43,9 +50,10 @@ class ConfigController extends BaseController
         return ExitCode::OK;
     }
 
-    protected function outputLogs($logs) {
+    protected function outputLogs($logs)
+    {
         foreach ($logs as $entry) {
-            $this->stdout($entry['message']."\n", $entry['type'] == 'error' ? Console::FG_RED : null);
+            $this->stdout($entry['message'] . "\n", $entry['type'] == 'error' ? Console::FG_RED : null);
         }
     }
 }
