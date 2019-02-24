@@ -10,9 +10,14 @@ class ConfigManager
 
     public $logs = [];
 
+    public $runGetLatestParamConfigsOnInit = true; // Set to false when running the syncDefaultConfig
+    public $className = 'mozzler\base\models\Config';
 
     public function init()
     {
+        if ($this->runGetLatestParamConfigsOnInit) {
+            \Yii::$app->params['config'] = $this->getLatestParamConfigs($this->className);
+        }
     }
 
     /**
@@ -77,7 +82,18 @@ class ConfigManager
      */
     protected function getParamsConfigs($options = null)
     {
-        return \Yii::$app->params['config']['defaults'];
+        return \Yii::$app->params['config'];
+    }
+
+
+    /**
+     * This can be used to set all the config params to the contents of the database
+     */
+    protected function getLatestParamConfigs($className)
+    {
+        // This updates the config params with what's in the database
+        $existingDbConfigs = $this->getExistingConfigs($className);
+        return ArrayHelper::merge(\Yii::$app->params['config'], $existingDbConfigs);
     }
 
     /**
