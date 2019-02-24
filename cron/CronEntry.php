@@ -23,7 +23,7 @@ class CronEntry extends Component
 
     public $dayWeek = "*"; // Accepts 0-6 ( 0 = Sunday, 6 = Saturday)
 
-    public $timezone = "Australia/Adelaide";
+    public $timezone = null; // e.g "Australia/Adelaide". If not specified it uses the \Yii::$app->formatter->timeZone default
 
     public $active = false; // Won't run unless true, but you can easily set it to true in the config/console.php file
 
@@ -51,6 +51,9 @@ class CronEntry extends Component
         $nearestMinuteTimestamp = round(floor($utcUnixTimestamp / 60) * 60);
 
         // -- Deal with the timezone issues
+        if (empty($this->timezone)) {
+            $this->timezone = \Yii::$app->formatter->timeZone; // Setting the default. Similar to yii2-base/fields/DateTime.php
+        }
         $dateTimeZone = new \DateTimeZone($this->timezone);
         $date = new \DateTime(null === $nearestMinuteTimestamp ? "@" . time() : "@" . $nearestMinuteTimestamp); // Timestamp is always parsed as UTC
         $date->setTimezone($dateTimeZone); // Convert to specified timezone
