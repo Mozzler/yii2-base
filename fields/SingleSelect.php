@@ -21,11 +21,21 @@ class SingleSelect extends Base
 
     public function rules()
     {
-        \Codeception\Util\Debug::debug("About to check the " . __METHOD__ . " for the options: " . var_export($this->options, true));
-        \Codeception\Util\Debug::debug("Checking that the range is in: " . var_export(array_keys($this->options), true));
-        return ArrayHelper::merge(parent::rules(), [
-            'in' => ['range' => array_keys($this->options), 'message' => 'Invalid option specified for ' . $this->label]
+        \Codeception\Util\Debug::debug(__METHOD__ . " About to check the " . __METHOD__ . " for the options: " . var_export($this->options, true));
+        \Codeception\Util\Debug::debug(__METHOD__ . " Checking that the range is in: " . var_export(array_keys($this->options), true));
+
+        $rules = ArrayHelper::merge(parent::rules(), [
+            'in' => ['range' => array_keys($this->options),
+                'message' => 'Invalid option specified for ' . $this->label,
+                'allowArray' => true,
+            ]
         ]);
+        \Codeception\Util\Debug::debug(__METHOD__ . " Returning the rules " . var_export($rules, true));
+        return $rules;
+
+//        return ArrayHelper::merge(parent::rules(), [
+//            'in' => ['range' => array_keys($this->options), 'message' => 'Invalid option specified for ' . $this->label]
+//        ]);
     }
 
     /**
