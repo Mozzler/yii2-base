@@ -23,12 +23,10 @@ class MultiSelect extends Base
         \Codeception\Util\Debug::debug(__METHOD__ . " About to check the " . __METHOD__ . " for the options: " . var_export($this->options, true));
         \Codeception\Util\Debug::debug(__METHOD__ . " Checking that the range is in: " . var_export(array_keys($this->options), true));
         $rules = ArrayHelper::merge(parent::rules(), [
-            'each' => [ 'rule' => [
-                'in' => [
-                    'range' => array_keys($this->options),
-                    'message' => 'Invalid option specified for ' . $this->label,
-                    'allowArray' => true,],
-            ]]
+            'in' => [
+                'range' => array_keys($this->options),
+                'message' => 'Invalid option specified for ' . $this->label,
+                'allowArray' => true,],
         ]);
 
         \Codeception\Util\Debug::debug(__METHOD__ . " Returning the rules - " . var_export($rules, true));
