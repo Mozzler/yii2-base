@@ -6,7 +6,7 @@ use yii\helpers\ArrayHelper;
 
 class TaskController extends BaseController {
 	
-	public $modelClass = 'app\models\Task';
+	public $modelClass = 'mozzler\base\models\Task';
 
 }
 
