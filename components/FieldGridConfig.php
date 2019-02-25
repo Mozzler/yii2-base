@@ -33,7 +33,6 @@ class FieldGridConfig {
 				'class' => \yii\grid\DataColumn::className(),
 				'format' => 'html',
 				'value' => function ($model, $key, $index, $column) {
-					//$attribute = substr($column->attribute,0,-3);
 					$relatedModel = $model->getRelated($column->attribute);
 					if (!$relatedModel) {
 						return "";
@@ -52,6 +51,16 @@ class FieldGridConfig {
 			],
 			'SingleSelect' => [
 				'class' => '\kartik\grid\EnumColumn'
+			],
+			'MultiSelect' => [
+				'class' => \yii\grid\DataColumn::className(),
+				'format' => 'html',
+				'value' => function ($model, $key, $index, $column) {
+					$attribute = $column->attribute;
+					$modelField = $model->getModelField($attribute);
+					$labels = $modelField->getOptionLabels($model->$attribute);
+					return join(", ", $labels);
+				}
 			]
 		];
 	}
