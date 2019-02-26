@@ -1,5 +1,5 @@
 <?php
-namespace app\controllers;
+namespace mozzler\base\controllers;
 
 use mozzler\base\controllers\ModelController as BaseController;
 use yii\helpers\ArrayHelper;
