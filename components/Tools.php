@@ -81,7 +81,7 @@ class Tools extends Component {
 	 *
 	 * @param	string	$className  Class name of the model to create (eg: `mozzler\auth\user`).
 	 * @param	array	$data		Default data to populate the model
-	 * @return	Basemodel	Returns a new model
+	 * @return	\mozzler\base\models\Model	Returns a new model
 	 */
 	public static function createModel($className, $data=[]) {
 		$model = Yii::createObject(self::getClassName($className));
