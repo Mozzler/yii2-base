@@ -13,8 +13,10 @@ use \yii\base\Component;
  * e.g
  *
  * ```
- * [
- * "versionParam" => "config.apiVersionId",
+ * "components" => [
+ * "deployManager" => [
+ * "class" => "mozzler\base\components\DeployManager",
+ * "versionParam" => "apiVersionNumber",
  * "init" => [
  * "indexes" => [
  * "command" => "deploy/sync",
@@ -43,7 +45,7 @@ use \yii\base\Component;
  * "config" => ["app.favourites", "mozzler.auth.user"],
  * "version" => "0.1.1"
  * ]
- * ]
+ * ] ],
  * ]
  * ```
  */
@@ -55,23 +57,23 @@ class DeployManager extends Component
 
 
     /**
-     * @param $command string e.g 'init' or 'redeploy', which should correspond with the appropriate configuration
+     * @param $commandSet string e.g 'init' or 'redeploy', which should correspond with the appropriate configuration
      * @return array
      * @throws \yii\base\Exception
      *
      * e.g $command
      */
-    public function run($command)
+    public function run($commandSet)
     {
-        if (empty($command)) {
+        if (empty($commandSet)) {
             throw new Exception("The DeployManager run() command expects 'init' or 'redeploy' as commands, none provided");
         }
 
-        $config = $this->$command;
+        $config = $this->$commandSet;
         $currentVersion = \Yii::$app->params[$this->versionParam];
 
         $stats = [
-            'Command' => $command,
+            'Command' => $commandSet,
             'TimeRun' => time(),
             'TimeRun Human Readable' => date('r'),
             'Current Version' => 'v' . $currentVersion,
@@ -81,7 +83,7 @@ class DeployManager extends Component
             'Entries Skipped' => 0,
             'Scripts Run' => [],
 
-            'Config' => $config,
+//            'Config' => $config, // Not needed to be output as the command already shows this before the confirmation step
 
             'Errors Count' => 0,
             'Errors' => [],
@@ -100,78 +102,99 @@ class DeployManager extends Component
             // -- Validity check
             if (empty($entry) || (!isset($entry['command']) && !isset($entry['script']))) {
                 $stats['Errors Count']++;
-                $stats['Errors'][] = "Command: {$command} - Entry {$entryName} : The entry is empty, need a command or script. " . json_encode($entry);
+                $stats['Errors'][] = "Entry {$entryName} : The entry is empty, need a command or script. " . json_encode($entry);
+                continue;
             }
 
             // -- Version Check
-            if (isset($entry['version']) && $entryName['version'] !== $currentVersion) {
+            if (isset($entry['version']) && $entry['version'] !== $currentVersion) {
                 $stats['Entries Skipped']++;
-                $stats['Log'][] = "Command: {$command} - Entry {$entryName} - Ignoring the entry as expected version: {$entryName['version']} !== current version: {$currentVersion}";
+                $stats['Log'][] = "Entry {$entryName} - Ignoring the entry as expected version: {$entry['version']} !== current version: {$currentVersion}";
+                continue;
             }
 
+
+            // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'; // Or could use > $isWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
+            $filePath = \Yii::getAlias('@app') . DIRECTORY_SEPARATOR; // e.g D:\www\bapp.viterra.com.au\
+
+            $command = '';
+            $params = isset($entry['params']) ? $entry['params'] : [];
+            $paramShellArgs = '';
+            if (!empty($params)) {
+                foreach ($params as $paramIndex => $param) {
+                    $paramShellArgs .= " " . escapeshellarg($param);
+                }
+            }
+            $yiiFile = "{$filePath}yii" . (true === $isWindows ? '.bat' : '');
+            // ---------------------------------------------------
+            //   Yii Command
+            // ---------------------------------------------------
             if (!empty($entry['command'])) {
 
-                $params = isset($entry['params']) ? $entry['params'] : '';
-                $stats['Log'][] = "Command: {$command} - Entry {$entryName} - "
+                $command = escapeshellarg($yiiFile) . " " . escapeshellarg($entry['command']) . " " . $paramShellArgs;
+                $stats['Log'][] = "Entry {$entryName} - Yii Command is: {$command}";
+            }
+
+
+            // ---------------------------------------------------
+            //   Script
+            // ---------------------------------------------------
+            if (!empty($entry['script'])) {
+                $command = escapeshellarg($yiiFile) . " script/run " . escapeshellarg($entry['script']) . " " . $paramShellArgs;
+//                $command = "{$yiiFile} script/run {$entry['script']} {$paramShellArgs}";
+                $stats['Log'][] = "Entry {$entryName} - Script is: {$command}";
 
             }
 
-        }
+//            // ---------------------------------------------------
+//            //   General Terminal Command
+//            // ---------------------------------------------------
+            if (!empty($entry['windowsCommand']) && $isWindows) {
 
-//
-//        $this->entries = ArrayHelper::merge($this->defaultEntries, $this->entries);
-//        $stats['Entries'] = count($this->entries);
-//        /** @var TaskManager $taskManager */
-//        $taskManager = \Yii::$app->taskManager; // Need to trigger running a task using this.
-//
-//        foreach ($this->entries as $cronEntryName => $cronEntry) {
-//
-//            if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
-//                $stats['Errors']++;
-//                $cronRun->addLog("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true), 'error');
-//            }
-//
-//            // -- Create the Cron Entry
-//            /** @var CronEntry $cronObject */
-//            $cronObject = null;
-//            if (!empty($cronEntry['class'])) {
-//                // Grab the defaults from the class, but override them with the current
-//                $cronObject = \Yii::createObject($cronEntry);
-//
-//            } else if (!empty($cronEntry['scriptClass'])) {
-//                // -- Creating a new object based on the generic class... Using the provided info
-//                $cronEntry['class'] = CronEntry::class;
-//                $cronObject = \Yii::createObject($cronEntry);
-//            }
-//
-//            if (empty($cronObject)) {
-//                $cronRun->addLog("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true), 'error');
-//                $stats['Errors']++;
-//                continue;
-//            }
-//
-//            if ($cronObject->shouldRunCronAtTime()) {
-//                $task = \Yii::$app->taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true);
-//
-//                $stats['Entries Run']++;
-//                $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
-//                $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->getId()}";
-//            } else {
-//                $stats['Entries Skipped']++;
-//            }
-//        }
-//
-//        // TODO: look at gc into a Trait
-//
-//        $gcRan = self::gc();
-//        $stats['Garbage Collection Ran'] = json_encode($gcRan);
-//
-//        $cronRun->stats = $stats;
-//        $cronRun->status = 'complete';
-//        if (!$cronRun->save()) {
-//            $cronRun->addLog('TODO: Shit!!', 'error');
-//            $stats['Errors']++;
-//        }
+                $command = "{$entry['windowsCommand']} {$paramShellArgs}";
+                $stats['Log'][] = "Entry {$entryName} - Windows Command is {$command}";
+
+            }
+            if (!empty($entry['linuxCommand']) && !$isWindows) {
+                $command = "{$entry['linuxCommand']} {$paramShellArgs}";
+                $stats['Log'][] = "Entry {$entryName} - Linux Command is {$command}";
+
+            }
+
+
+            // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
+            // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
+
+            $outputArray = [];
+            $returnVar = null;
+            // -------------------
+            //  Run Serially
+            // -------------------
+            if ($isWindows) {
+                $runCommand = $command;
+
+                $stats['Log'][] = "Entry {$entryName} - Is on Windows and running the command: {$runCommand}";
+                session_write_close(); // Getting around the possible concurrency issue described in http://de2.php.net/manual/en/function.exec.php#99781
+                exec($runCommand, $outputArray, $returnVar);
+                session_start();
+
+//                pclose(popen($runCommand, "r")); // The async way of running it
+            } else {
+                $runCommand = "{$command} 2>&1";
+                $stats['Log'][] = "Entry {$entryName} - Is on *nix and running the command: {$runCommand}";
+                exec($runCommand, $outputArray, $returnVar);
+            }
+            $stats['Scripts Run'][] = $runCommand;
+
+            $output = '';
+            foreach ($outputArray as $outputLineNumber => $outputLine) {
+//                $output .= "{$outputLineNumber}. $outputLine\n";
+                $output .= $outputLine . "\n";
+            }
+            $stats['Log'][] = "Entry {$entryName} Completed with the return: " . json_encode($returnVar) . " and the output\n------------------ {$entryName} ----------\n" . $output . "\n";
+
+        }
 
         return $stats;
     }

@@ -89,7 +89,7 @@ class DeployController extends BaseController
      * ./yii deploy/drop-collections app.cache,app.config,mozzler.auth.access_tokens
      *
      * You can also specify the force param so you don't need to confirm deletion:
-     * ./yii deploy/drop-collections --force=true app.cache,app.config,mozzler.auth.access_tokens
+     * ./yii deploy/drop-collections --force=1 app.cache,app.config,mozzler.auth.access_tokens
      */
     public function actionDropCollections($collectionsCSV)
     {
@@ -145,6 +145,58 @@ class DeployController extends BaseController
             $this->stdout((true === $drop ? "✓ Dropped" : "✗ Failed to drop") . " collection {$collectionName}\n");
         }
         return ExitCode::OK;
+    }
+
+
+    public function actionInit()
+    {
+
+        if (!isset(\Yii::$app->deployManager)) {
+            $this->stderr("The deployManager is not defined, please check your console.php configuration");
+        }
+        $this->stdout("Init Commands: " . print_r(\Yii::$app->deployManager->init, true) . "\n");
+        if (false === boolval($this->force) && $this->confirm("Are you sure you want to run the deploy/init commands?")) {
+            \Yii::debug("User requested to run the init commands");
+        } else if (true === boolval($this->force)) {
+            $this->stdout("Force = " . json_encode($this->force) . "\n");
+        } else {
+            $this->stdout("Not running the init commands\n");
+            return ExitCode::NOUSER;
+        }
+        $this->stdout("Running the initial deployment commands please wait.\n");
+
+        // -- Run the init
+        $stats = \Yii::$app->deployManager->run('init');
+
+        // -- Output
+        $this->stdout("Init commands ran with: \n");
+        $this->stdout(print_r($stats, true));
+    }
+
+
+    public function actionRedeploy()
+    {
+
+        if (!isset(\Yii::$app->deployManager)) {
+            $this->stderr("The deployManager is not defined, please check your console.php configuration");
+        }
+        $this->stdout("Redeploy Commands: " . print_r(\Yii::$app->deployManager->redeploy, true) . "\n");
+        if (false === boolval($this->force) && $this->confirm("Are you sure you want to run the deploy/redeploy commands?")) {
+            \Yii::debug("User requested to run the redeploy commands");
+        } else if (true === boolval($this->force)) {
+            $this->stdout("Force = " . json_encode($this->force) . "\n");
+        } else {
+            $this->stdout("Not running the redeploy commands\n");
+            return ExitCode::NOUSER;
+        }
+        $this->stdout("Running the redeploy deployment commands please wait.\n");
+
+        // -- Run the init
+        $stats = \Yii::$app->deployManager->run('redeploy');
+
+        // -- Output
+        $this->stdout("Redeploy commands ran with: \n");
+        $this->stdout(print_r($stats, true));
     }
 
     protected function outputLogs($logs)
