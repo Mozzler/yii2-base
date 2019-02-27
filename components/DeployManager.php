@@ -133,38 +133,28 @@ class DeployManager extends Component
             if (!empty($entry['command'])) {
 
                 $command = escapeshellarg($yiiFile) . " " . escapeshellarg($entry['command']) . " " . $paramShellArgs;
-                $stats['Log'][] = "Entry {$entryName} - Yii Command is: {$command}";
             }
-
 
             // ---------------------------------------------------
             //   Script
             // ---------------------------------------------------
             if (!empty($entry['script'])) {
-                $command = escapeshellarg($yiiFile) . " script/run " . escapeshellarg($entry['script']) . " " . $paramShellArgs;
-//                $command = "{$yiiFile} script/run {$entry['script']} {$paramShellArgs}";
-                $stats['Log'][] = "Entry {$entryName} - Script is: {$command}";
-
+                // @todo: Get the script/run command to work
+                $command = escapeshellarg($yiiFile) . " " . escapeshellarg("script/run") . " " . escapeshellarg($entry['script']) . " " . $paramShellArgs;
             }
 
-//            // ---------------------------------------------------
-//            //   General Terminal Command
-//            // ---------------------------------------------------
+            // ---------------------------------------------------
+            //   General Terminal Command
+            // ---------------------------------------------------
+            // With great power comes great responsibility
             if (!empty($entry['windowsCommand']) && $isWindows) {
-
-                $command = "{$entry['windowsCommand']} {$paramShellArgs}";
-                $stats['Log'][] = "Entry {$entryName} - Windows Command is {$command}";
+                $command = escapeshellarg($entry['windowsCommand']) . " {$paramShellArgs}";
 
             }
             if (!empty($entry['linuxCommand']) && !$isWindows) {
-                $command = "{$entry['linuxCommand']} {$paramShellArgs}";
-                $stats['Log'][] = "Entry {$entryName} - Linux Command is {$command}";
+                $command = escapeshellarg($entry['linuxCommand']) . " {$paramShellArgs}";
 
             }
-
-
-            // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
-            // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
 
             $outputArray = [];
             $returnVar = null;
@@ -178,7 +168,6 @@ class DeployManager extends Component
                 session_write_close(); // Getting around the possible concurrency issue described in http://de2.php.net/manual/en/function.exec.php#99781
                 exec($runCommand, $outputArray, $returnVar);
                 session_start();
-
 //                pclose(popen($runCommand, "r")); // The async way of running it
             } else {
                 $runCommand = "{$command} 2>&1";
@@ -189,7 +178,6 @@ class DeployManager extends Component
 
             $output = '';
             foreach ($outputArray as $outputLineNumber => $outputLine) {
-//                $output .= "{$outputLineNumber}. $outputLine\n";
                 $output .= $outputLine . "\n";
             }
             $stats['Log'][] = "Entry {$entryName} Completed with the return: " . json_encode($returnVar) . " and the output\n------------------ {$entryName} ----------\n" . $output . "\n";
