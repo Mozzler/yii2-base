@@ -198,7 +198,7 @@ class Tools extends Component
         $checkPermissions = $options['checkPermissions'];
 
         /** @var \mozzler\base\models\Model $model */
-        $model = Tools::createModel($className);
+        $model = static::createModel($className);
         $query = $model->find($checkPermissions);
 
         if ($filter)
