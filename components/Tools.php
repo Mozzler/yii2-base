@@ -187,7 +187,7 @@ class Tools extends Component
      * @param    array $options
      * @return   int   Returns the number of models in the collection
      */
-    public static function getModelsCount($className, $filter = [], $options = [])
+    public static function countModels($className, $filter = [], $options = [])
     {
         $options = ArrayHelper::merge([
             'offset' => null,
