@@ -1,1 +1,1 @@
-{{ widget.model[widget.attribute]|date(widget.format, widget.timeZone) }}
+{{ widget.model[widget.attribute] ? widget.model[widget.attribute]|date(widget.format, widget.timeZone) : "-" }}
