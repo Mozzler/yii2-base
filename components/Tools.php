@@ -9,6 +9,8 @@ use yii\helpers\ArrayHelper;
 class Tools extends Component
 {
 
+    public static $isApiRegex = '/api/';
+
     public static function app()
     {
         return \Yii::$app;
@@ -321,5 +323,10 @@ class Tools extends Component
     public static function error($message, $location = null, $dump = false)
     {
         \Yii::error($dump ? print_r($message, true) : $message, $location);
+    }
+
+    public static function isApi() {
+        $controllerClass = \Yii::$app->controller->module::className();
+        return preg_match(static::$isApiRegex, $controllerClass) == 1;
     }
 }
