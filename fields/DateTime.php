@@ -10,6 +10,10 @@ class DateTime extends Base {
 	 * epoch integer
 	 */
 	public function setValue($value) {
+		if (!$value) {
+			return null;
+		}
+
 		// handle a string value
 		if (is_string($value)) {
 			// if $value is a string containing an integer, return the integer
