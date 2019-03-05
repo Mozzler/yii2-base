@@ -307,11 +307,9 @@ class Model extends ActiveRecord {
     {
         return [
             [
-                'class' => TimestampBehavior::className(),
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['createdAt', 'updatedAt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updatedAt'],
-                ],
+				'class' => TimestampBehavior::className(),
+				'createdAtAttribute' => 'createdAt',
+				'updatedAtAttribute' => 'updatedAt'
             ],
             [
             	'class' => BlameableBehavior::className(),

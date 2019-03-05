@@ -9,6 +9,8 @@ class Timestamp extends Integer {
 		if (!$value) {
 			return null;
 		}
+
+		return $value;
 	}
 	
 }
