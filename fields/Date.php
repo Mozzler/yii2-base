@@ -11,6 +11,11 @@ class Date extends Base {
 	 */
 	public function setValue($value) {
 		$value = parent::setValue($value);
+
+		if (!$value) {
+			return null;
+		}
+
 		$timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
 		
 		// Create a datetime object for the requested time
