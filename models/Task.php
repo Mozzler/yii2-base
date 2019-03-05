@@ -47,30 +47,35 @@ class Task extends BaseModel
     {
         return ArrayHelper::merge(parent::modelFields(), [
             'scriptClass' => [
+                'label' => 'Script Class',
                 'type' => 'Text'
             ],
             'status' => [
+                'label' => 'Status',
                 'type' => 'SingleSelect',
                 'options' => [self::STATUS_PENDING => 'Pending', self::STATUS_INPROGRESS => 'In Progress', self::STATUS_COMPLETE => 'Complete', self::STATUS_ERROR => 'Error']
             ],
             'triggerType' => [
-
+                'label' => 'Trigger Type',
                 'type' => 'SingleSelect',
                 'options' => [self::TRIGGER_TYPE_INSTANT => 'Instant', // Run via the Command Line straight away (esp used by the Cron manager)
                     self::TRIGGER_TYPE_BACKGROUND => 'Background' // Run by the background task manager (e.g If a user requests a large CSV file to be generated and emailed to them)
                 ]
             ],
             'config' => [
-                'type' => 'Json'
+                'type' => 'Json',
+                'label' => 'Config'
             ],
             'log' => [
+                'label' => 'Logs',
                 'type' => 'Json', // Use addLog(),
                 'rules' => [
                     'default' => ['value' => []]
-                ]
+                ],
             ],
             'timeoutSeconds' => [
-                'type' => 'Integer'
+                'label' => 'Timeout In Seconds',
+                'type' => 'Integer',
                 // Used by the TaskController command
                 // You can set to 0 if you want it to run indefinitely, but doing so could cause stuck processes which could cause the server to crash so would be a VERY bad idea
             ]
@@ -89,6 +94,12 @@ class Task extends BaseModel
     public function scenarios()
     {
         $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE] = ['scriptClass', 'status', 'triggerType', 'config', 'timeoutSeconds'];
+//        $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
+        $scenarios[self::SCENARIO_UPDATE] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds']; // You shouldn't really be able to edit them
+        $scenarios[self::SCENARIO_LIST] = ['id', 'scriptClass', 'status', 'triggerType', 'updatedAt'];
+        $scenarios[self::SCENARIO_VIEW] = ['id', 'scriptClass', 'status', 'triggerType', 'timeoutSeconds', 'name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = [];
 
         return $scenarios;
     }
