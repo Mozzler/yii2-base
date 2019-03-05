@@ -26,7 +26,7 @@ class ErrorHandler extends \yii\web\ErrorHandler {
             }
 
             $array['type'] = get_class($exception);
-            if (!$exception instanceof UserException && !YII_DEBUG) {
+            if (!$exception instanceof UserException && YII_DEBUG) {
                 $array['file'] = $exception->getFile();
                 $array['line'] = $exception->getLine();
                 $array['stack-trace'] = explode("\n", $exception->getTraceAsString());
