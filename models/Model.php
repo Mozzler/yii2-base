@@ -680,5 +680,62 @@ class Model extends ActiveRecord {
 	public function setScenario($scenario) {
 		parent::setScenario(ModelHelper::getModelScenario($this, $scenario));
 	}
+
+	public function save($runValidation = true, $attributeNames = null, $checkPermissions=true) {
+		try {
+			if ($this->getIsNewRecord()) {
+	            return $this->insert($runValidation, $attributeNames, $checkPermissions);
+	        } else {
+	            return $this->update($runValidation, $attributeNames, $checkPermissions) !== false;
+	        }
+		}
+		catch (\yii\mongodb\Exception $e) {
+			$code = (int) $e->getCode();
+			
+			switch ($code) {
+				case 11000:
+					// duplicate key exception
+					preg_match('/index: (\w*) dup key/', $e->getMessage(), $results);
+					$indexName = trim($results[1]);
+
+					$modelIndexes = $this->modelIndexes();
+					if (!isset($modelIndexes[$indexName])) {
+						// haven't been able to find this index, so rethrow the exception
+						throw $e;
+					}
+
+					$foundIndex = $modelIndexes[$indexName];
+					/*
+					// TODO
+					// handle if the duplicate key exception has been caused by an
+					// autoincrement field. See rappsio/engine/fields/AutoIncrement.php
+					// note: this is recursive and will continue until insertion can occur
+					if ($this->getIsNewRecord()) {
+						$autoincrement = $this->getConfig("autoincrement");
+						if ($autoincrement && isset($autoincrement['index'])) {
+							if ($autoincrement['index'] == $indexName) {
+								// increment the field and try to save again
+								$fieldName = $autoincrement['field'];
+								$this->$fieldName += 1;
+								
+								return $this->save(false, null, $checkPermissions);
+							}
+						}
+					}*/
+					
+					$message = "Duplicate key for index: ".$indexName;
+					if (isset($foundIndex['duplicateMessage'])) {
+						$message = $foundIndex['duplicateMessage'];
+					}
+					
+					$this->addError($results[1], $message);
+					return false;
+					break;
+				default:
+					// rethrow the exception
+					throw $e;
+			}
+		}
+	}
 	
 }
