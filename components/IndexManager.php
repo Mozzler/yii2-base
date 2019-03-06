@@ -121,7 +121,8 @@ class IndexManager
 	
 	protected function getModelIndexes($className)
 	{
-    	return $className::modelIndexes();
+		$model = \Yii::createObject($className);
+    	return $model->modelIndexes();
 	}
 	
 	protected function getCollection($className) {

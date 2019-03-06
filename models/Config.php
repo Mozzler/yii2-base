@@ -17,7 +17,7 @@ class Config extends BaseModel
 		];
     }
     
-    public static function modelIndexes() {
+    public function modelIndexes() {
 		return ArrayHelper::merge(parent::modelIndexes(), [
 			'uniqueKey_' => [
 				'columns' => ['key_' => 1],

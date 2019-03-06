@@ -12,6 +12,7 @@ class FieldGridConfig {
 	
 	public function defaultConfig() {
 		return [
+			'AutoIncrement' => [],
 			'Base' => [],
 			'Boolean' => [
 				'class' => 'kartik\grid\BooleanColumn'

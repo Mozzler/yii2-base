@@ -25,7 +25,7 @@ class CronRun extends BaseModel
         ];
     }
 
-    public static function modelIndexes()
+    public function modelIndexes()
     {
         return ArrayHelper::merge(parent::modelIndexes(), [
             'timestampUniqueId' => [

@@ -6,6 +6,7 @@ use yii\base\Component;
 class Mozzler extends Component {
 	
 	public $fieldTypes = [
+        'AutoIncrement' => 'mozzler\base\fields\AutoIncrement',
 		'MongoId' => 'mozzler\base\fields\MongoId',
         'Text' => 'mozzler\base\fields\Text',
         'TextLarge' => 'mozzler\base\fields\TextLarge',

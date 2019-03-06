@@ -3,6 +3,7 @@ namespace mozzler\base\models;
 
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
+use mozzler\base\models\behaviors\AutoIncrementBehavior;
 use yii\helpers\ArrayHelper;
 
 use mozzler\rbac\mongodb\ActiveRecord as ActiveRecord;
@@ -98,9 +99,26 @@ class Model extends ActiveRecord {
 	 *  - Updated indexes
 	 *  - Deleted indexes
 	 */
-	public static function modelIndexes()
+	public function modelIndexes()
 	{
-    	return [];
+		$indexes = [];
+
+		// Automatically generate unique indexes for auto increment fields
+		foreach ($this->modelFields() as $attribute => $fieldConfig) {
+			if ($fieldConfig['type'] == 'AutoIncrement') {
+				$indexes['autoIncrement'.ucfirst($attribute)] = [
+					'columns' => [$attribute => -1],
+					'options' => [
+						'unique' => 1
+					],
+					'attribute' => $attribute,
+					'autoIncrement' => true,
+					'duplicateMessage' => 'Autoincrement collision, will try again'
+				];
+			}
+		}
+		
+		return $indexes;
 	}
 	
 	public function scenarios()
@@ -306,16 +324,20 @@ class Model extends ActiveRecord {
 	public function behaviors()
     {
         return [
-            [
+            'timestamps' => [
 				'class' => TimestampBehavior::className(),
 				'createdAtAttribute' => 'createdAt',
 				'updatedAtAttribute' => 'updatedAt'
-            ],
-            [
+			],
+			'blameable' => [
             	'class' => BlameableBehavior::className(),
             	'createdByAttribute' => 'createdUserId',
             	'updatedByAttribute' => 'updatedUserId',
-            ]
+			],
+			'autoincrement' => [
+				'class' => AutoIncrementBehavior::className(),
+				'autoIncrementAttributes' => $this->autoIncrementAttributes()
+			]
         ];
     }
     
@@ -705,23 +727,19 @@ class Model extends ActiveRecord {
 					}
 
 					$foundIndex = $modelIndexes[$indexName];
-					/*
-					// TODO
+
 					// handle if the duplicate key exception has been caused by an
-					// autoincrement field. See rappsio/engine/fields/AutoIncrement.php
+					// autoincrement field. See mozzler\base\fields\AutoIncrement.php
 					// note: this is recursive and will continue until insertion can occur
 					if ($this->getIsNewRecord()) {
-						$autoincrement = $this->getConfig("autoincrement");
-						if ($autoincrement && isset($autoincrement['index'])) {
-							if ($autoincrement['index'] == $indexName) {
-								// increment the field and try to save again
-								$fieldName = $autoincrement['field'];
-								$this->$fieldName += 1;
-								
-								return $this->save(false, null, $checkPermissions);
-							}
+						if (isset($foundIndex['autoIncrement']) && $foundIndex['autoIncrement']) {
+							$fieldName = $foundIndex['field'];
+							$this->$fieldName = intval($this->fieldName) + 1;
+
+							// Try saving again, but don't re-validate
+							return $this->save(false, null, $checkPermissions);
 						}
-					}*/
+					}
 					
 					$message = "Duplicate key for index: ".$indexName;
 					if (isset($foundIndex['duplicateMessage'])) {
@@ -736,6 +754,19 @@ class Model extends ActiveRecord {
 					throw $e;
 			}
 		}
+	}
+
+	protected function autoIncrementAttributes()
+	{
+		$autoIncrementAttributes = [];
+
+        foreach ($this->modelFields() as $attribute => $fieldConfig) {
+            if ($fieldConfig['type'] == 'AutoIncrement') {
+                $autoIncrementAttributes[] = $attribute;
+            }
+		}
+		
+		return $autoIncrementAttributes;
 	}
 	
 }
