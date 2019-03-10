@@ -12,16 +12,10 @@ class SingleSelect extends Base
 
     public function defaultRules()
     {
-        return [
+        return ArrayHelper::merge(parent::defaultRules(), [
             'string' => [
                 'max' => 255
-            ]
-        ];
-    }
-
-    public function rules()
-    {
-        return ArrayHelper::merge(parent::rules(), [
+            ],
             'in' => ['range' => array_keys($this->options), 'message' => 'Invalid option specified for ' . $this->label]
         ]);
     }

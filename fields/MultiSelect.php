@@ -13,23 +13,14 @@ class MultiSelect extends Base
     public function defaultRules()
     {
         return ArrayHelper::merge(parent::defaultRules(), [
-            'string' => new \yii\helpers\UnsetArrayValue()
-        ]);
-    }
-
-    // allowArray
-    public function rules()
-    {
-        $rules = ArrayHelper::merge(parent::rules(), [
+            'string' => new \yii\helpers\UnsetArrayValue(),
             'in' => [
                 'range' => array_keys($this->options),
                 'message' => 'Invalid option specified for ' . $this->label,
-                'allowArray' => true,],
+                'allowArray' => true,
+            ],
         ]);
-
-        return $rules;
     }
-
 
     /**
      * Take an array of option keys and return the values
