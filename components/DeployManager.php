@@ -53,7 +53,7 @@ class DeployManager extends Component
 {
     public $init = [];
     public $redeploy = [];
-    public $versionParam = "apiVersionNumber"; // e.g \Yii::$app->params['apiVersionNumber'] will be used for the version number
+    public $versionParam = "versionNumber"; // e.g \Yii::$app->params['apiVersionNumber'] will be used for the version number
 
 
     /**
