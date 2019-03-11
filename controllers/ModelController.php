@@ -67,6 +67,23 @@ class ModelController extends WebController {
 		        'delete' => [
 		            'grant' => true
 		        ]
+			],
+			'admin' => [
+				'create' => [
+		            'grant' => true
+		        ],
+		        'view' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'index' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
 	        ]
 	    ];
 	}

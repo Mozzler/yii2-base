@@ -212,6 +212,20 @@ class Model extends ActiveRecord {
 		        'delete' => [
 		            'grant' => true
 		        ]
+	        ],
+	        'admin' => [
+				'find' => [
+		            'grant' => true
+		        ],
+		        'insert' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
 	        ]
 	    ];
 	}

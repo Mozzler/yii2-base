@@ -81,7 +81,24 @@ class ActiveController extends BaseActiveController
 		        'delete' => [
 		            'grant' => false
 		        ]
-	        ],
+            ],
+            'admin' => [
+				'create' => [
+		            'grant' => true
+		        ],
+		        'view' => [
+		            'grant' => true
+		        ],
+		        'update' => [
+		            'grant' => true
+		        ],
+		        'index' => [
+		            'grant' => true
+		        ],
+		        'delete' => [
+		            'grant' => true
+		        ]
+            ],
 	        'registered' => [
 				'create' => [
 		            'grant' => true
