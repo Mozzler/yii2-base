@@ -468,7 +468,7 @@ class Model extends ActiveRecord {
 			$field = $this->getModelField($attribute);
 		} else {
 			$attribute = $attribute.'Id';
-			$field = $this->getModelField($attribute.'Id');
+			$field = $this->getModelField($attribute);
 		}
 
 	    if ($field) {
