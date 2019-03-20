@@ -17,11 +17,11 @@ class Model extends ActiveRecord {
 
 	public static $moduleClass = '\mozzler\base\Module';
 	public $controllerRoute;
-	
+
 	protected static $collectionName;
 	protected $modelFields;
 	protected $modelConfig;
-	
+
 	const SCENARIO_CREATE = 'create';
 	const SCENARIO_UPDATE = 'update';
 	const SCENARIO_DELETE = 'delete';
@@ -36,17 +36,17 @@ class Model extends ActiveRecord {
 	const SCENARIO_UPDATE_API = 'update-api';
 	const SCENARIO_LIST_API = 'list-api';
 	const SCENARIO_VIEW_API = 'view-api';
-	
+
 	public function init() {
 		parent::init();
-		
+
 		$this->initModelConfig();
 		$this->initModelFields();
-		
+
 		if (!$this->controllerRoute) {
 			$className = self::className();
 			preg_match('/([^\\\\]*)$/i', $className, $matches);
-		
+
 			if (sizeof($matches) == 2) {
 				// transform Controller Name to be a valid URL form
 				// lowercase & hyphenated before an uppercase if camelCase
@@ -59,7 +59,7 @@ class Model extends ActiveRecord {
 			}
 		}
 	}
-	
+
 	protected function modelConfig()
 	{
 		return [
@@ -72,15 +72,15 @@ class Model extends ActiveRecord {
 			]*/
 		];
 	}
-	
+
 	protected function initModelConfig()
 	{
 		$this->modelConfig = $this->modelConfig();
 	}
-	
+
 	/**
 	 * Specifies the indexes of a Model.
-	 * 
+	 *
 	 * Sample model class:
 	 * return ArrayHelper::merge(parent::modelIndexes(), [
 	 *		'nameUnique' => [
@@ -90,8 +90,8 @@ class Model extends ActiveRecord {
 	 *			],
 	 *			'duplicateMessage' => ['Name already exists in the collection']
 	 *		]
-	 *	]); 
-	 * 
+	 *	]);
+	 *
 	 * Indexes defined in the model class will be synced to MongoDB Collection
 	 * through mozzler\base\components\IndexManager class
 	 * where it automatically detects:
@@ -117,10 +117,10 @@ class Model extends ActiveRecord {
 				];
 			}
 		}
-		
+
 		return $indexes;
 	}
-	
+
 	public function scenarios()
     {
         return [
@@ -134,11 +134,11 @@ class Model extends ActiveRecord {
             self::SCENARIO_DEFAULT => array_keys($this->modelFields())
         ];
     }
-	
+
 	protected function initModelFields() {
 		$this->modelFields = FieldHelper::createFields($this, $this->modelFields());
 	}
-	
+
 	/**
 	 * Define the available fields for this model, along with their configuration
 	 */
@@ -179,7 +179,7 @@ class Model extends ActiveRecord {
 			],
 		];
 	}
-	
+
 	/**
 	 * Deny access to public users, which ensures
 	 */
@@ -229,68 +229,68 @@ class Model extends ActiveRecord {
 	        ]
 	    ];
 	}
-	
+
 	public function getModelConfig($key=null) {
 		if ($key) {
 			if (isset($this->modelConfig[$key])) {
 				return $this->modelConfig[$key];
 			}
-			
+
 			return null;
 		}
-		
+
 		return $this->modelConfig;
 	}
-	
+
 	public function getModelField($key=null) {
 		if ($key) {
 			// Handle 'id' as an alias for _id
 			if ($key == 'id') {
 				$key = '_id';
 			}
-			
+
 			if (isset($this->modelFields[$key])) {
 				return $this->modelFields[$key];
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public function fields()
 	{
 		// just use the current scenario fields
 		return $this->activeAttributes();
 	}
-	
+
 	public function attributes()
 	{
 		$attributes = [];
 		$fields = $this->modelFields;
-		
+
 		if (!$fields) {
 			return [];
 		}
-		
+
 		foreach ($fields as $fieldKey => $field) {
 			$attributes[] = $fieldKey;
 		}
-		
+
 		return $attributes;
 	}
-	
+
 	public function attributeLabels()
 	{
 		$labels = [];
 		$fields = $this->modelFields;
-		
+
 		foreach ($fields as $fieldKey => $field) {
 			$labels[$fieldKey] = \Yii::t('app', $field->label);
 		}
-		
+
 		return $labels;
 	}
-	
+
 	/**
 	 * Build field rules from fields() configuration
 	 */
@@ -298,7 +298,7 @@ class Model extends ActiveRecord {
 	{
 		$rules = [];
 		$fields = $this->modelFields;
-		
+
 		foreach ($fields as $fieldName => $field) {
 			foreach ($field->rules() as $validator => $fieldRules) {
 				if (is_array($fieldRules)) {
@@ -318,12 +318,12 @@ class Model extends ActiveRecord {
 					$rule = [$fieldName, $fieldRules];
 					$rules[] = $rule;
 				}
-			}	
+			}
 		}
-		
+
 		return $rules;
 	}
-	
+
 	/**
 	 * Helper method to load default values for all fields in this model
 	 */
@@ -334,7 +334,7 @@ class Model extends ActiveRecord {
 			}
 		}
 	}
-	
+
 	public function behaviors()
     {
         return [
@@ -354,10 +354,10 @@ class Model extends ActiveRecord {
 			]
         ];
     }
-    
+
     /**
 	 * Add support for internals
-	 * 
+	 *
 	 * @ignore
 	 * @internal Override yii2/base/ArrayableTrait.php to support this objects custom fields() method
 	 */
@@ -370,7 +370,7 @@ class Model extends ActiveRecord {
 
             $result[$field] = $field;
         }
-        
+
         $result = array_merge(['id' => function($model) {
 			return $model->getId();
 		}], $result);
@@ -382,10 +382,10 @@ class Model extends ActiveRecord {
         foreach ($this->extraFields() as $field => $definition) {
             $result[$field] = $field;
         }
-		
+
         return $result;
     }
-    
+
     /**
      * Get the route for an action on this model
      *
@@ -416,17 +416,17 @@ class Model extends ActiveRecord {
 	public function getId() {
         return (string)$this->getPrimaryKey();
     }
-    
+
     public static function collectionName()
     {
 	    if (isset(static::$collectionName))
 	    {
 		    return static::$collectionName;
 	    }
-	    
+
 	    return parent::collectionName();
     }
-    
+
     /**
 	 * Override the default getDirtyAttributes() method to remove
 	 * any fields that shouldn't be saved to the database.
@@ -438,7 +438,7 @@ class Model extends ActiveRecord {
 	 */
     public function getDirtyAttributes($names = null) {
 	    $attributes = parent::getDirtyAttributes($names);
-	    
+
 	    // only include attributes that should be saved
 	    $finalAttributes = [];
 	    foreach ($attributes as $key => $value) {
@@ -447,7 +447,7 @@ class Model extends ActiveRecord {
 			    $finalAttributes[$key] = $field->setValue($value);
 		    }
 	    }
-	    
+
 	    return $finalAttributes;
     }
 
@@ -501,15 +501,15 @@ class Model extends ActiveRecord {
 
 					return $this->getRelatedOne($relatedModelNamespace, $attribute, $checkPermissions);
 					break;
-				
+
 				default:
 					return false;
 			}
     	}
-    	
+
     	return false;
     }
-    
+
     /**
      *
 	 */
@@ -519,7 +519,7 @@ class Model extends ActiveRecord {
         $query->checkPermissions = $checkPermissions;
         return $query->one();
     }
-    
+
     /**
 	 * @todo Can this be protected?
 	 * @see getRelated()
@@ -532,7 +532,7 @@ class Model extends ActiveRecord {
 
 		return $this->buildQuery($query, $filter, $limit, $offset, $orderBy, $fields)->all();
     }
-    
+
     /**
 	 * Add support for internals
 	 *
@@ -546,31 +546,31 @@ class Model extends ActiveRecord {
 			$manyFilter = $filter['$many'];
 			unset($filter['$many']);
 		}
-		
-		$relatedObjects = $this->getRelatedMany($modelClass, $fieldFrom, $fieldTo, $manyFilter, null, null, [], [$fieldToMany], false);		
+
+		$relatedObjects = $this->getRelatedMany($modelClass, $fieldFrom, $fieldTo, $manyFilter, null, null, [], [$fieldToMany], false);
 		$ids = [];
 		foreach ($relatedObjects as $record)
 			$ids[] = (string) $record->$fieldToMany;
-		
+
 		if (sizeof($ids) == 0)
 			return [];
-		
+
 		// related class = many:many join collection
 		$relatedClass = \Yii::createObject($modelClass);
 		$relatedField = $relatedClass->getField($fieldToMany);
 		$relatedModel = \Yii::createObject($relatedField->relatedModel);
-		
+
 		if (!isset($filter['_id'])) {
 			$filter['_id'] = [
 				'$in' => $ids
 			];
 		}
-		
+
 		// find all related models, but this time apply filtering etc.
 		$query = $relatedModel->find($checkPermissions);
 		return $this->buildQuery($query, $filter, $limit, $offset, $orderBy, $fields)->all();
 	}
-	
+
 	/**
 	 * Add support for internals
 	 *
@@ -580,19 +580,19 @@ class Model extends ActiveRecord {
 	protected function buildQuery($query, $filter=[], $limit=20, $offset=null, $orderBy=[], $fields=[]) {
 		if ($filter)
 	        $query->where = $filter;
-	    
+
 	    if ($limit)
 	    	$query->limit = $limit;
-	    
+
 	    if ($offset)
 	    	$query->offset = $offset;
-	    
+
 	    if ($orderBy)
 	    	$query->orderBy = $orderBy;
-	    
+
 	    return $query;
 	}
-	
+
 	/**
      * Add support for permission checks
      *
@@ -602,11 +602,11 @@ class Model extends ActiveRecord {
 	public static function find($checkPermissions=true, $applyDefaultFilter=true) {
 		$query = \Yii::createObject('yii\mongodb\ActiveQuery', [get_called_class()]);
 		$query->checkPermissions = $checkPermissions;
-		
+
 		/*if (isset(static::$modelDefaultFilter) && $applyDefaultFilter) {
 			$query->defaultFilter = static::$modelDefaultFilter;
 		}*/
-		
+
 		return $query;
     }
 
@@ -634,7 +634,7 @@ class Model extends ActiveRecord {
     public static function findOne($condition, $checkPermissions=true, $applyDefaultFilter=true) {
         return static::findByCondition($condition, $checkPermissions, $applyDefaultFilter)->one();
     }
-    
+
     /**
      * Add support for permission checks
      *
@@ -654,10 +654,10 @@ class Model extends ActiveRecord {
                 throw new InvalidConfigException('"' . get_called_class() . '" must have a primary key.');
             }
         }
-        
+
         return $query->andWhere($condition);
     }
-    
+
     /**
 	 * Build a DataProvider that has a query filtering by the
 	 * data provided in $params
@@ -665,7 +665,7 @@ class Model extends ActiveRecord {
 	public function search($params=[]) {
 		// create a query from the parent model
 		$query = $this->find();
-		
+
 		// load the parameters into this model and continue
 		// if the model validates
 		if ($this->load($params)) {
@@ -678,38 +678,38 @@ class Model extends ActiveRecord {
 					$attributeFilters[] = $modelField->generateFilter($this, $attribute);
 				}
 			}
-			
+
 			// if we have filters to apply, build a filter condition that can
 			// be added to the query
 			if (sizeof($attributeFilters) > 0) {
 				$filterParams['and'] = $attributeFilters;
-			
+
 				$params = ['filter' => $filterParams];
 				$dataFilter = new ActiveDataFilter([
 					'searchModel' => $this
 				]);
-			
+
 				$filterCondition = null;
 				$dataFilter->load($params);
 		        if ($dataFilter->validate()) {
 		            $filterCondition = $dataFilter->build();
-		            
+
 		            // if we have a valid filter condition, add it to the query
 					if ($filterCondition !== null) {
 						$query->andWhere($filterCondition);
 					}
-		        } else {		        
+		        } else {
 			        \Yii::warning('Search filter isn\'t valid: '.print_r($dataFilter->getErrors()['filter'],true));
 			        \Yii::warning(print_r($filterParams,true));
 			    }
 			}
 		}
-		
+
 		return new ActiveDataProvider([
 			'query' => $query,
 		]);
 	}
-	
+
 	/**
 	 * Set the scenario, but support an array of scenarios to check
 	 */
@@ -727,7 +727,7 @@ class Model extends ActiveRecord {
 		}
 		catch (\yii\mongodb\Exception $e) {
 			$code = (int) $e->getCode();
-			
+
 			switch ($code) {
 				case 11000:
 					// duplicate key exception
@@ -754,12 +754,12 @@ class Model extends ActiveRecord {
 							return $this->save(false, null, $checkPermissions);
 						}
 					}
-					
+
 					$message = "Duplicate key for index: ".$indexName;
 					if (isset($foundIndex['duplicateMessage'])) {
 						$message = $foundIndex['duplicateMessage'];
 					}
-					
+
 					$this->addError($results[1], $message);
 					return false;
 					break;
@@ -779,8 +779,23 @@ class Model extends ActiveRecord {
                 $autoIncrementAttributes[] = $attribute;
             }
 		}
-		
+
 		return $autoIncrementAttributes;
 	}
-	
+
+
+    protected function auditLogAttributes()
+    {
+        $auditLogAttributes = [];
+
+        foreach ($this->modelFields() as $attribute => $fieldConfig) {
+            // -- All but the related fields
+            if (false === stripos($fieldConfig['type'], 'Relate')) {
+                $auditLogAttributes[] = $attribute;
+            }
+        }
+
+        return $auditLogAttributes;
+    }
+
 }
