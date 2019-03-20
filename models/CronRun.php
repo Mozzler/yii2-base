@@ -79,6 +79,7 @@ class CronRun extends BaseModel
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
         $scenarios[self::SCENARIO_LIST] = ['timestamp', 'status'];
         $scenarios[self::SCENARIO_VIEW] = ['timestamp', 'stats', 'status', 'log'];
+        $scenarios[self::SCENARIO_SEARCH] = ['status'];
 
         return $scenarios;
     }

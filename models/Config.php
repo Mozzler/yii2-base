@@ -43,17 +43,6 @@ class Config extends BaseModel
 			]
 		]);
     }
-    
-    /**
-     * @return array the validation rules.
-     */
-    public function rules()
-    {
-        return [
-            // key and value are required
-            [['key_', 'value_'], 'required']
-        ];
-    }
 
     public function scenarios()
     {
@@ -61,7 +50,8 @@ class Config extends BaseModel
 	    $scenarios[self::SCENARIO_CREATE] = ['key_', 'value_'];
 	    $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
 	    $scenarios[self::SCENARIO_LIST] = ['key_', 'value_', 'createdAt'];
-	    $scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'createdAt'];
+			$scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'createdAt'];
+			$scenarios[self::SCENARIO_SEARCH] = ['key_'];
 	    
         return $scenarios;
     }

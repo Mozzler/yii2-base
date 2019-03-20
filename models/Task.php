@@ -99,7 +99,7 @@ class Task extends BaseModel
         $scenarios[self::SCENARIO_UPDATE] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds']; // You shouldn't really be able to edit them
         $scenarios[self::SCENARIO_LIST] = ['id', 'scriptClass', 'status', 'triggerType', 'updatedAt'];
         $scenarios[self::SCENARIO_VIEW] = ['id', 'scriptClass', 'status', 'triggerType', 'timeoutSeconds', 'name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = [];
+        $scenarios[self::SCENARIO_SEARCH] = ['scriptClass', 'status'];
 
         return $scenarios;
     }
