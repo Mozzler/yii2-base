@@ -84,7 +84,7 @@ class AuditLogBehaviour extends AttributesBehavior
         $auditLogData = [
             'newValue' => json_encode($model->$attribute),
             'field' => $attribute,
-            'entityId' => $model->getId(),
+            'entityId' => Tools::ensureId($model->getId()),
             'entityType' => get_class($model),
             'action' => $action,
             'actionId' => $this->auditLogActionId,
