@@ -6,6 +6,7 @@ use mozzler\base\components\Tools;
 use mozzler\base\models\AuditLog;
 use mozzler\base\widgets\BaseWidget;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 
 class ViewAuditLog extends BaseWidget
 {
@@ -45,10 +46,15 @@ class ViewAuditLog extends BaseWidget
 
 
         // -- Get the associated auditLog's
-        $auditLog = Tools::getModels(AuditLog::class, ['entityId' => Tools::ensureId($model->getId()), 'entityType' => $model::className()]);
-        if (!empty($auditLog)) {
-            \Yii::debug("The auditLog entries found are: " . print_r($auditLog, true));
-            $config['auditLog'] = $auditLog;
+        $auditLogs = Tools::getModels(AuditLog::class, ['entityId' => Tools::ensureId($model->getId()), 'entityType' => $model::className()], ['limit' => 100, 'orderBy' => ['createdAt' => -1]]);
+        if (!empty($auditLogs)) {
+//            \Yii::debug("The auditLog entries found are: " . print_r($auditLogs, true));
+
+            $auditLogEntries = ArrayHelper::index(ArrayHelper::toArray($auditLogs), null, 'actionId');
+            \Yii::debug("-- The auditLogEntries are: " . var_export($auditLogEntries, true));
+
+
+            $config['auditLog'] = $auditLogEntries;
         } else {
             \Yii::warning("No auditLog entries found.");
         }

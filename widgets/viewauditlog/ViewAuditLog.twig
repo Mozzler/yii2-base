@@ -1,16 +1,31 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
 {% if widget.auditLog %}
-    {% for auditEntry in widget.auditLog %}
+    {% for auditEntryAction in widget.auditLog %}
         <div class="panel panel-primary">
-            <div class="panel-heading audit-action-{{ auditEntry.action }}">{{ auditEntry.action | capitalize }}</div>
+            <div class="panel-heading audit-action-{{ auditEntryAction.0.action }}">{{ auditEntryAction.0.action | capitalize }}</div>
             <div class="panel-body">
                 <p>
+                    {% if auditEntryAction.0.createdAt %}
+                        createdAt: <strong>{{ auditEntryAction.0.createdAt }}</strong><br/>
+                    {% endif %}
+                    {% if auditEntryAction.0.createdUserId %}
+                        createdUserId: <strong>{{ auditEntryAction.0.createdUserId }}</strong><br/>
+                    {% endif %}
+                    {% if auditEntryAction.0.actionId %}
+                        actionId: <strong>{{ auditEntryAction.0.actionId }}</strong><br/>
+                    {% endif %}
 
-                    {% for auditField in ['field', 'newValue', 'previousValue', 'createdAt', 'createdUserId', 'actionId'] %}
-                        {% if auditEntry[auditField] %}
-                            {{ auditField }}: <strong>{{ auditEntry[auditField] }}</strong><br/>
-                        {% endif %}
-                    {% endfor %}
+                </p>
+
+                {% for auditEntry in auditEntryAction %}
+                    <p>
+                        {% for auditField in ['field', 'newValue', 'previousValue', ] %}
+                            {% if auditEntry[auditField] %}
+                                {{ auditField }}: <strong>{{ auditEntry[auditField] }}</strong><br/>
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endfor %}
                 </p>
             </div>
         </div>
