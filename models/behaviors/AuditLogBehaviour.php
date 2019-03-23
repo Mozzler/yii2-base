@@ -56,10 +56,10 @@ class AuditLogBehaviour extends AttributesBehavior
 //            \Yii::debug("Setting the AuditLogBehaviour attributes to: " . print_r($attributes, true) . "\nBased on the auditLogAttributes: ". json_encode($auditLogAttributes));
                 $this->attributes = $attributes;
             } else {
-                \Yii::debug("The AuditLogBehaviour owner isn't set. Can't find the attributes");
+                \Yii::warning("The AuditLogBehaviour can't find the auditLogAttributes to be applied to. Ensure you've used it correctly");
             }
         } catch (\Throwable $exception) {
-            \Yii::error("The AuditLogBehaviour Init errored with: " . $exception->getMessage());
+            \Yii::error("The AuditLogBehaviour Init errored with: " . Tools::returnExceptionAsString($exception));
         }
     }
 
@@ -69,7 +69,6 @@ class AuditLogBehaviour extends AttributesBehavior
     {
         try {
 
-            // @todo: Only process dirty (changed) attributes if it's on update
             /** @var Model $model */
             $model = $this->owner;
 
@@ -109,15 +108,16 @@ class AuditLogBehaviour extends AttributesBehavior
                 }
             }
 
-            \Yii::debug("AuditLogBehaviour->saveAuditLog() Setting the AuditLog to to: " . print_r($auditLogData, true));
+//            \Yii::debug("AuditLogBehaviour->saveAuditLog() Setting the AuditLog to: " . json_encode($auditLogData, JSON_PRETTY_PRINT));
 
             $auditLog = Tools::createModel(AuditLog::class, $auditLogData);
             $auditLogSaved = $auditLog->save(true, null, false);
             if (!$auditLogSaved) {
                 \Yii::error("auditLog save error:\n" . print_r($auditLog->getErrors(), true));
             }
+
         } catch (\Throwable $exception) {
-            \Yii::error("The AuditLogBehaviour saveAuditLog() errored with: " . $exception->getMessage());
+            \Yii::error("The AuditLogBehaviour saveAuditLog() threw an exception with: " . Tools::returnExceptionAsString($exception));
         }
         return $this->owner->$attribute; // Return the original attribute
     }

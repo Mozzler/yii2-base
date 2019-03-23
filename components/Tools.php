@@ -291,7 +291,7 @@ class Tools extends Component
     public static function returnExceptionAsString($exception)
     {
         /** @var $exception \Exception */
-        return "#### EXCEPTION ####\nMessage: {$exception->getMessage()}\nCode: {$exception->getCode()}\nTrace\n--------\n{$exception->getTraceAsString()}";
+        return "\n#### EXCEPTION ####\nType: " . get_class($exception) . "\nCode: {$exception->getCode()}\nMessage: {$exception->getMessage()}\nTrace\n--------\n{$exception->getTraceAsString()}";
     }
 
     /**
@@ -325,7 +325,8 @@ class Tools extends Component
         \Yii::error($dump ? print_r($message, true) : $message, $location);
     }
 
-    public static function isApi() {
+    public static function isApi()
+    {
         $controllerClass = \Yii::$app->controller->module::className();
         return preg_match(static::$isApiRegex, $controllerClass) == 1;
     }
