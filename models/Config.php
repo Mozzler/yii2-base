@@ -72,7 +72,7 @@ class Config extends BaseModel
         return ArrayHelper::merge(parent::behaviors(), [
             [
                 'class' => AuditLogBehaviour::class,
-                'auditLogAttributes' => $this->auditLogAttributes(),
+                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
                 'skipUpdateOnClean' => true,
             ]
         ]);
