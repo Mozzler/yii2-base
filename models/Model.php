@@ -127,6 +127,7 @@ class Model extends ActiveRecord
 
     public function scenarios()
     {
+
         return [
             self::SCENARIO_CREATE => ['name'],
             self::SCENARIO_UPDATE => ['name'],
@@ -137,7 +138,7 @@ class Model extends ActiveRecord
             self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
 
             self::SCENARIO_DEFAULT => array_keys($this->modelFields()),
-            self::SCENARIO_AUDITABLE => ArrayHelper::merge(array_keys($this->modelFields()), ['updatedAt' => new \yii\helpers\UnsetArrayValue(), 'createdAt' => new \yii\helpers\UnsetArrayValue(), 'createdUserId' => new \yii\helpers\UnsetArrayValue(), 'updatedUserId' => new \yii\helpers\UnsetArrayValue()]), // Default to all fields except the updated and created auto-generated fields
+            self::SCENARIO_AUDITABLE => array_values(array_diff(array_keys($this->modelFields()), ['updatedAt', 'createdAt', 'createdUserId', 'updatedUserId'])), // Default to all fields except the updated and created auto-generated fields. Note the use of array_values to repack the array after array_diff removes the entries
         ];
     }
 
