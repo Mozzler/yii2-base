@@ -97,6 +97,10 @@ class AuditLogBehaviour extends AttributesBehavior
             $previousModel = Tools::getModel($model::className(), ['_id' => Tools::ensureId($model->getId())], false);
             if (!empty($previousModel)) {
                 $auditLogData['previousValue'] = json_encode($previousModel->$attribute);
+
+                if ($auditLogData['previousValue'] === $auditLogData['newValue']) {
+                    return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
+                }
             }
         }
 
