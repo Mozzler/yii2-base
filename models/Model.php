@@ -808,7 +808,7 @@ class Model extends ActiveRecord
 
         foreach ($this->modelFields() as $attribute => $fieldConfig) {
             // -- All but the related fields
-            if (false === stripos($fieldConfig['type'], 'Relate') || !in_array($attribute, ['updatedAt', 'createdAt'])) {
+            if (false === stripos($fieldConfig['type'], 'Relate') && !in_array($attribute, ['updatedAt', 'createdAt'])) {
                 $auditLogAttributes[] = $attribute;
             }
         }

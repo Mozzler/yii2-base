@@ -49,7 +49,7 @@ class AuditLog extends BaseModel
                 'required' => true,
             ],
             'entityId' => [
-                'type' => 'Text',
+                'type' => 'MongoId',
                 'label' => 'Entity ID',
                 'required' => true,
             ],
