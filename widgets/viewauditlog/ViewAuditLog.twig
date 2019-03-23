@@ -1,0 +1,19 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+{% if widget.auditLog %}
+    {% for auditEntry in widget.auditLog %}
+        <div class="panel panel-primary">
+            <div class="panel-heading audit-action-{{ auditEntry.action }}">{{ auditEntry.action | capitalize }}</div>
+            <div class="panel-body">
+                <p>
+
+                    {% for auditField in ['field', 'newValue', 'previousValue', 'createdAt', 'createdUserId', 'actionId'] %}
+                        {% if auditEntry[auditField] %}
+                            {{ auditField }}: <strong>{{ auditEntry[auditField] }}</strong><br/>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+</{{ widget.tag }}>
