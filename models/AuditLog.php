@@ -49,7 +49,8 @@ class AuditLog extends BaseModel
                 'required' => true,
             ],
             'entityId' => [
-                'type' => 'MongoId',
+                'type' => 'RelateOne',
+                'relatedModelField' => 'entityType',
                 'label' => 'Entity ID',
                 'required' => true,
             ],
@@ -79,10 +80,10 @@ class AuditLog extends BaseModel
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['id', 'newValue', 'previousValue', 'field', 'entityId', 'entityType', 'action', 'actionId'];
+        $scenarios[self::SCENARIO_CREATE] = ['id', 'newValue', 'previousValue', 'field', 'entityId', 'action', 'actionId'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['action', 'entityType', 'entityId', 'field', 'newValue', 'createdUserId'];
-        $scenarios[self::SCENARIO_VIEW] = ['id', 'newValue', 'previousValue', 'field', 'entityId', 'entityType', 'action', 'actionId', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'];
+        $scenarios[self::SCENARIO_LIST] = ['action', 'entityId', 'field', 'newValue', 'createdUserId'];
+        $scenarios[self::SCENARIO_VIEW] = ['id', 'newValue', 'previousValue', 'field', 'entityId', 'action', 'actionId', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'];
         return $scenarios;
     }
 
