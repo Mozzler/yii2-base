@@ -13,6 +13,7 @@ use mozzler\base\helpers\ModelHelper;
 
 use yii\data\ActiveDataProvider;
 use yii\data\ActiveDataFilter;
+use yii\helpers\UnsetArrayValue;
 
 class Model extends ActiveRecord
 {
@@ -33,6 +34,7 @@ class Model extends ActiveRecord
     const SCENARIO_SEARCH = 'search';
     const SCENARIO_EXPORT = 'export';
     const SCENARIO_DEFAULT = 'default';
+    const SCENARIO_AUDITABLE = 'auditable'; // Which fields to save to the auditLog, if the AuditLogBehaviour has been attached
 
     const SCENARIO_CREATE_API = 'create-api';
     const SCENARIO_UPDATE_API = 'update-api';
@@ -133,7 +135,9 @@ class Model extends ActiveRecord
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => ['id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
             self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
-            self::SCENARIO_DEFAULT => array_keys($this->modelFields())
+
+            self::SCENARIO_DEFAULT => array_keys($this->modelFields()),
+            self::SCENARIO_AUDITABLE => ArrayHelper::merge(array_keys($this->modelFields()), ['updatedAt' => new \yii\helpers\UnsetArrayValue(), 'createdAt' => new \yii\helpers\UnsetArrayValue(), 'createdUserId' => new \yii\helpers\UnsetArrayValue(), 'updatedUserId' => new \yii\helpers\UnsetArrayValue()]), // Default to all fields except the updated and created auto-generated fields
         ];
     }
 
