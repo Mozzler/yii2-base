@@ -805,19 +805,4 @@ class Model extends ActiveRecord
         return $autoIncrementAttributes;
     }
 
-
-    protected function auditLogAttributes()
-    {
-        $auditLogAttributes = [];
-
-        foreach ($this->modelFields() as $attribute => $fieldConfig) {
-            // -- All but the related fields
-            if (false === stripos($fieldConfig['type'], 'Relate') && !in_array($attribute, ['updatedAt', 'createdAt'])) {
-                $auditLogAttributes[] = $attribute;
-            }
-        }
-
-        return $auditLogAttributes;
-    }
-
 }
