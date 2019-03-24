@@ -7,6 +7,7 @@ use mozzler\base\models\AuditLog;
 use mozzler\base\widgets\BaseWidget;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\bootstrap\Modal;
 
 class ViewAuditLog extends BaseWidget
 {
@@ -31,7 +32,14 @@ class ViewAuditLog extends BaseWidget
             ],
             'model' => null,
             'auditLogEntries' => [],
-            'limit' => 100
+            'limit' => 100,
+            'modalConfig' => [
+                'size' => Modal::SIZE_LARGE,
+                'header' => "Audit Log",
+                // Sent to the modal widget as per https://www.yiiframework.com/extension/yiisoft/yii2-bootstrap/doc/api/2.0/yii-bootstrap-modal
+                'toggleButton' => ['label' => 'Show AuditLog', 'class' => 'btn btn-primary btn-sm'],
+//                'class="btn btn-primary btn-sm"'
+            ],
         ];
     }
 
@@ -56,7 +64,7 @@ class ViewAuditLog extends BaseWidget
                      * @var Int $auditLogIndex
                      * @var AuditLog $auditLog
                      */
-                    foreach($auditLogSet as $auditLogIndex => $auditLog) {
+                    foreach ($auditLogSet as $auditLogIndex => $auditLog) {
                         if (empty($auditLog)) {
                             \Yii::warning("Unexpectedly empty auditLog. \$auditLogEntries[$auditLogActionId][$auditLogIndex]");
                             continue;
