@@ -33,7 +33,7 @@ class ViewAuditLog extends BaseWidget
             'model' => null,
             'auditLogEntries' => [],
             'limit' => 100,
-            'showModal' => false,
+            'showModal' => true,
             'modalConfig' => [
                 'size' => Modal::SIZE_LARGE,
                 'header' => "Audit Log",

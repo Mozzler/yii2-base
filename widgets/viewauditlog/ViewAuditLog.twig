@@ -7,7 +7,7 @@
             "id": "auditlog-widget-modal-" ~ widget.id
         }|merge(widget.modalConfig)) %}
     {% else %}
-        <h2>Audit Log</h2>
+        <h3>Audit Log</h3>
     {% endif %}
     {% for auditEntryAction in widget.auditLog %}
         <div class="panel panel-{% if auditEntryAction.0.action == "update" %}success{% elseif auditEntryAction.0.action ==  "insert" %}primary{% elseif auditEntryAction.0.action ==  "delete" %}warning{% endif %}">
@@ -48,7 +48,7 @@
         </div>
     {% endfor %}
     {% if widget.showModal %}
-        {% set widget = widget.end() %}
+        {% set modal = modal.end() %}
     {% endif %}
 {% endif %}
 </{{ widget.tag }}>
