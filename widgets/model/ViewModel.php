@@ -79,15 +79,18 @@ class ViewModel extends BaseWidget
         $behaviours = $model->behaviors();
         foreach ($behaviours as $behaviour) {
             if (!empty($behaviour) && !empty($behaviour['class']) && AuditLogBehaviour::class === $behaviour['class']) {
-                // -- The auditLog behaviour is attached, so get the auditLog entries
-                \Yii::debug("The auditLog behaviour is attached: " . json_encode($behaviour, JSON_PRETTY_PRINT));
+                // -- The auditLog behaviour is attached, so get an auditLog entry if there's one attached
+//                \Yii::debug("The auditLog behaviour is attached: " . json_encode($behaviour, JSON_PRETTY_PRINT));
                 if (empty($model)) {
-                    \Yii::warning("The model isn't defined. Can't attach the auditLog");
+                    \Yii::warning("The model isn't defined. Can't attach the auditLog"); // This shouldn't happen, but just in case
                     break;
                 }
-                $config['auditLogAttached'] = true;
-
-                break;
+                // -- See if there's any auditLogs for this model
+                $auditLog = $t::getModel(AuditLog::class, ['entityId' => $t::ensureId($model->getId()), 'entityType' => $model::className()]);
+                if (!empty($auditLog) && \Yii::$app->rbac->canAccessModel($auditLog, 'find')) {
+                    $config['auditLogAttached'] = true;
+                }
+                break; // Stop searching
             }
         }
 
