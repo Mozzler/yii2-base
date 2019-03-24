@@ -1,32 +1,36 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
 {% if widget.auditLog %}
     {% for auditEntryAction in widget.auditLog %}
-        <div class="panel panel-primary">
-            <div class="panel-heading audit-action-{{ auditEntryAction.0.action }}">{{ auditEntryAction.0.action | capitalize }}</div>
+        <div class="panel panel-{% if auditEntryAction.0.action == "update" %}success{% elseif auditEntryAction.0.action ==  "insert" %}primary{% elseif auditEntryAction.0.action ==  "delete" %}warning{% endif %}">
+            <div class="panel-heading audit-action-{{ auditEntryAction.0.action }}">{{ auditEntryAction.0.action | title }}
+                - {{ auditEntryAction.0.createdAt | date }}</div>
             <div class="panel-body">
                 <p>
-                    {% if auditEntryAction.0.createdAt %}
-                        createdAt: <strong>{{ auditEntryAction.0.createdAt }}</strong><br/>
-                    {% endif %}
                     {% if auditEntryAction.0.createdUserId %}
                         createdUserId: <strong>{{ auditEntryAction.0.createdUserId }}</strong><br/>
                     {% endif %}
-                    {% if auditEntryAction.0.actionId %}
-                        actionId: <strong>{{ auditEntryAction.0.actionId }}</strong><br/>
-                    {% endif %}
-
                 </p>
 
-                {% for auditEntry in auditEntryAction %}
-                    <p>
-                        {% for auditField in ['field', 'newValue', 'previousValue', ] %}
-                            {% if auditEntry[auditField] %}
-                                {{ auditField }}: <strong>{{ auditEntry[auditField] }}</strong><br/>
-                            {% endif %}
-                        {% endfor %}
-                    </p>
-                {% endfor %}
-                </p>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="auditlog-header-field">Field</th>
+                        <th class="auditlog-header-new-value">New Value</th>
+                        <th class="auditlog-header-previous-value">Previous Value</th>
+                    </tr>
+                    </thead>
+                    {% for auditEntry in auditEntryAction %}
+                        <tr>
+                            {% for auditField in ['field', 'newValue', 'previousValue', ] %}
+                                <td class="auditlog-{{ auditField }}">
+                                    {% if auditEntry[auditField] %}
+                                        {{ auditEntry[auditField]|striptags }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         </div>
     {% endfor %}

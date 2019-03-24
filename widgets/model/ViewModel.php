@@ -85,7 +85,7 @@ class ViewModel extends BaseWidget
                     \Yii::warning("The model isn't defined. Can't attach the auditLog"); // This shouldn't happen, but just in case
                     break;
                 }
-                // -- See if there's any auditLogs for this model
+                // -- Check if there's any auditLogs for this model and that you are allowed to view them
                 $auditLog = $t::getModel(AuditLog::class, ['entityId' => $t::ensureId($model->getId()), 'entityType' => $model::className()]);
                 if (!empty($auditLog) && \Yii::$app->rbac->canAccessModel($auditLog, 'find')) {
                     $config['auditLogAttached'] = true;
