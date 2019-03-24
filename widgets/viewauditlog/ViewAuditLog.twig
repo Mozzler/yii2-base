@@ -21,11 +21,14 @@
                     </thead>
                     {% for auditEntry in auditEntryAction %}
                         <tr>
-                            {% for auditField in ['field', 'newValue', 'previousValue', ] %}
-                                <td class="auditlog-{{ auditField }}">
-                                    {% if auditEntry[auditField] %}
-                                            {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry, "attribute" : auditField}) }}
-                                        {#{{ auditEntry[auditField]|striptags }}#}
+                            <td class="auditlog-field">
+                            {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry, "attribute" : "field"}) }}
+                            </td>
+
+                            {% for referenceModel in ['newModel', 'previousModel', ] %}
+                                <td class="auditlog-{{ auditEntry.field }}-{{ referenceModel }}">
+                                    {% if auditEntry[referenceModel] %}
+                                            {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry[referenceModel], "attribute" : auditEntry.field }) }}
                                     {% endif %}
                                 </td>
                             {% endfor %}

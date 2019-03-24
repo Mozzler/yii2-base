@@ -48,10 +48,26 @@ class ViewAuditLog extends BaseWidget
         // -- Get the associated auditLogs
         $auditLogs = Tools::getModels(AuditLog::class, ['entityId' => Tools::ensureId($model->getId()), 'entityType' => $model::className()], ['limit' => $config['limit'], 'orderBy' => ['createdAt' => -1]]);
         if (!empty($auditLogs)) {
+            $auditLogEntries = ArrayHelper::index($auditLogs, null, 'actionId');
 
-//            $auditLogEntries = ArrayHelper::toArray($auditLogs);
-//            foreach ($auditLogs as $auditLogIndex => $auditLog) {
-//                try {
+            foreach ($auditLogEntries as $auditLogActionId => $auditLogSet) {
+                try {
+                    /**
+                     * @var Int $auditLogIndex
+                     * @var AuditLog $auditLog
+                     */
+                    foreach($auditLogSet as $auditLogIndex => $auditLog) {
+                        if (empty($auditLog)) {
+                            \Yii::warning("Unexpectedly empty auditLog. \$auditLogEntries[$auditLogActionId][$auditLogIndex]");
+                            continue;
+                        }
+                        if (isset($auditLog->previousValue)) {
+                            $auditLog->previousModel = Tools::createModel($auditLog->entityType, [$auditLog->field => $auditLog->previousValue]);
+                        }
+                        if (isset($auditLog->newValue)) {
+                            $auditLog->newModel = Tools::createModel($auditLog->entityType, [$auditLog->field => $auditLog->newValue]);
+                        }
+                    }
 //                    // -- JSON Decode the values
 //                    foreach (['newValue', 'previousValue'] as $fieldToProcess) {
 //                        if (isset($auditLog[$fieldToProcess])) {
@@ -64,12 +80,11 @@ class ViewAuditLog extends BaseWidget
 //                            $auditLogEntries[$auditLogIndex][$fieldToProcess] = is_bool($value) ? json_encode($value) : (string)$value;
 //                        }
 //                    }
-//                } catch (\Throwable $exception) {
-//                    \Yii::warning("Unable to JSON decode the auditLog #{$auditLogIndex} " . Tools::returnExceptionAsString($exception));
-//                }
-//            }
+                } catch (\Throwable $exception) {
+                    \Yii::warning("Unable to process the auditLog #{$auditLogActionId} " . Tools::returnExceptionAsString($exception));
+                }
+            }
 
-            $auditLogEntries = ArrayHelper::index($auditLogs, null, 'actionId');
             $config['auditLog'] = $auditLogEntries;
         } else {
             \Yii::warning("No auditLog entries found.");
