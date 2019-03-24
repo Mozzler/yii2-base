@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models;
 
+use mozzler\base\models\behaviors\AuditLogBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
@@ -54,6 +55,17 @@ class Config extends BaseModel
 			$scenarios[self::SCENARIO_SEARCH] = ['key_'];
 	    
         return $scenarios;
+    }
+
+
+    public function behaviors() {
+        return ArrayHelper::merge(parent::behaviors(), [
+            [
+                'class' => AuditLogBehaviour::class,
+                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
+                'skipUpdateOnClean' => true,
+            ]
+        ]);
     }
     
 }

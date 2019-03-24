@@ -29,7 +29,10 @@ class UpdateModel extends BaseWidget {
 	public function code() {
 		$config = $this->config();
 		$t = new \mozzler\base\components\Tools;
-		
+
+		if (empty($config['model'])) {
+		    \Yii::error("No model specified");
+        }
 		$config['attributes'] = $config['model']->activeAttributes();
 		$config['items'] = [];
 		$config['hiddenItems'] = [];

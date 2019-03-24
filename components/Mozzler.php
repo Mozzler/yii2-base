@@ -16,6 +16,7 @@ class Mozzler extends Component {
         'DateTime' => 'mozzler\base\fields\DateTime',
         'Boolean' => 'mozzler\base\fields\Boolean',
         'Email' => 'mozzler\base\fields\Email',
+        'Raw' => 'mozzler\base\fields\Raw',
         'RelateOne' => 'mozzler\base\fields\RelateOne',
         'RelateMany' => 'mozzler\base\fields\RelateMany',
         'Password' => 'mozzler\base\fields\Password',

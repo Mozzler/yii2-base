@@ -4,7 +4,7 @@
         	'items': widget.items
 	    }) }}
     {% endset %}
-    
+
     <{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
         {{ t.renderWidget("mozzler.base.widgets.bootstrap.Panel", arrayhelper.merge({
             "body": {
@@ -12,5 +12,9 @@
             }
         }, widget.panelConfig)) }}
 
+
+    {% if widget.auditLogAttached %}
+        {{ t.renderWidget("mozzler.base.widgets.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
+    {% endif %}
     </{{ widget.container.tag }}>
 </{{ widget.tag }}>
