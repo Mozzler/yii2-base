@@ -34,12 +34,12 @@ class AuditLog extends BaseModel
     {
         return ArrayHelper::merge(parent::modelFields(), [
             'newValue' => [
-                'type' => 'TextLarge',
+                'type' => 'Raw',
                 'label' => 'New Value',
                 'required' => true,
             ],
             'previousValue' => [
-                'type' => 'TextLarge',
+                'type' => 'Raw',
                 'label' => 'Previous Value',
                 'required' => false,
             ],

@@ -53,7 +53,6 @@ class AuditLogBehaviour extends AttributesBehavior
                         BaseActiveRecord::EVENT_BEFORE_DELETE => [$this, 'saveAuditLog']
                     ];
                 }
-//            \Yii::debug("Setting the AuditLogBehaviour attributes to: " . print_r($attributes, true) . "\nBased on the auditLogAttributes: ". json_encode($auditLogAttributes));
                 $this->attributes = $attributes;
             } else {
                 \Yii::warning("The AuditLogBehaviour can't find the auditLogAttributes to be applied to. Ensure you've used it correctly");
@@ -86,7 +85,7 @@ class AuditLogBehaviour extends AttributesBehavior
             }
 
             $auditLogData = [
-                'newValue' => json_encode($model->$attribute),
+                'newValue' => $model->$attribute,
                 'field' => $attribute,
                 'entityId' => Tools::ensureId($model->getId()),
                 'entityType' => get_class($model),
@@ -100,15 +99,14 @@ class AuditLogBehaviour extends AttributesBehavior
                 // Locate the previous value for this attribute
                 $previousModel = Tools::getModel($model::className(), ['_id' => Tools::ensureId($model->getId())], false);
                 if (!empty($previousModel)) {
-                    $auditLogData['previousValue'] = json_encode($previousModel->$attribute);
+                    $auditLogData['previousValue'] = $previousModel->$attribute;
 
-                    if ($auditLogData['previousValue'] === $auditLogData['newValue']) {
+                    if (json_encode($auditLogData['previousValue']) === json_encode($auditLogData['newValue'])) {
                         return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
                     }
                 }
             }
 
-//            \Yii::debug("AuditLogBehaviour->saveAuditLog() Setting the AuditLog to: " . json_encode($auditLogData, JSON_PRETTY_PRINT));
 
             $auditLog = Tools::createModel(AuditLog::class, $auditLogData);
             $auditLogSaved = $auditLog->save(true, null, false);
