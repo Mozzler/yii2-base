@@ -1,10 +1,12 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
 
 {% if widget.auditLog %}
-{% set modal = t.getWidget('yii.bootstrap.Modal') %}
-    {% set modal = modal.begin({
-        "id": "auditlog-widget-modal-" ~ widget.id
-    }|merge(widget.modalConfig)) %}
+    {% if widget.showModal %}
+        {% set modal = t.getWidget('yii.bootstrap.Modal') %}
+        {% set modal = modal.begin({
+            "id": "auditlog-widget-modal-" ~ widget.id
+        }|merge(widget.modalConfig)) %}
+    {% endif %}
     {% for auditEntryAction in widget.auditLog %}
         <div class="panel panel-{% if auditEntryAction.0.action == "update" %}success{% elseif auditEntryAction.0.action ==  "insert" %}primary{% elseif auditEntryAction.0.action ==  "delete" %}warning{% endif %}">
             <div class="panel-heading audit-action-{{ auditEntryAction.0.action }}">{{ auditEntryAction.0.action | title }}
@@ -43,6 +45,8 @@
             </div>
         </div>
     {% endfor %}
-{% set widget = widget.end() %}
+    {% if widget.showModal %}
+        {% set widget = widget.end() %}
+    {% endif %}
 {% endif %}
 </{{ widget.tag }}>
