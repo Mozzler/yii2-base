@@ -29,7 +29,10 @@ class UpdateModel extends BaseWidget {
 	public function code() {
 		$config = $this->config();
 		$t = new \mozzler\base\components\Tools;
-		
+
+		if (empty($config['model'])) {
+		    \Yii::error("No model specified");
+        }
 		$config['attributes'] = $config['model']->activeAttributes();
 		$config['items'] = [];
 		$config['hiddenItems'] = [];
@@ -38,7 +41,7 @@ class UpdateModel extends BaseWidget {
 		foreach ($config['attributes'] as $attribute) {
 			$modelField = $config['model']->getModelField($attribute);
 			if (!$modelField) {
-				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ".$model->scenario." on ".$model->className());
+				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ". $config['model']->scenario." on ". $config['model']->className());
 				continue;
 			}
 			
