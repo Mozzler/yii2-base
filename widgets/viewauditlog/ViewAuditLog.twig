@@ -7,7 +7,7 @@
             <div class="panel-body">
                 <p>
                     {% if auditEntryAction.0.createdUserId %}
-                        createdUserId: <strong>{{ auditEntryAction.0.createdUserId }}</strong><br/>
+                        {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId"})) }}
                     {% endif %}
                 </p>
 
@@ -24,7 +24,8 @@
                             {% for auditField in ['field', 'newValue', 'previousValue', ] %}
                                 <td class="auditlog-{{ auditField }}">
                                     {% if auditEntry[auditField] %}
-                                        {{ auditEntry[auditField]|striptags }}
+                                            {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry, "attribute" : auditField}) }}
+                                        {#{{ auditEntry[auditField]|striptags }}#}
                                     {% endif %}
                                 </td>
                             {% endfor %}
