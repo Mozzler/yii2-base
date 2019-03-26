@@ -770,7 +770,7 @@ class Model extends ActiveRecord
                     // note: this is recursive and will continue until insertion can occur
                     if ($this->getIsNewRecord()) {
                         if (isset($foundIndex['autoIncrement']) && $foundIndex['autoIncrement']) {
-                            $fieldName = $foundIndex['field'];
+                            $fieldName = $foundIndex['attribute'];
                             $this->$fieldName = intval($this->fieldName) + 1;
 
                             // Try saving again, but don't re-validate
