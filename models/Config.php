@@ -66,6 +66,36 @@ class Config extends BaseModel
                 'skipUpdateOnClean' => true,
             ]
         ]);
-    }
+		}
+		
+		public static function rbac() {
+			return ArrayHelper::merge(parent::rbac(), [
+					'registered' => [
+							'find' => [
+									'grant' => false
+							],
+							'insert' => [
+									'grant' => false
+							],
+							'update' => [
+									'grant' => false
+							],
+							'delete' => [
+									'grant' => false
+							]
+					],
+					'admin' => [
+							'insert' => [
+									'grant' => true
+							],
+							'update' => [
+									'grant' => true
+							],
+							'delete' => [
+									'grant' => true
+							]
+					]
+			]);
+	}
     
 }
