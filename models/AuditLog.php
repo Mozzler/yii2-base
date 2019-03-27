@@ -93,6 +93,9 @@ class AuditLog extends BaseModel
     public static function rbac() {
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
+                'find' => [
+                    'grant' => false
+                ],
                 'insert' => [
                     'grant' => false
                 ],
