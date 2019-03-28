@@ -79,8 +79,39 @@ class CronRun extends BaseModel
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
         $scenarios[self::SCENARIO_LIST] = ['timestamp', 'status'];
         $scenarios[self::SCENARIO_VIEW] = ['timestamp', 'stats', 'status', 'log'];
+        $scenarios[self::SCENARIO_SEARCH] = ['status'];
 
         return $scenarios;
+    }
+
+    public static function rbac() {
+        return ArrayHelper::merge(parent::rbac(), [
+            'registered' => [
+                'find' => [
+                    'grant' => false
+                ],
+                'insert' => [
+                    'grant' => false
+                ],
+                'update' => [
+                    'grant' => false
+                ],
+                'delete' => [
+                    'grant' => false
+                ]
+            ],
+            'admin' => [
+                'insert' => [
+                    'grant' => false
+                ],
+                'update' => [
+                    'grant' => false
+                ],
+                'delete' => [
+                    'grant' => false
+                ]
+            ]
+        ]);
     }
 
 }

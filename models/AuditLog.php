@@ -90,4 +90,34 @@ class AuditLog extends BaseModel
         return $scenarios;
     }
 
+    public static function rbac() {
+        return ArrayHelper::merge(parent::rbac(), [
+            'registered' => [
+                'find' => [
+                    'grant' => false
+                ],
+                'insert' => [
+                    'grant' => false
+                ],
+                'update' => [
+                    'grant' => false
+                ],
+                'delete' => [
+                    'grant' => false
+                ]
+            ],
+            'admin' => [
+                'insert' => [
+                    'grant' => false
+                ],
+                'update' => [
+                    'grant' => false
+                ],
+                'delete' => [
+                    'grant' => false
+                ]
+            ]
+        ]);
+    }
+
 }

@@ -39,10 +39,15 @@ class AutoIncrementBehavior extends AttributesBehavior
     {
         $model = $this->owner;
 
+        if (isset($model->$attribute)) {
+            // Use value if supplied
+            return $model->$attribute;
+        }
+
         // locate the last inserted autoincrement value for this attribute
         $models = \Yii::$app->t::getModels($model::className(), [], [
-            'sort' => [
-                $attribute => -1
+            'orderBy' => [
+                $attribute => SORT_DESC
             ],
             'limit' => 1,
             'checkPermissions' => false

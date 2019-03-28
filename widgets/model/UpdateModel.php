@@ -41,7 +41,7 @@ class UpdateModel extends BaseWidget {
 		foreach ($config['attributes'] as $attribute) {
 			$modelField = $config['model']->getModelField($attribute);
 			if (!$modelField) {
-				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ". $config['model']->scenario." on ". $config['model']->className());
+				\Yii::warning("Non-existent attribute ($attribute) specified in scenario ".$config['model']->scenario." on ".$config['model']->className());
 				continue;
 			}
 			

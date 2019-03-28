@@ -41,7 +41,8 @@ class BaseModelAction extends BaseAction
 
         /* @var $modelClass ActiveRecordInterface */
         $modelClass = $this->controller->modelClass;
-        \Yii::createObject($modelClass);
+        $emptyModel = \Yii::createObject($modelClass);
+        $modelClass = $emptyModel::className();
         $keys = $modelClass::primaryKey();
         if (count($keys) > 1) {
             $values = explode(',', $id);
