@@ -29,15 +29,8 @@ class AuditLogBehaviour extends AttributesBehavior
 
         try {
 
-            $this->auditLogActionId = (string)new ObjectId(); // This should be fairly unique for this action
+            $this->auditLogActionId = (string)new ObjectId(); // This should be fairly unique for this action, allowing grouping of updates
             $attributes = [];
-
-            $auditLogAttributes = [];
-            if (!empty($this->auditLogAttributes)) {
-                $auditLogAttributes = $this->auditLogAttributes;
-            } else if (!empty($this->owner) && method_exists($this->owner, 'attributes')) {
-                $auditLogAttributes = $this->owner->attributes();
-            }
 
             // We need to save the auditLog :
             // - After the Insert so we know the modelId
@@ -45,8 +38,8 @@ class AuditLogBehaviour extends AttributesBehavior
             // - After the Delete so we know it was properly deleted
 
 
-            if (!empty($auditLogAttributes)) {
-                foreach ($auditLogAttributes as $attribute) {
+            if (!empty($this->auditLogAttributes)) {
+                foreach ($this->auditLogAttributes as $attribute) {
                     $attributes[$attribute] = [
                         BaseActiveRecord::EVENT_AFTER_INSERT => [$this, 'saveAuditLog'],
                         BaseActiveRecord::EVENT_AFTER_UPDATE => [$this, 'saveAuditLog'],
@@ -55,7 +48,7 @@ class AuditLogBehaviour extends AttributesBehavior
                 }
                 $this->attributes = $attributes;
             } else {
-                \Yii::warning("The AuditLogBehaviour can't find the auditLogAttributes to be applied to. Ensure you've used it correctly");
+                \Yii::warning("The AuditLogBehaviour can't find the \$this->auditLogAttributes to be applied to. Ensure you've assigned some attributes to be applied");
             }
         } catch (\Throwable $exception) {
             \Yii::error("The AuditLogBehaviour Init errored with: " . Tools::returnExceptionAsString($exception));
@@ -63,6 +56,13 @@ class AuditLogBehaviour extends AttributesBehavior
     }
 
     /**
+     * Save Audit Log
+     *
+     * The main method which gets executed for each attribute
+     *
+     * @param $event
+     * @param $attribute
+     * @return mixed
      */
     protected function saveAuditLog($event, $attribute)
     {
@@ -97,9 +97,7 @@ class AuditLogBehaviour extends AttributesBehavior
             // Example $event->changedAttributes = {"value_":"68","updatedAt":1553749836,"updatedUserId":{"$oid":"5c4e56ef52c0ce0c815f5232"}}
             if (!empty($event->changedAttributes) && isset($event->changedAttributes[$attribute])) {
                 $auditLogData['previousValue'] = $event->changedAttributes[$attribute];
-                \Yii::debug("The changedAttributes is set and it's a {$action} action so saving the previousValue. The changeAttributes are: " . json_encode($event->changedAttributes));
             } else if (AuditLog::ACTION_UPDATE === $action) {
-                \Yii::debug("The changedAttributes isn't set but this is a {$action} action so not saving the auditLog");
                 return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
             }
 
