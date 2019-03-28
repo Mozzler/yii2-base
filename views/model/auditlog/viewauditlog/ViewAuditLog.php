@@ -38,7 +38,7 @@ class ViewAuditLog extends BaseWidget
                 'size' => Modal::SIZE_LARGE,
                 'header' => "Audit Log",
                 // Sent to the modal widget as per https://www.yiiframework.com/extension/yiisoft/yii2-bootstrap/doc/api/2.0/yii-bootstrap-modal
-                'toggleButton' => ['label' => 'Show AuditLog', 'class' => 'btn btn-primary btn-sm'],
+                'toggleButton' => ['label' => 'Show AuditLog', 'class' => 'btn btn-default btn-sm'],
 //                'class="btn btn-primary btn-sm"'
             ],
         ];

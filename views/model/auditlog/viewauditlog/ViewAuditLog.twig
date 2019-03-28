@@ -4,7 +4,7 @@
     {% if widget.showModal %}
         {% set modal = t.getWidget('yii.bootstrap.Modal') %}
         {% set modal = modal.begin({
-            "id": "auditlog-widget-modal-" ~ widget.id
+            "id": "auditlog-widget-modal-" ~ widget.model.id
         }|merge(widget.modalConfig)) %}
     {% else %}
         <h3>Audit Log</h3>
