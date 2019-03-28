@@ -1,6 +1,6 @@
 <?php
 
-namespace mozzler\base\widgets\viewauditlog;
+namespace mozzler\base\views\model\auditlog\viewauditlog;
 
 use mozzler\base\components\Tools;
 use mozzler\base\models\AuditLog;
@@ -16,7 +16,7 @@ class ViewAuditLog extends BaseWidget
      * Example usage in the ViewModel.php
      *
       {% if widget.auditLogAttached %}
-        {{ t.renderWidget("mozzler.base.widgets.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
+        {{ t.renderWidget("mozzler.base.views.model.auditlog.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
       {% endif %}
      */
 
@@ -49,7 +49,7 @@ class ViewAuditLog extends BaseWidget
         $config = $this->config();
 
         if (empty($config['model'])) {
-            throw new Exception("There's no model provided to the auditLog. Try calling it using {{ t.renderWidget(\"mozzler.base.widgets.viewauditlog.ViewAuditLog\",{\"model\": widget.model }) }}");
+            throw new Exception("There's no model provided to the auditLog. Try calling it and setting the model correctly");
         }
         $model = $config['model'];
 

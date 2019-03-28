@@ -14,7 +14,7 @@
 
 
     {% if widget.auditLogAttached %}
-        {{ t.renderWidget("mozzler.base.widgets.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
+        {{ t.renderWidget("mozzler.base.views.model.auditlog.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
     {% endif %}
     </{{ widget.container.tag }}>
 </{{ widget.tag }}>
