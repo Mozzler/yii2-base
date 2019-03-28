@@ -94,26 +94,19 @@ class AuditLogBehaviour extends AttributesBehavior
             ];
 
 
+            // Example $event->changedAttributes = {"value_":"68","updatedAt":1553749836,"updatedUserId":{"$oid":"5c4e56ef52c0ce0c815f5232"}}
             if (!empty($event->changedAttributes) && isset($event->changedAttributes[$attribute])) {
                 $auditLogData['previousValue'] = $event->changedAttributes[$attribute];
-                if (json_encode($auditLogData['previousValue']) === json_encode($auditLogData['newValue']) && AuditLog::ACTION_INSERT !== $action) {
-                    return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
-                }
+                \Yii::debug("The changedAttributes is set and it's a {$action} action so saving the previousValue. The changeAttributes are: " . json_encode($event->changedAttributes));
+            } else if (AuditLog::ACTION_UPDATE === $action) {
+                \Yii::debug("The changedAttributes isn't set but this is a {$action} action so not saving the auditLog");
+                return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
             }
-//                // Locate the previous value for this attribute (used if BEFORE_UPDATE... But you shouldn't be using that)
-//                $previousModel = Tools::getModel($model::className(), ['_id' => Tools::ensureId($model->getId())], false);
-//                if (!empty($previousModel)) {
-//                    $auditLogData['previousValue'] = $previousModel->$attribute;
-//
-//                    if (json_encode($auditLogData['previousValue']) === json_encode($auditLogData['newValue'])) {
-//                        return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
-//                    }
-//                }
 
             $auditLog = Tools::createModel(AuditLog::class, $auditLogData);
             $auditLogSaved = $auditLog->save(true, null, false);
             if (!$auditLogSaved) {
-                \Yii::error("auditLog save error:\n" . print_r($auditLog->getErrors(), true));
+                \Yii::error("AuditLogBehaviour - Error saving the AuditLog :\n" . print_r($auditLog->getErrors(), true));
             }
 
         } catch (\Throwable $exception) {
