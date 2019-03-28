@@ -68,14 +68,14 @@ class Config extends BaseModel
     }
 
 
-    public function behaviors() {
-        return ArrayHelper::merge(parent::behaviors(), [
-            [
-                'class' => AuditLogBehaviour::class,
-                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
-                'skipUpdateOnClean' => true,
-            ]
-        ]);
-    }
+//    public function behaviors() {
+//        return ArrayHelper::merge(parent::behaviors(), [
+//            [
+//                'class' => AuditLogBehaviour::class,
+//                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
+//                'skipUpdateOnClean' => true,
+//            ]
+//        ]);
+//    }
     
 }
