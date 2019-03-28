@@ -33,7 +33,7 @@ class ConfigController extends BaseController
                     'grant' => false
                 ],
                 'update' => [
-                    'grant' => false
+                    'grant' => true
                 ],
                 'delete' => [
                     'grant' => false
