@@ -4,6 +4,7 @@
 
 namespace mozzler\base\commands;
 
+use mozzler\base\components\Tools;
 use \yii\mongodb\Connection;
 use yii\helpers\Console;
 use yii\console\ExitCode;
@@ -106,16 +107,21 @@ class DeployController extends BaseController
 
         $this->stdout("You requested to drop the {$collectionReference}:\n\n");
         foreach ($collections as $collectionIndex => $collectionName) {
-            \Yii::$app->rbac->ignoreCollection($collectionName);
-            /** @var \yii\mongodb\Collection $databaseCollection */
-            $collection = \Yii::$app->mongodb->getCollection($collectionName);
-            if (empty($collection)) {
-                $this->stderr("Warning: Invalid collection {$collectionName}");
-                unset($collections[$collectionIndex]);
-            } else {
-                $documentsCount = $collection->count();
-                $totalDocuments += $documentsCount;
-                $this->stdout("- {$collectionName} : {$documentsCount} documents\n");
+            try {
+                \Yii::$app->rbac->ignoreCollection($collectionName);
+                /** @var \yii\mongodb\Collection $databaseCollection */
+                $collection = \Yii::$app->mongodb->getCollection($collectionName);
+                if (empty($collection)) {
+                    $this->stderr("Warning: Invalid collection {$collectionName}");
+                    unset($collections[$collectionIndex]);
+                } else {
+                    $documentsCount = $collection->count();
+                    $totalDocuments += $documentsCount;
+                    $this->stdout("- {$collectionName} : {$documentsCount} documents\n");
+                }
+            } catch (\Throwable $exception) {
+                $this->stderr("Error: Issue getting collection count for {$collectionName}\n" . Tools::returnExceptionAsString($exception));
+                unset($collections[$collectionIndex]); // Assume there's an issue with this collection, most likely it's already been dropped
             }
         }
         $this->stdout("\n");
@@ -139,10 +145,15 @@ class DeployController extends BaseController
         //   Drop the Collections
         // -----------------------------------------------
         foreach ($collections as $collectionIndex => $collectionName) {
-            /** @var \yii\mongodb\Collection $databaseCollection */
-            $collection = \Yii::$app->mongodb->getCollection($collectionName);
-            $drop = $collection->drop();
-            $this->stdout((true === $drop ? "✓ Dropped" : "✗ Failed to drop") . " collection {$collectionName}\n");
+            try {
+
+                /** @var \yii\mongodb\Collection $databaseCollection */
+                $collection = \Yii::$app->mongodb->getCollection($collectionName);
+                $drop = $collection->drop();
+                $this->stdout((true === $drop ? "✓ Dropped" : "✗ Failed to drop") . " collection {$collectionName}\n");
+            } catch (\Throwable $exception) {
+                $this->stderr("✗ Error: Unable to drop collection {$collectionName}\n" . Tools::returnExceptionAsString($exception));
+            }
         }
         return ExitCode::OK;
     }
