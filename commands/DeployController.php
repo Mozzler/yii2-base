@@ -5,6 +5,7 @@
 namespace mozzler\base\commands;
 
 use mozzler\base\components\Tools;
+use yii\helpers\ArrayHelper;
 use \yii\mongodb\Connection;
 use yii\helpers\Console;
 use yii\console\ExitCode;
@@ -191,6 +192,25 @@ class DeployController extends BaseController
         if (!isset(\Yii::$app->deployManager)) {
             $this->stderr("The deployManager is not defined, please check your console.php configuration");
         }
+
+
+        // -- Auto-set the --force=1 param otherwise the drop-collections waits forever
+        foreach (\Yii::$app->deployManager->redeploy as $entryName => $entry) {
+            if ('deploy/drop-collections' === $entry['command']
+                && is_array($entry['params'])
+                && empty(array_filter($entry['params'], function ($var) {
+                    // -- Ensure force hasn't already been set
+                    return false !== stripos($var, '--force');
+                }))
+            ) {
+                $redeploy = \Yii::$app->deployManager->redeploy;
+                $redeploy[$entryName]['params'][] = '--force=1';
+                \Yii::$app->deployManager->redeploy = $redeploy;
+                $this->stdout("Note: Auto-added '--force=1' to the params for the {$entryName} drop collections command.\n", Console::FG_PURPLE);
+            }
+        }
+
+
         $this->stdout("Redeploy Commands: " . print_r(\Yii::$app->deployManager->redeploy, true) . "\n");
         if (false === boolval($this->force) && $this->confirm("Are you sure you want to run the deploy/redeploy commands?")) {
             \Yii::debug("User requested to run the redeploy commands");
