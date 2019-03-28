@@ -5,22 +5,11 @@
 namespace mozzler\base\commands;
 
 use mozzler\base\components\Tools;
-use yii\helpers\ArrayHelper;
 use \yii\mongodb\Connection;
 use yii\helpers\Console;
 use yii\console\ExitCode;
 
 use mozzler\base\helpers\IndexHelper;
-
-/*
-    'uniqueMobileDeviceId' => [
-				'columns' => ['mobileDeviceId'],
-				'metadata' => [
-					'unique' => 1
-				],
-				'duplicateMessage' => ['Mobile device already exists']
-			]
- */
 
 /**
  * This command echoes the first argument that you have entered.
