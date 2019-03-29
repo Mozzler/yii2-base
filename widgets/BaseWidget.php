@@ -49,8 +49,8 @@ class BaseWidget extends Widget {
 	}
 	
 	// take $config and process it to generate final config
-	public function code() {
-		return $this->config();
+	public function code($templatify=false) {
+		return $this->config($templatify);
 	}
 	
 	public function html($config=[]) {
