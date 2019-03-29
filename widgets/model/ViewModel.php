@@ -45,7 +45,7 @@ class ViewModel extends BaseWidget
     // take $config and process it to generate final config
     public function code()
     {
-        $config = $this->config(true);
+        $config = $this->config(false);
         $model = $config['model'];
         $t = new \mozzler\base\components\Tools;
 
@@ -94,7 +94,9 @@ class ViewModel extends BaseWidget
             }
         }
 
-        return $config;
+        $this->config = $config;
+
+        return parent::code(true);
     }
 
 }
