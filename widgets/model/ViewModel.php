@@ -27,10 +27,11 @@ class ViewModel extends BaseWidget
             'panelConfig' => [
                 'heading' => [
                     'title' => [
-                        'content' =>
-                            '{% if t.app.rbac.canAccessModel(widget.model, "update") %}
+                        'content' => '
 							<div class="pull-right">
-								<a href="{{ widget.model.getUrl("update") }}" class="btn btn-success btn-sm">Edit {{ widget.model.getModelConfig(\'label\') }}</a>
+								{% if widget.auditLogAttached %}<button type="button" class="btn btn-default btn-sm widget-model-view-auditlog-button" data-toggle="modal" data-target="#auditlog-widget-modal-{{ widget.model.id}}">Show AuditLog</button> {% endif %}
+                            {% if t.app.rbac.canAccessModel(widget.model, "update") %}
+     <a href="{{ widget.model.getUrl("update") }}" class="btn btn-success btn-sm">Edit {{ widget.model.getModelConfig(\'label\') }}</a>
 							</div>
 						{% endif %}
 						{{ widget.model.getModelConfig("label") }}'

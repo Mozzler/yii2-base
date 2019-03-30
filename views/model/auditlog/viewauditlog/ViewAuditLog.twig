@@ -4,37 +4,37 @@
     {% if widget.showModal %}
         {% set modal = t.getWidget('yii.bootstrap.Modal') %}
         {% set modal = modal.begin({
-            "id": "auditlog-widget-modal-" ~ widget.id
+            "id": "auditlog-widget-modal-" ~ widget.model.id
         }|merge(widget.modalConfig)) %}
     {% else %}
         <h3>Audit Log</h3>
     {% endif %}
     {% for auditEntryAction in widget.auditLog %}
         <div class="panel panel-{% if auditEntryAction.0.action == "update" %}success{% elseif auditEntryAction.0.action ==  "insert" %}primary{% elseif auditEntryAction.0.action ==  "delete" %}warning{% endif %}">
-            <div class="panel-heading audit-action-{{ auditEntryAction.0.action }}">{{ auditEntryAction.0.action | title }}
-                - {{ auditEntryAction.0.createdAt | date }}</div>
+            <div class="panel-heading auditlog-action-{{ auditEntryAction.0.action }}"><strong
+                        class="auditlog-action">{% if auditEntryAction.0.action == "update" %}Updated{% elseif auditEntryAction.0.action ==  "insert" %}Inserted{% elseif auditEntryAction.0.action ==  "delete" %}Deleted{% endif %}</strong>{% if auditEntryAction.0.createdUserId %}
+                by <strong
+                        class="auditlog-name">{{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId", "wrapLayout": false})) | striptags }}{% endif %}</strong>
+                on <strong class="auditlog-date">{{ auditEntryAction.0.createdAt | date }}</strong></div>
             <div class="panel-body">
-                <p>
-                    {% if auditEntryAction.0.createdUserId %}
-                        {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId"})) }}
-                    {% endif %}
-                </p>
 
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
                     <tr>
                         <th class="auditlog-header-field">Field</th>
-                        <th class="auditlog-header-new-value">New Value</th>
                         <th class="auditlog-header-previous-value">Previous Value</th>
+                        <th class="auditlog-header-new-value">New Value</th>
                     </tr>
                     </thead>
                     {% for auditEntry in auditEntryAction %}
                         <tr>
                             <td class="auditlog-field">
-                                {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry, "attribute" : "field"}) }}
+                                {% if auditEntry['newModel'].getModelField(auditEntry.field) %}{{ auditEntry['newModel'].getModelField(auditEntry.field).label }}{% else %}
+                                    {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry, "attribute" : 'field'}) }}
+                                {% endif %}
                             </td>
 
-                            {% for referenceModel in ['newModel', 'previousModel', ] %}
+                            {% for referenceModel in ['previousModel', 'newModel'] %}
                                 <td class="auditlog-{{ auditEntry.field }}-{{ referenceModel }}">
                                     {% if auditEntry[referenceModel] %}
                                         {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry[referenceModel], "attribute" : auditEntry.field }) }}

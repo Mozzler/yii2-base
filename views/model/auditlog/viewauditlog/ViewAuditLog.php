@@ -1,6 +1,6 @@
 <?php
 
-namespace mozzler\base\widgets\viewauditlog;
+namespace mozzler\base\views\model\auditlog\viewauditlog;
 
 use mozzler\base\components\Tools;
 use mozzler\base\models\AuditLog;
@@ -13,11 +13,13 @@ class ViewAuditLog extends BaseWidget
 {
 
     /*
-     * Example usage in the ViewModel.php
+     * Example usage in the ViewModel.twig
      *
       {% if widget.auditLogAttached %}
-        {{ t.renderWidget("mozzler.base.widgets.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
+        {{ t.renderWidget("mozzler.base.views.model.auditlog.viewauditlog.ViewAuditLog",{"model": widget.model }) }}
       {% endif %}
+
+     * Note: You also need to add the button to trigger this as it's been disabled by default and the ViewModel panel creates the button instead
      */
 
     /**
@@ -35,11 +37,10 @@ class ViewAuditLog extends BaseWidget
             'limit' => 100,
             'showModal' => true,
             'modalConfig' => [
+                // Set the modal widget config. https://www.yiiframework.com/extension/yiisoft/yii2-bootstrap/doc/api/2.0/yii-bootstrap-modal
                 'size' => Modal::SIZE_LARGE,
                 'header' => "Audit Log",
-                // Sent to the modal widget as per https://www.yiiframework.com/extension/yiisoft/yii2-bootstrap/doc/api/2.0/yii-bootstrap-modal
-                'toggleButton' => ['label' => 'Show AuditLog', 'class' => 'btn btn-primary btn-sm'],
-//                'class="btn btn-primary btn-sm"'
+                'toggleButton' => false, // This should be shown in the widgets/model/ViewModel.php panelConfig heading content
             ],
         ];
     }
@@ -49,7 +50,7 @@ class ViewAuditLog extends BaseWidget
         $config = $this->config();
 
         if (empty($config['model'])) {
-            throw new Exception("There's no model provided to the auditLog. Try calling it using {{ t.renderWidget(\"mozzler.base.widgets.viewauditlog.ViewAuditLog\",{\"model\": widget.model }) }}");
+            throw new Exception("There's no model provided to the auditLog. Try calling it and setting the model correctly");
         }
         $model = $config['model'];
 
@@ -62,7 +63,6 @@ class ViewAuditLog extends BaseWidget
             foreach ($auditLogEntries as $auditLogActionId => $auditLogSet) {
                 try {
                     /**
-                     * @var Int $auditLogIndex
                      * @var AuditLog $auditLog
                      */
                     foreach ($auditLogSet as $auditLogIndex => $auditLog) {
@@ -77,18 +77,6 @@ class ViewAuditLog extends BaseWidget
                             $auditLog->newModel = Tools::createModel($auditLog->entityType, [$auditLog->field => $auditLog->newValue]);
                         }
                     }
-//                    // -- JSON Decode the values
-//                    foreach (['newValue', 'previousValue'] as $fieldToProcess) {
-//                        if (isset($auditLog[$fieldToProcess])) {
-//                            $value = json_decode($auditLog[$fieldToProcess], true);
-//                            // Arrays we want as JSON strings
-//                            if (is_array($value)) {
-//                                $value = json_encode($value, JSON_PRETTY_PRINT);
-//                            }
-//                            // Booleans which we want as 'true' or 'false'
-//                            $auditLogEntries[$auditLogIndex][$fieldToProcess] = is_bool($value) ? json_encode($value) : (string)$value;
-//                        }
-//                    }
                 } catch (\Throwable $exception) {
                     \Yii::warning("Unable to process the auditLog #{$auditLogActionId} " . Tools::returnExceptionAsString($exception));
                 }
@@ -102,5 +90,3 @@ class ViewAuditLog extends BaseWidget
     }
 
 }
-
-?>
