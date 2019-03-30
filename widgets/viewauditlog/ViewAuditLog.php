@@ -44,7 +44,7 @@ class ViewAuditLog extends BaseWidget
         ];
     }
 
-    public function code()
+    public function code($templatify = false)
     {
         $config = $this->config();
 

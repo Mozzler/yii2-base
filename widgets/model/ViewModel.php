@@ -43,7 +43,7 @@ class ViewModel extends BaseWidget
     }
 
     // take $config and process it to generate final config
-    public function code()
+    public function code($templatify = false)
     {
         $config = $this->config(false);
         $model = $config['model'];

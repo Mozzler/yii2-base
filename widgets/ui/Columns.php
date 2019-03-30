@@ -32,7 +32,7 @@ class Columns extends BaseWidget {
 	}
 	
 	// take $config and process it to generate final config
-	public function code() {
+	public function code($templatify = false) {
 		$config = $this->config();
 		$t = new \mozzler\base\components\Tools;
 
@@ -45,7 +45,7 @@ class Columns extends BaseWidget {
 		    $i = 0;
 		    foreach ($config['items'] as $item) {
 			    if ($i % $maxRows === 0) {
-				    $colun++;
+                    $column++;
 				}
 				
 				if (!isset($columnItems[$column])) {

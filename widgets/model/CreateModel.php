@@ -26,7 +26,7 @@ class CreateModel extends BaseWidget {
 	}
 	
 	// take $config and process it to generate final config
-	public function code() {
+	public function code($templatify = false) {
 		$config = $this->config();
 		$model = $config['model'];
 		$t = new \mozzler\base\components\Tools;
