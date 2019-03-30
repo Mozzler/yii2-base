@@ -21,7 +21,12 @@ class BaseWidget extends Widget {
 	}
 	
 	public function config($templatify=false) {
-		$config = ArrayHelper::merge($this->defaultConfig(), $this->config,['_templatify' => $templatify]);
+		$config = ArrayHelper::merge($this->defaultConfig(), $this->config);
+		
+		if ($templatify) {
+			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
+		}
+		
 		$config['id'] = $this->id;
 		
 		return $config;
@@ -40,9 +45,6 @@ class BaseWidget extends Widget {
 	
 	public function run() {
 		$config = $this->code();
-        if (true === $config['_templatify']) {
-            $config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
-        }
 		return $this->html($config);
 	}
 	
