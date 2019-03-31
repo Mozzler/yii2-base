@@ -28,7 +28,6 @@ class RenderField extends BaseWidget
 
         $modelConfig = $modelField->widgets['input'];
         unset($modelConfig['class']);
-        \Yii::debug("The modelConfig is: " . json_encode($modelConfig));
         $config = ArrayHelper::merge($config, is_array($modelConfig) ? $modelConfig : []);
 
         return $fieldWidget::widget(["config" => $config]);

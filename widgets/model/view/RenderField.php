@@ -22,14 +22,15 @@ class RenderField extends BaseWidget
 
         // establish the type of field we need to render
         $modelField = $config['model']->getModelField($config['attribute']);
-        $fieldType = $modelField->type;
+
+        $modelConfig = $modelField->widgets['input'];
+        unset($modelConfig['class']);
+        $config = ArrayHelper::merge($config, is_array($modelConfig) ? $modelConfig : []);
+
 
         // Load the field object, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'view.class');
         if (!empty($className) && class_exists($className)) {
-            $modelConfig = $modelField->widgets['view'];
-            unset($modelConfig['class']);
-            $config = ArrayHelper::merge($config, $modelConfig);
             $fieldWidget = \Yii::createObject($modelField->widgets['view']);
         } else {
             // no specific field class, so fall back to the base class
