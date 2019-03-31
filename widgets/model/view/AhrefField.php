@@ -13,7 +13,8 @@ class AhrefField extends BaseField
 
 
     /*
-     * Example usage:
+     * Example model usage:
+     * function modelFields() { return  [
      * 'answerButtonLink' => [
             'type' => 'Text',
             'label' => 'Link',
@@ -26,6 +27,7 @@ class AhrefField extends BaseField
                 ]
             ]
         ],
+    ];}
     */
     public function defaultConfig()
     {
