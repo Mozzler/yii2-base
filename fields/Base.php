@@ -34,7 +34,7 @@ class Base extends Component {
 	public function init() {
 		parent::init();
 
-		\Yii::debug("Base Field: widgets is: ". var_export($this->widgets, true));
+
 		// set default input / view widgets based on this field type
 		$this->widgets['input'] = ArrayHelper::merge([
 			'class' => 'mozzler\base\widgets\model\input\\'.$this->type.'Field',
@@ -55,6 +55,7 @@ class Base extends Component {
 			'config' => []
 		], isset($this->widgets['filter']) && is_array($this->widgets['filter']) ? $this->widgets['filter'] : []);
 
+//        \Yii::debug("Base Field: widgets after merging is: ". var_export($this->widgets, true));
 	}
 	
 	/**
