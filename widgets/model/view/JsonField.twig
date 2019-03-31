@@ -1,0 +1,5 @@
+{% if widget.prettyJson %}
+    <pre class="view-model-field-{{ widget.attribute | escape('html_attr') }}">{{ widget.prettyJson }}</pre>
+{% elseif widget.model[widget.attribute] %}
+    <pre class="view-model-field-{{ widget.attribute | escape('html_attr') }}">{{ widget.model[widget.attribute] | json_encode }}</pre>
+{% endif %}

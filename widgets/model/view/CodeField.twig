@@ -1,0 +1,3 @@
+{% if widget.model[widget.attribute] %}
+    <code class="view-model-field-{{ widget.attribute | escape('html_attr') }}">{{ widget.model[widget.attribute] | nl2br() }}</code>
+{% endif %}
