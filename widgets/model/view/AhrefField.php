@@ -11,7 +11,6 @@ class AhrefField extends BaseField
     public $title = '';
     public $target = '_blank';
 
-
     /*
      * Example model usage:
      * function modelFields() { return  [
@@ -29,14 +28,16 @@ class AhrefField extends BaseField
         ],
     ];}
     */
-    public function defaultConfig()
+    public function config($templatify = false)
     {
-        return ArrayHelper::merge(parent::defaultConfig(), [
+        \Yii::warning("The AhrefField default config is using: " . var_export([
+                'target' => $this->target,
+                'title' => $this->title,
+            ], true));
+        return ArrayHelper::merge(parent::config(), [
             'target' => $this->target,
             'title' => $this->title,
         ]);
     }
 
 }
-
-?>
