@@ -28,16 +28,14 @@ class AhrefField extends BaseField
         ],
     ];}
     */
-    public function config($templatify = false)
+    public function defaultConfig()
     {
-        \Yii::warning("The AhrefField default config is using: " . var_export([
-                'target' => $this->target,
-                'title' => $this->title,
-            ], true));
-        return ArrayHelper::merge(parent::config(), [
+        return ArrayHelper::merge(parent::defaultConfig(), [
             'target' => $this->target,
             'title' => $this->title,
         ]);
     }
 
 }
+
+?>
