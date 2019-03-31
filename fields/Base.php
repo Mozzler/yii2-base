@@ -34,11 +34,12 @@ class Base extends Component {
 	public function init() {
 		parent::init();
 
+		\Yii::debug("Base Field: widgets is: ". var_export($this->widgets, true));
 		// set default input / view widgets based on this field type
 		$this->widgets['input'] = ArrayHelper::merge([
 			'class' => 'mozzler\base\widgets\model\input\\'.$this->type.'Field',
 			'config' => []
-		], isset($this->widgets['input']) ? $this->widgets['input'] : []);
+		], isset($this->widgets['input']) && is_array($this->widgets['input'])? $this->widgets['input'] : []);
 
 		if ($this->hidden) {
 			$this->widgets['input']['class'] = 'mozzler\base\widgets\model\input\\HiddenField';
@@ -47,12 +48,12 @@ class Base extends Component {
 		$this->widgets['view'] = ArrayHelper::merge([
 			'class' => 'mozzler\base\widgets\model\view\\'.$this->type.'Field',
 			'config' => []
-		], isset($this->widgets['view']) ? $this->widgets['view'] : []);
+		], isset($this->widgets['view']) && is_array($this->widgets['view']) ? $this->widgets['view'] : []);
 
 		$this->widgets['filter'] = ArrayHelper::merge([
 			'class' => 'mozzler\base\widgets\model\filter\\'.$this->type.'Field',
 			'config' => []
-		], isset($this->widgets['filter']) ? $this->widgets['filter'] : []);
+		], isset($this->widgets['filter']) && is_array($this->widgets['filter']) ? $this->widgets['filter'] : []);
 
 	}
 	
