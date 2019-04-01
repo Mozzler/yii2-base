@@ -24,7 +24,7 @@ class RenderField extends BaseWidget
 
         $fieldType = $modelField->type;
 
-        $modelConfig = $modelField->widgets['input'];
+        $modelConfig = $modelField->widgets['filter'];
         unset($modelConfig['class']);
         $config = ArrayHelper::merge($config, is_array($modelConfig) ? $modelConfig : []);
 
@@ -32,7 +32,7 @@ class RenderField extends BaseWidget
         // Load the field object, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'filter.class');
         if (!empty($className) && class_exists($className)) {
-            $fieldWidget = \Yii::createObject($modelField->widgets['filter']);
+            $fieldWidget = \Yii::createObject($className);
         } else {
             // no specific field class, so fall back to the base class
             $config['viewName'] = $fieldType . 'Field';

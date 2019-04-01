@@ -54,8 +54,6 @@ class Base extends Component {
 			'class' => 'mozzler\base\widgets\model\filter\\'.$this->type.'Field',
 			'config' => []
 		], isset($this->widgets['filter']) && is_array($this->widgets['filter']) ? $this->widgets['filter'] : []);
-
-//        \Yii::debug("Base Field: widgets after merging is: ". var_export($this->widgets, true));
 	}
 	
 	/**

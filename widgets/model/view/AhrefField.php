@@ -7,10 +7,6 @@ use yii\helpers\ArrayHelper;
 
 class AhrefField extends BaseField
 {
-
-    public $title = '';
-    public $target = '_blank';
-
     /*
      * Example model usage:
      * function modelFields() { return  [
@@ -21,21 +17,22 @@ class AhrefField extends BaseField
             'widgets' => [
                 'view' => [
                     'class' => 'mozzler\base\widgets\model\view\AhrefField',
-                    'title' => 'Answer Link',
-                    'target' => '_blank',
+                    'config' => [
+                        'title' => 'Answer Link',
+                        'target' => '_self',
+                    ]
                 ]
             ]
-        ],
     ];}
     */
     public function defaultConfig()
     {
-        return ArrayHelper::merge(parent::defaultConfig(), [
-            'target' => $this->target,
-            'title' => $this->title,
+        $config = ArrayHelper::merge(parent::defaultConfig(), [
+            'target' => '_blank',
+            'title' => '', // Set the config if you want to change this
         ]);
+        return $config;
     }
-
 }
 
 ?>

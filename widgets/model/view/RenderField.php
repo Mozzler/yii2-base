@@ -10,7 +10,7 @@ class RenderField extends BaseWidget
 
     public function defaultConfig()
     {
-        return \yii\helpers\ArrayHelper::merge(parent::defaultConfig(), [
+        return ArrayHelper::merge(parent::defaultConfig(), [
             'wrapLayout' => true,
             'layoutConfig' => []
         ]);
@@ -18,26 +18,26 @@ class RenderField extends BaseWidget
 
     public function config($templatify = true)
     {
-        $config = parent::config();
+        $config = parent::config($templatify);
 
+        /** @var \mozzler\base\models\Model $model */
+        $model = $config['model'];
         // establish the type of field we need to render
-        $modelField = $config['model']->getModelField($config['attribute']);
+        $modelField = $model->getModelField($config['attribute']);
 
-        $modelConfig = $modelField->widgets['input'];
-        unset($modelConfig['class']);
+        $modelConfig = $modelField->widgets['view'];
         $config = ArrayHelper::merge($config, is_array($modelConfig) ? $modelConfig : []);
-
 
         // Load the field object, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'view.class');
         if (!empty($className) && class_exists($className)) {
-            $fieldWidget = \Yii::createObject($modelField->widgets['view']);
+            $fieldWidget = \Yii::createObject($className);
         } else {
             // no specific field class, so fall back to the base class
             $fieldWidget = \Yii::createObject('\\mozzler\\base\\widgets\\model\\view\\BaseField');
         }
 
-        $config['widgetHtml'] = $fieldWidget::widget(["config" => $config]);
+        $config['widgetHtml'] = $fieldWidget->widget(["config" => $config]);
         return $config;
     }
 
