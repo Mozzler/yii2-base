@@ -1,3 +1,7 @@
 .auditlog-field {
     font-weight: bold;
 }
+
+.widget-audit-log-entries .panel {
+ overflow: auto;
+}
