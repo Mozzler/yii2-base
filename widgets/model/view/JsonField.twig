@@ -1,5 +1,5 @@
 {% if widget.prettyJson %}
-    <pre class="view-model-field-{{ widget.attribute | escape('html_attr') }}">{{ widget.prettyJson }}</pre>
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.prettyJson }}</{{ widget.tag }}>
 {% elseif widget.model[widget.attribute] %}
-    <pre class="view-model-field-{{ widget.attribute | escape('html_attr') }}">{{ widget.model[widget.attribute] | json_encode }}</pre>
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] | json_encode }}</{{ widget.tag }}>
 {% endif %}

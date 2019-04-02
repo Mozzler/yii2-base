@@ -5,3 +5,8 @@
 .widget-model-view .btn {
 	margin-top: -4px;
 }
+
+/* So the long fields don't go beyond where they should */
+.widget-model-field-view {
+	overflow: hidden;
+}
