@@ -50,9 +50,9 @@ class TaskManager extends \yii\base\Component
         }
 
         /** @var Task $task */
-        $task = \Yii::createObject(Task::class);
-        $task->load($taskConfig, '');
-        if (!$task->save()) {
+        $task = Tools::createModel(Task::class, $taskConfig);
+
+        if (!$task->save(true, null, false)) {
             throw new \Exception("Unable to save a task for execution: " . json_encode($task->getErrors()));
         }
 
