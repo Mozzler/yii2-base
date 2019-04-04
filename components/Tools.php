@@ -327,7 +327,11 @@ class Tools extends Component
 
     public static function isApi()
     {
-        $controllerClass = \Yii::$app->controller->module::className();
-        return preg_match(static::$isApiRegex, $controllerClass) == 1;
+        if (isset(\Yii::$app) && isset(\Yii::$app->controller) && isset(\Yii::$app->controller->module)) { // Ensure the controller and module exist otherwise the codeception tests barf
+            $controllerClass = \Yii::$app->controller->module::className();
+            return preg_match(static::$isApiRegex, $controllerClass) == 1;
+        } else {
+            return false; // NB: It's likely being run as a test or via CLI
+        }
     }
 }
