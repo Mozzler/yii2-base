@@ -44,7 +44,8 @@ class Serializer extends \yii\rest\Serializer
                 $models[$i] = $model->toArray($finalFields, $finalExpand);
             }
             if ($model instanceof Arrayable) {
-                $models[$i] = $model->toArray($fields, $expand);
+                list($finalFields, $finalExpand) = $this->buildFinalFields($model);
+                $models[$i] = $model->toArray($finalFields, $expand);
             } elseif (is_array($model)) {
                 $models[$i] = ArrayHelper::toArray($model);
             }
