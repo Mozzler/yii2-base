@@ -38,7 +38,7 @@ class Task extends BaseModel
                 'options' => [
                     'unique' => 1
                 ],
-                'duplicateMessage' => ['That task already exists']
+                'duplicateMessage' => 'That task already exists'
             ]
         ]);
     }
@@ -69,9 +69,7 @@ class Task extends BaseModel
             'log' => [
                 'label' => 'Logs',
                 'type' => 'Json', // Use addLog(),
-                'rules' => [
-                    'default' => ['value' => []]
-                ],
+                'default' => [],
             ],
             'timeoutSeconds' => [
                 'label' => 'Timeout In Seconds',
