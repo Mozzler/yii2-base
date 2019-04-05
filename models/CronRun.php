@@ -42,7 +42,7 @@ class CronRun extends BaseModel
     {
         return ArrayHelper::merge(parent::modelFields(), [
             'timestamp' => [
-                'type' => 'Integer',
+                'type' => 'Timestamp',
                 'label' => 'Timestamp (Minute)',
                 'required' => true,
             ],
