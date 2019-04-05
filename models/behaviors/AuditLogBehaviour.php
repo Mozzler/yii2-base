@@ -34,16 +34,14 @@ class AuditLogBehaviour extends AttributesBehavior
 
             // We need to save the auditLog :
             // - After the Insert so we know the modelId
-            // - After the Update so we know the previous and validated updated value
-            // - After the Delete so we know it was properly deleted
+            // - After the Update so we know the previous and validated updated value 
 
 
             if (!empty($this->auditLogAttributes)) {
                 foreach ($this->auditLogAttributes as $attribute) {
                     $attributes[$attribute] = [
                         BaseActiveRecord::EVENT_AFTER_INSERT => [$this, 'saveAuditLog'],
-                        BaseActiveRecord::EVENT_AFTER_UPDATE => [$this, 'saveAuditLog'],
-                        BaseActiveRecord::EVENT_AFTER_DELETE => [$this, 'saveAuditLog']
+                        BaseActiveRecord::EVENT_AFTER_UPDATE => [$this, 'saveAuditLog']
                     ];
                 }
                 $this->attributes = $attributes;
@@ -79,9 +77,6 @@ class AuditLogBehaviour extends AttributesBehavior
                 case BaseActiveRecord::EVENT_AFTER_UPDATE:
                     $action = AuditLog::ACTION_UPDATE;
                     break;
-                case BaseActiveRecord::EVENT_AFTER_DELETE:
-                    $action = AuditLog::ACTION_DELETE;
-                    break;
             }
 
             $auditLogData = [
@@ -92,7 +87,6 @@ class AuditLogBehaviour extends AttributesBehavior
                 'action' => $action,
                 'actionId' => $this->auditLogActionId,
             ];
-
 
             // Example $event->changedAttributes = {"value_":"68","updatedAt":1553749836,"updatedUserId":{"$oid":"5c4e56ef52c0ce0c815f5232"}}
             if (!empty($event->changedAttributes) && isset($event->changedAttributes[$attribute])) {
