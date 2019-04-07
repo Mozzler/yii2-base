@@ -69,6 +69,11 @@ class AuditLogBehaviour extends AttributesBehavior
             /** @var Model $model */
             $model = $this->owner;
 
+            if (!isset($model->$attribute)) {
+                // -- Don't try to log empty fields
+                return $model->$attribute;
+            }
+
             $action = $event->name; // Init
             switch ($event->name) {
                 case BaseActiveRecord::EVENT_AFTER_INSERT:
