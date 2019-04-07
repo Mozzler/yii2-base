@@ -39,7 +39,10 @@ class Task extends BaseModel
                     'unique' => 1
                 ],
                 'duplicateMessage' => 'That task already exists'
-            ]
+            ],
+            'createdAt' => [
+                'columns' => ['createdAt' => 1],
+            ],
         ]);
     }
 
