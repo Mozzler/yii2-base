@@ -8,7 +8,11 @@ class BaseField extends BaseWidget
 
     public function defaultConfig()
 	{
-        return [];
+        return [
+            'model' => null,
+            'attribute' => null,
+            'fieldOptions' => []
+        ];
     }
 
 }
