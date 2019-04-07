@@ -69,6 +69,10 @@ class BaseWidget extends Widget {
     
     // take an object and output it to Javascript for this widget
     public function outputJsData($jsData) {
+        if (!isset(\Yii::$app->controller)) {
+            // Don't run if there isn't a controller, e.g inside a unit test
+            return false;
+        }
 	    $view = \Yii::$app->controller->getView();
 	    $view->registerJs(" m.widgets['".$this->id."'] = ".json_encode($jsData)."; ", WebView::POS_HEAD);
     }
@@ -80,6 +84,10 @@ class BaseWidget extends Widget {
 	 */
     public function outputCss()
     {
+        if (!isset(\Yii::$app->controller)) {
+            // Don't run if there isn't a controller, e.g inside a unit test
+            return false;
+        }
 	    $view = \Yii::$app->controller->getView();
 	    $cssFile = $this->dirName . DIRECTORY_SEPARATOR . $this->viewName.'.css';
 	    
@@ -93,6 +101,10 @@ class BaseWidget extends Widget {
      * Output any javascript files associated with this widget
      */
     public function outputJs() {
+        if (!isset(\Yii::$app->controller)) {
+            // Don't run if there isn't a controller, e.g inside a unit test
+            return false;
+        }
         $jsTypes = [
             'ready' => WebView::POS_READY,
             'begin' => WebView::POS_BEGIN,
