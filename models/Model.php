@@ -334,6 +334,20 @@ class Model extends ActiveRecord
         return $rules;
     }
 
+    public function attributeHints()
+    {
+        $hints = [];
+        $fields = $this->modelFields;
+
+        foreach ($fields as $fieldName => $field) {
+            if ($field->hint) {
+                $hints[$fieldName] = $field->hint;
+            }
+        }
+
+        return $hints;
+    }
+
     /**
      * Helper method to load default values for all fields in this model
      */
