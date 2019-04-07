@@ -37,7 +37,7 @@ class IndexManager
                 if ($eIndex['key'] == $modelIndexes[$indexName]['columns']) {
 
                     foreach ($existingIndexOptions as $optionKey => $optionValue) {
-                        if ($optionValue != ArrayHelper::getValue($modelIndexes[$indexName]['options'], $optionKey)) {
+                        if (!empty($modelIndexes[$indexName]['options']) && $optionValue != ArrayHelper::getValue($modelIndexes[$indexName]['options'], $optionKey)) {
                             $this->handleUpdate($collection, $indexName, $modelIndexes[$indexName]);
                         }
                     }
