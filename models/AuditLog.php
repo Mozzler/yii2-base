@@ -33,6 +33,28 @@ class AuditLog extends BaseModel
         ];
     }
 
+    public function modelIndexes()
+    {
+        return ArrayHelper::merge(parent::modelIndexes(), [
+            'defaultEntityCreatedQuery' => [
+                'columns' => [
+                    'entityId' => 1,
+                    'entityType' => 1,
+                    'createdAt' => -1,
+                ],
+            ],
+            'entityId' => [
+                'columns' => ['entityId' => 1],
+            ],
+            'entityType' => [
+                'columns' => ['entityType' => 1],
+            ],
+            'createdAt' => [
+                'columns' => ['createdAt' => -1],
+            ],
+        ]);
+    }
+
     protected function modelFields()
     {
         return ArrayHelper::merge(parent::modelFields(), [
@@ -90,7 +112,8 @@ class AuditLog extends BaseModel
         return $scenarios;
     }
 
-    public static function rbac() {
+    public static function rbac()
+    {
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
                 'find' => [
