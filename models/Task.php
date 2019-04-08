@@ -41,8 +41,8 @@ class Task extends BaseModel
                 'duplicateMessage' => 'That task already exists'
             ],
             'createdAt' => [
-                'columns' => ['createdAt' => 1],
-            ],
+                'columns' => ['createdAt' => 1]
+            ]
         ]);
     }
 
@@ -98,7 +98,7 @@ class Task extends BaseModel
         $scenarios[self::SCENARIO_CREATE] = ['scriptClass', 'status', 'triggerType', 'config', 'timeoutSeconds'];
 //        $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
         $scenarios[self::SCENARIO_UPDATE] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds']; // You shouldn't really be able to edit them
-        $scenarios[self::SCENARIO_LIST] = ['scriptClass', 'status', 'triggerType', 'updatedAt'];
+        $scenarios[self::SCENARIO_LIST] = ['scriptClass', 'status', 'triggerType', 'createdAt'];
         $scenarios[self::SCENARIO_VIEW] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds', 'createdAt', 'updatedAt', 'log'];
         $scenarios[self::SCENARIO_SEARCH] = ['scriptClass', 'status'];
 
