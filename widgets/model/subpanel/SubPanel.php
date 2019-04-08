@@ -57,7 +57,7 @@ class SubPanel extends BaseWidget {
 						'class' => 'col-md-6 text-right widget-model-subpanels-subpanel-buttons'
 					],
 					'items' => [
-						'create' => "<a href=\"{{ widget.emptyRelatedModel.getUrl('create', {(widget.relationAttribute): widget.model.id}) }}\" class=\"btn btn-primary btn-sm\">Create {{ widget.emptyRelatedModel.getModelConfig('label') }}</a>"
+						'create' => "<a href=\"{{ widget.emptyRelatedModel.getUrl('create', {(widget.relatedField.relatedField): widget.model.id}) }}\" class=\"btn btn-primary btn-sm\">Create {{ widget.emptyRelatedModel.getModelConfig('label') }}</a>"
 					]
 				]
 			],
