@@ -14,9 +14,12 @@ class ActiveDeleteAction extends \yii\rest\DeleteAction
         $model = $this->findModel($id);
 
         if ($model && $model->delete()) {
-            return true;
+            return ['success' => true];
         }
-        return parent::run();
+
+        // -- If the above failed then try the base delete method
+        parent::run($id); // Throws an exception if it fails.
+        return ['success' => true];
     }
     
 }
