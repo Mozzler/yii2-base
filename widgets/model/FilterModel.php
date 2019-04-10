@@ -63,10 +63,13 @@ class FilterModel extends BaseWidget {
             ]
         ]);
 	}
-	
+    
+    /**
+     * Force templatify
+     */
 	public function config($templatify=true)
 	{
-    	return parent::config($templatify);
+    	return parent::config(true);
 	}
 }
 
