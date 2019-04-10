@@ -168,7 +168,7 @@ class Model extends ActiveRecord
             ],
             'createdAt' => [
                 'type' => 'Timestamp',
-                'label' => 'Inserted'
+                'label' => 'Created'
             ],
             'createdUserId' => [
                 'type' => 'RelateOne',
