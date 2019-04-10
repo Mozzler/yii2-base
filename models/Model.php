@@ -168,21 +168,21 @@ class Model extends ActiveRecord
             ],
             'createdAt' => [
                 'type' => 'Timestamp',
-                'label' => 'Created'
+                'label' => 'Created Time'
             ],
             'createdUserId' => [
                 'type' => 'RelateOne',
-                'label' => 'Created user',
+                'label' => 'Created User',
                 'relatedField' => '_id',
                 'relatedModel' => 'app\models\User'
             ],
             'updatedAt' => [
                 'type' => 'Timestamp',
-                'label' => 'Updated'
+                'label' => 'Updated Time'
             ],
             'updatedUserId' => [
                 'type' => 'RelateOne',
-                'label' => 'Updated user',
+                'label' => 'Updated User',
                 'relatedField' => '_id',
                 'relatedModel' => 'app\models\User'
             ],
