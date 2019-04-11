@@ -12,7 +12,7 @@ class ActiveIndexAction extends \yii\rest\IndexAction
     public $scenario = [Model::SCENARIO_LIST_API, Model::SCENARIO_LIST];
     public $resultScenario = [Model::SCENARIO_LIST_API, Model::SCENARIO_LIST];
 
-    public $pageSizeMaxLimit = 300;
+    public $pageSizeMaxLimit = 500;
 
     /*
     * Prepares the data provider that should return the requested collection of the models.
