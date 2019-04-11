@@ -1,6 +1,10 @@
 <?php
 namespace mozzler\base\components;
 
+use yii\base\Exception;
+use yii\base\ErrorException;
+use yii\base\UserException;
+use yii\web\HttpException;
 /**
  * A custom error handler that supports providing detailed error messages
  * for APIs
@@ -20,6 +24,8 @@ class ErrorHandler extends \yii\web\ErrorHandler {
                 'name' => ($exception instanceof Exception || $exception instanceof ErrorException) ? $exception->getName() : 'Exception',
                 'message' => $exception->getMessage(),
                 'code' => $exception->getCode(),
+//                'line' => $exception->getLine(), // Show when debugging issues with errors caused without YII_DEBUG and in throwing exceptions
+//                'file' => $exception->getFile(),
             ];
             if ($exception instanceof HttpException) {
                 $array['status'] = $exception->statusCode;
