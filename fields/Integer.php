@@ -11,7 +11,7 @@ class Integer extends Base {
 		// work around for default value of 0 appearing as empty
 		// when populating a form
 		if (is_numeric($this->default)) {
-			$this->default = strval($this->default);
+			$this->default = intval(strval($this->default));
 		}
 	}
 	
