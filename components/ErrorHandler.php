@@ -1,16 +1,19 @@
 <?php
+
 namespace mozzler\base\components;
 
 use yii\base\Exception;
 use yii\base\ErrorException;
 use yii\base\UserException;
 use yii\web\HttpException;
+
 /**
  * A custom error handler that supports providing detailed error messages
  * for APIs
  */
-class ErrorHandler extends \yii\web\ErrorHandler {
-    
+class ErrorHandler extends \yii\web\ErrorHandler
+{
+
     public $detailedApiMessages = true;
 
     /**
@@ -18,7 +21,8 @@ class ErrorHandler extends \yii\web\ErrorHandler {
      * to include detailed information if an API, but exclude sensitive
      * information (file, line, stack-trace) if not debug mode
      */
-    protected function convertExceptionToArray($exception) {
+    protected function convertExceptionToArray($exception)
+    {
         if (\Yii::$app->t::isApi() && $this->detailedApiMessages) {
             $array = [
                 'name' => ($exception instanceof Exception || $exception instanceof ErrorException) ? $exception->getName() : 'Exception',
@@ -28,7 +32,9 @@ class ErrorHandler extends \yii\web\ErrorHandler {
 //                'file' => $exception->getFile(),
             ];
             if ($exception instanceof HttpException) {
-                $array['status'] = $exception->statusCode;
+                if (!isset($array['code'])) {
+                    $array['status'] = $exception->statusCode;
+                }
             }
 
             $array['type'] = get_class($exception);
