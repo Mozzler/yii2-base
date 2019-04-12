@@ -291,7 +291,7 @@ class Tools extends Component
     public static function returnExceptionAsString($exception)
     {
         /** @var $exception \Exception */
-        return "\n#### EXCEPTION ####\nType: " . get_class($exception) . "\nCode: {$exception->getCode()}\nMessage: {$exception->getMessage()}\nTrace\n--------\n{$exception->getTraceAsString()}";
+        return "\n#### EXCEPTION ####\nType: " . get_class($exception) . "\nCode: {$exception->getCode()}\nMessage: {$exception->getMessage()}\nLine: {$exception->getLine()}\nFile: {$exception->getFile()}\nTrace\n--------\n{$exception->getTraceAsString()}";
     }
 
     /**
