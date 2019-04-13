@@ -37,9 +37,9 @@ class Tools extends Component
     /**
      * Render a twig template
      *
-     * @param    string $template Twig template to render
-     * @param    array $data Data to pass to the template
-     * @param    array $options Any template rendering options
+     * @param string $template Twig template to render
+     * @param array $data Data to pass to the template
+     * @param array $options Any template rendering options
      * @return    string    Returns the template result
      */
     public static function renderTwig($template, $data = [], $options = [])
@@ -89,10 +89,10 @@ class Tools extends Component
     /**
      * Create an empty model.
      *
-     * @param    string $className Class name of the model to create (eg: `mozzler\auth\user`).
-     * @param    array $data Default data to populate the model
-     * @throws \yii\base\InvalidConfigException
+     * @param string $className Class name of the model to create (eg: `mozzler\auth\user`).
+     * @param array $data Default data to populate the model
      * @return    \mozzler\base\models\Model    Returns a new model
+     * @throws \yii\base\InvalidConfigException
      */
     public static function createModel($className, $data = [])
     {
@@ -134,9 +134,9 @@ class Tools extends Component
      *    "status" => "draft"
      * ]);
      *
-     * @param    string $className Class name of the model to get
-     * @param    array $filter MongoDB filter to apply to the query
-     * @param    array $options
+     * @param string $className Class name of the model to get
+     * @param array $filter MongoDB filter to apply to the query
+     * @param array $options
      * @return    array    Returns an array of found models. If none found, returns an empty array.
      */
     public static function getModels($className, $filter = [], $options = [])
@@ -184,9 +184,9 @@ class Tools extends Component
      * ]);
      * ```
      *
-     * @param    string $className Class name of the model to get
-     * @param    array $filter MongoDB filter to apply to the query
-     * @param    array $options
+     * @param string $className Class name of the model to get
+     * @param array $filter MongoDB filter to apply to the query
+     * @param array $options
      * @return   int   Returns the number of models in the collection
      */
     public static function countModels($className, $filter = [], $options = [])
@@ -256,11 +256,11 @@ class Tools extends Component
      * - via config if specified when calling sendEmail
      * - via `web.php` configuration
      *
-     * @param    string $to Email recipient(s) in the format `[<email address> => <name>]`
-     * @param    string $subject Email subject.
-     * @param    string $template Name of template to use for rendering the email (eg: `user/welcome.twig`). Email templates are all prefixed by `emails/`, but this doesn't need to be included when specifying the template name.
-     * @param    array $data Data to send to the email template.
-     * @param    array $config Config for sending the email such as; setting `replyTo` or `from` which is merged with `$params['config']`
+     * @param string $to Email recipient(s) in the format `[<email address> => <name>]`
+     * @param string $subject Email subject.
+     * @param string $template Name of template to use for rendering the email (eg: `user/welcome.twig`). Email templates are all prefixed by `emails/`, but this doesn't need to be included when specifying the template name.
+     * @param array $data Data to send to the email template.
+     * @param array $config Config for sending the email such as; setting `replyTo` or `from` which is merged with `$params['config']`
      * @return bool whether this message is sent successfully.
      */
     public static function sendEmail($to, $subject, $template, $data = [], $config = [])
@@ -331,6 +331,7 @@ class Tools extends Component
             $controllerClass = \Yii::$app->controller->module::className();
             return preg_match(static::$isApiRegex, $controllerClass) == 1;
         } else {
+            Yii::debug("Can't find the \Yii::\$app->controller->module so can't check if the request is API or not");
             return false; // NB: It's likely being run as a test or via CLI
         }
     }
