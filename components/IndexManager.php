@@ -8,6 +8,7 @@ use yii\helpers\FileHelper;
 class IndexManager
 {
 
+    public $defaultModelPaths = ['@app/models/', '@mozzler/base/models/'];
     public $logs = [];
 
     public function syncModelIndexes($className)
@@ -156,8 +157,11 @@ class IndexManager
      * ]
      *
      */
-    public function buildModelClassList($modelPaths)
+    public function buildModelClassList($modelPaths = null)
     {
+        if (empty($modelPaths)) {
+            $modelPaths = $this->defaultModelPaths;
+        }
         $models = [];
 
         foreach ($modelPaths as $modelPath) {

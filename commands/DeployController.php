@@ -21,8 +21,8 @@ use mozzler\base\helpers\IndexHelper;
  */
 class DeployController extends BaseController
 {
-    // specify the default modelPaths to sync indexes
-    public $modelPaths = ['@app/models/', '@mozzler/base/models/'];
+    // Specify the modelPaths to sync indexes (or use null for the default)
+    public $modelPaths = null; // or you can specify them, e.g  ['@app/models/', '@mozzler/base/models/'];
 
     /**
      * @var bool if true then there's no confirmation step

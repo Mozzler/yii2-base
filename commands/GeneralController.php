@@ -7,7 +7,9 @@ use app\components\viterra\exceptions\ApiException;
 use Egulias\EmailValidator\EmailParser;
 use Egulias\EmailValidator\Warning\ObsoleteDTEXT;
 use MongoDB\BSON\ObjectId;
+use mozzler\base\components\IndexManager;
 use mozzler\base\components\Tools;
+use mozzler\base\models\Model;
 use mozzler\base\models\Task;
 use Yii;
 use yii\console\Controller;
@@ -28,13 +30,14 @@ use yii\validators\EmailValidator;
 class GeneralController extends BaseController
 {
 
-    public $emailTemplate =  'defaultEmail.twig';
+    public $emailTemplate = '@mozzler/base/views/layouts/emails/html.twig';
 
     /**
      * Send a test email
      *
-     * Take note that this expects a twig file in views/emails/defaultEmail.twig
-     * which can output the {{content}} field in your project
+     * Sends a generic test email to the email address you specify
+     * This is mainly useful to ensure the \Yii::$app->mailer is
+     * configured correctly and that you can send
      *
      * @param $emailAddress
      * @return int
@@ -50,7 +53,9 @@ class GeneralController extends BaseController
         // -- Ensure it's at least sort of looking like a valid email address
         $validator = new EmailValidator();
         if ($validator->validate($emailAddress, $error)) {
-            $this->stdout("✓ Emailing: $emailAddress\n", Console::FG_GREEN);
+            $this->stdout("Email Address: ");
+            $this->stdout("{$emailAddress}\n", Console::FG_CYAN);
+
         } else {
             $this->stderr("#### Error ####\nInvalid email address provided {$emailAddress}\n", Console::FG_RED);
             return ExitCode::USAGE;
@@ -73,7 +78,10 @@ This is a test email to {$emailAddress}
 Sent on {{ "now" |date("m/d/Y\") }}
 EOC;
 
-            $this->stdout("Email subject: $emailSubject\n");
+            $this->stdout("Email Subject: ");
+            $this->stdout("$emailSubject\n", Console::FG_CYAN);
+            $this->stdout("Email Template: ");
+            $this->stdout("{$this->emailTemplate}\n", Console::FG_CYAN);
             $emailData = ['content' => $content];
 
             // -- We use the configured Yii Tools version
@@ -96,6 +104,47 @@ EOC;
         } catch (\Throwable $exception) {
             $this->stderr("There was an exception with sending the test email: " . Tools::returnExceptionAsString($exception));
             return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        return ExitCode::OK;
+    }
+
+    /**
+     * Model Rules
+     *
+     * Outputs a list of the models and their 'rules'
+     * This is mainly used for helping cover any OWASP sanitisation requirements
+     * or for basic debugging
+     *
+     * @return int
+     */
+    public function actionModelRules($asJson = false)
+    {
+        /** @var IndexManager $indexManager */
+        $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
+
+        // find all the models
+        $models = $indexManager->buildModelClassList();
+
+        $json = [];
+        foreach ($models as $className) {
+            /** @var Model $model */
+            $model = \Yii::createObject($className);
+            $rules = $model->rules();
+
+            if (!$asJson) {
+
+                $this->stdout('Model: ' . $className . "\n", Console::FG_GREEN);
+                $this->stdout(print_r($rules, true));
+                $this->stdout("------\n\n");
+            } else {
+                $json[] = ['model' => $className,
+                    'rules' => $rules];
+            }
+        }
+
+        if ($asJson) {
+            $this->stdout(json_encode($json, JSON_PRETTY_PRINT));
         }
 
         return ExitCode::OK;
