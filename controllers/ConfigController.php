@@ -30,13 +30,13 @@ class ConfigController extends BaseController
             ],
             'admin' => [
                 'create' => [
-                    'grant' => false
+                    'grant' => true
                 ],
                 'update' => [
                     'grant' => true
                 ],
                 'delete' => [
-                    'grant' => false
+                    'grant' => true
                 ]
             ]
         ]);
