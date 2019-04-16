@@ -4,6 +4,7 @@ namespace mozzler\base\events;
 
 use Yii;
 use yii\base\Event;
+use yii\web\Response;
 
 class RequestEvent
 {
@@ -13,28 +14,48 @@ class RequestEvent
      * @throws \yii\web\NotFoundHttpException
      *
      * Expected to be called in the web.php $config = [
-     * 'on beforeRequest' => ['mozzler\base\events\RequestEvent', 'verifyRequestModes'],
+     * 'on beforeAction' => ['\mozzler\base\events\RequestEvent', 'handleDeniedModes'],
      * ...
      * ]
+     *
+     * You then set the params.php to include something like:
+     * 'deniedModes' => ['api'],
+     *
+     * The two modes are 'api' or 'web'
+     * The main use of this is so that you can have servers that just return API or just process Web requests.
+     * If you deny both then you'd better like using the command line
      */
-    public function verifyRequestModes($event)
+    public function handleDeniedModes($event)
     {
-        if (!isset(\Yii::$app->params['requestModes'])) {
-            Yii::error("No Yii params['requestModes'] set, try adding ['web', 'api']");
-            throw new \yii\web\NotFoundHttpException("You are not able to access this site");
+        if (!isset(\Yii::$app->params['deniedModes'])) {
+            Yii::debug("No Yii params['deniedModes'] set, not rejecting the request");
+            return $event;
         }
-        $requestModes = \Yii::$app->params['requestModes'];
+        $deniedModes = \Yii::$app->params['deniedModes'];
         $isApi = \mozzler\base\components\Tools::isApi();
-        if ($isApi && !in_array('api', $requestModes)) {
-            Yii::error("No api in the Yii params['requestModes'], rejecting the request");
-            // @todo: Get this to return a JSON error response
-            throw new \yii\web\NotFoundHttpException("You are not able to access the API");
+        if ($isApi && in_array('api', $deniedModes)) {
+            Yii::error("Api in the Yii params['deniedModes'], rejecting the request");
+            Yii::$app->response->statusCode = 404;
+
+            // -- Setting a nicer JSON response
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            Yii::$app->response->content = json_encode([
+                "name" => "API not available",
+                'message' => 'Access Denied',
+                "code" => 404,
+                "type" => "yii\\web\\NotFoundHttpException"
+            ]);
+            $event->isValid = false;
+            return $event;
         }
-        if (!$isApi && !in_array('web', $requestModes)) {
-            Yii::error("No web in the Yii params['requestModes'], rejecting the request");
-            throw new \yii\web\NotFoundHttpException("You are not able to access this website");
+        if (!$isApi && in_array('web', $deniedModes)) {
+            Yii::error("Web in the Yii params['deniedModes'], rejecting the request");
+            Yii::$app->response->statusCode = 404;
+            $event->isValid = false;
+            return $event;
         }
-        Yii::info("Request modes check - isApi: " . json_encode($isApi) . " and the requestModes is " . json_encode($requestModes) . " so allowing the request");
+        Yii::error("Denied Request modes check - isApi: " . json_encode($isApi) . " and the denied requestModes is " . json_encode($deniedModes) . " but it's not either, so allowing the request");
+        return $event;
     }
 
 }
