@@ -51,7 +51,12 @@ class Task extends BaseModel
         return ArrayHelper::merge(parent::modelFields(), [
             'scriptClass' => [
                 'label' => 'Script Class',
-                'type' => 'Text'
+                'type' => 'Text',
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\PreField',
+                    ]
+                ]
             ],
             'status' => [
                 'label' => 'Status',
@@ -105,7 +110,8 @@ class Task extends BaseModel
         return $scenarios;
     }
 
-    public static function rbac() {
+    public static function rbac()
+    {
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
                 'find' => [
