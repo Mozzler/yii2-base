@@ -31,12 +31,12 @@ class LinkField extends BaseField
             "tag" => "a",
             "options" => [
                 "class" => "",
-                "href" => "{{ widget.model[widget.attribute] }}",
+                "href" => '{{ widget.model[widget.attribute] }}',
                 "title" => '',
-                "target" => '_blank',
             ],
             "model" => null,
-            "attribute" => null
+            "attribute" => null,
+            'value' => '{{ widget.model[widget.attribute] }}'
         ]);
     }
 
