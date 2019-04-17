@@ -65,9 +65,13 @@ class IndexModel extends BaseWidget {
 			$config = $this->applyRbacToActionColumn($config);
 		}
 		
-		$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
+		$finalConfig = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
+
+		// exclude gridViewConfig['columns'] from the templatify as they should be 
+		// processed separately by each widget
+		$finalConfig['gridViewConfig']['columns'] = $config['gridViewConfig']['columns'];
 		
-		return $config;
+		return $finalConfig;
     }
     
     protected function buildColumns($model) {
@@ -83,7 +87,7 @@ class IndexModel extends BaseWidget {
 				continue;
 			}
 			
-			$customFieldConfig = [];
+			$customFieldConfig = isset($field->widgets['grid']) ? $field->widgets['grid'] : [];
 			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
 		}
 		
