@@ -33,7 +33,6 @@ class LinkField extends BaseField
                 "class" => "",
                 "href" => '{{ widget.model[widget.attribute] }}',
                 "title" => '',
-                "target" => '_blank',
             ],
             "model" => null,
             "attribute" => null,
