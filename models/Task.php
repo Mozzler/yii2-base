@@ -54,7 +54,7 @@ class Task extends BaseModel
                 'type' => 'Text',
                 'widgets' => [
                     'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\PreField',
+                        'class' => 'mozzler\base\widgets\model\view\CodeField',
                     ]
                 ]
             ],
