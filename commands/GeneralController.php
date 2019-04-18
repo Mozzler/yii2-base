@@ -75,7 +75,7 @@ class GeneralController extends BaseController
             $emailSubject = "Test Email";
             $content = <<<EOC
 This is a test email to {$emailAddress}
-Sent on {{ "now" |date("m/d/Y\") }}
+Sent on $currentTimestamp
 EOC;
 
             $this->stdout("Email Subject: ");
