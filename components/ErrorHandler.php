@@ -6,6 +6,7 @@ use yii\base\Exception;
 use yii\base\ErrorException;
 use yii\base\UserException;
 use yii\web\HttpException;
+use mozzler\base\error\PassthroughApiException;
 
 /**
  * A custom error handler that supports providing detailed error messages
@@ -20,16 +21,16 @@ class ErrorHandler extends \yii\web\ErrorHandler
      * Override the default conversion of exceptions to arrays
      * to include detailed information if an API, but exclude sensitive
      * information (file, line, stack-trace) if not debug mode
+     *
+     * If it's a PassthroughApiException then the message is JSON encoded and should be returned decoded
      */
     protected function convertExceptionToArray($exception)
     {
         if (\Yii::$app->t::isApi() && $this->detailedApiMessages) {
             $array = [
                 'name' => ($exception instanceof Exception || $exception instanceof ErrorException) ? $exception->getName() : 'Exception',
-                'message' => $exception->getMessage(),
+                'message' => $exception instanceof PassthroughApiException ? json_decode($exception->getMessage()) : $exception->getMessage(),
                 'code' => $exception->getCode(),
-//                'line' => $exception->getLine(), // Show when debugging issues with errors caused without YII_DEBUG and in throwing exceptions
-//                'file' => $exception->getFile(),
             ];
             if ($exception instanceof HttpException) {
                 if (!isset($array['code'])) {
@@ -38,6 +39,7 @@ class ErrorHandler extends \yii\web\ErrorHandler
             }
 
             $array['type'] = get_class($exception);
+
             if (!$exception instanceof UserException && YII_DEBUG) {
                 $array['file'] = $exception->getFile();
                 $array['line'] = $exception->getLine();
