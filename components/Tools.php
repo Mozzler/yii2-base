@@ -9,7 +9,7 @@ use yii\helpers\ArrayHelper;
 class Tools extends Component
 {
 
-    public static $isApiRegex = '/api/';
+    public static $isApiRegex = '/api|OauthModule/';
 
     public static function app()
     {
@@ -329,9 +329,10 @@ class Tools extends Component
     {
         if (isset(\Yii::$app) && isset(\Yii::$app->controller) && isset(\Yii::$app->controller->module)) { // Ensure the controller and module exist otherwise the codeception tests barf
             $controllerClass = \Yii::$app->controller->module::className();
+            Yii::debug("isAPI says the controller class is: {$controllerClass}");
             return preg_match(static::$isApiRegex, $controllerClass) == 1;
         } else {
-            Yii::debug("Can't find the \Yii::\$app->controller->module so can't check if the request is API or not");
+            Yii::warning("Can't find the \Yii::\$app->controller->module so can't check if the request is API or not");
             return false; // NB: It's likely being run as a test or via CLI
         }
     }
