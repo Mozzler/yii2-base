@@ -39,7 +39,7 @@ class ActiveController extends BaseActiveController
 
     public function actions()
     {
-        return [
+        return ArrayHelper::merge(parent::actions(), [
             'index' => [
                 'class' => 'mozzler\base\actions\ActiveIndexAction',
                 'modelClass' => $this->modelClass
@@ -60,7 +60,7 @@ class ActiveController extends BaseActiveController
                 'class' => 'mozzler\base\actions\ActiveDeleteAction',
                 'modelClass' => $this->modelClass
             ]
-        ];
+        ]);
     }
     
     public static function rbac() {
