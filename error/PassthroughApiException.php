@@ -9,7 +9,7 @@ use yii\web\HttpException;
  * Class PassthroughApiException
  *
  * This is used by the API to return JSON encoded messages
- * which are shown by the error handler
+ * which are shown json_decoded by the mozzler\base\components\ErrorHandler
  */
 class PassthroughApiException extends HttpException
 {
