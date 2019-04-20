@@ -35,6 +35,7 @@ class PassthroughApiException extends HttpException
 
         $this->message = $response;
         $this->code = $code;
+        $this->statusCode = $code;
 
     }
 
