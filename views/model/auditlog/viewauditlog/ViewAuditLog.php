@@ -36,6 +36,8 @@ class ViewAuditLog extends BaseWidget
             'auditLogEntries' => [],
             'limit' => 100,
             'showModal' => true,
+            'format' => \Yii::$app->formatter->datetimeFormat,
+            'timeZone' => \Yii::$app->formatter->timeZone,
             'modalConfig' => [
                 // Set the modal widget config. https://www.yiiframework.com/extension/yiisoft/yii2-bootstrap/doc/api/2.0/yii-bootstrap-modal
                 'size' => Modal::SIZE_LARGE,

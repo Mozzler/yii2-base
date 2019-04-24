@@ -15,7 +15,7 @@
                         class="auditlog-action">{% if auditEntryAction.0.action == "update" %}Updated{% elseif auditEntryAction.0.action ==  "insert" %}Inserted{% elseif auditEntryAction.0.action ==  "delete" %}Deleted{% endif %}</strong>{% if auditEntryAction.0.createdUserId %}
                 by <strong
                         class="auditlog-name">{{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId", "wrapLayout": false})) | striptags }}{% endif %}</strong>
-                on <strong class="auditlog-date">{{ auditEntryAction.0.createdAt | date }}</strong></div>
+                on <strong class="auditlog-date">{{ auditEntryAction.0.createdAt | date(widget.format, widget.timeZone) }}</strong></div>
             <div class="panel-body">
 
                 <table class="table table-striped">
