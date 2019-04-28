@@ -1,4 +1,3 @@
 {% if widget.model[widget.attribute] %}
-    CURRENCY:
     <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.currencySymbol }}{{ widget.model[widget.attribute] | number_format(widget.decimalPlaces, widget.decimalSeparator, widget.thousandsSeparator) }}</{{ widget.tag }}>
 {% endif %}

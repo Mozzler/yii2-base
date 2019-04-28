@@ -7,7 +7,7 @@ class CurrencyField extends BaseField {
     public function defaultConfig()
     {
         return \yii\helpers\ArrayHelper::merge(parent::defaultConfig(), [
-            "tag" => "pre",
+            "tag" => "span",
             "currencySymbol" => "$", // @todo: Make this automatically locale specific
             "decimalPlaces" => 2, // How many decimals to show
             "decimalSeparator" => '.',
