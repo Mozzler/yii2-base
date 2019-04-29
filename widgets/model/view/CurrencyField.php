@@ -13,7 +13,6 @@ class CurrencyField extends BaseField
             "tag" => "span",
             "currencySymbol" => null, // @todo: Make this automatically locale specific
             "numberFormatterOptions" => [], // How many decimals to show example: [ \NumberFormatter::MIN_FRACTION_DIGITS => 0, \NumberFormatter::MAX_FRACTION_DIGITS => 2,
-        ],
             "numberFormatterTextOptions" => [],
             "options" => [
                 "class" => "",
