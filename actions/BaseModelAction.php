@@ -1,18 +1,20 @@
 <?php
+
 namespace mozzler\base\actions;
 
 use yii\web\NotFoundHttpException;
 
 class BaseModelAction extends BaseAction
 {
-	public $id = 'model';
-	
+    public $id = 'model';
+
     public $findModel;
-    
+
     /**
      * Return data as JSON if accept content type is set to `application/json`
      */
-    public function run() {
+    public function run()
+    {
         if ($this->controller->jsonRequested) {
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             // TODO: Test this return $this->controller->asJson($this->controller->data);
@@ -22,8 +24,8 @@ class BaseModelAction extends BaseAction
 
         return parent::run();
     }
-	
-	/**
+
+    /**
      * Returns the data model based on the primary key given.
      * If the data model is not found, a 404 HTTP exception will be raised.
      * @param string $id the ID of the model to be loaded. If the model has a composite primary key,
@@ -58,6 +60,33 @@ class BaseModelAction extends BaseAction
         } else {
             throw new NotFoundHttpException("Object not found: $id");
         }
+    }
+
+
+    /**
+     * @param null $model
+     * @return \yii\db\ActiveRecord
+     *
+     * Loads up the model and the defaults
+     * Used in the Create and Update Actions
+     */
+    public function loadModel($model = null)
+    {
+
+        if (is_null($model)) {
+            // If it's a create action
+            /* @var $model \yii\db\ActiveRecord */
+            $model = $this->controller->getModel();
+        }
+        $model->setScenario($this->scenario);
+
+        // Load default values
+        $model->loadDefaultValues();
+
+        // Populate the model with any GET data
+        $model->load(\Yii::$app->request->get(), "");
+
+        return $model;
     }
 }
 

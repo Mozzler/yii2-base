@@ -23,12 +23,9 @@ class ModelUpdateAction extends BaseModelAction
     {
 	    $id = \Yii::$app->request->get('id');
 	    $model = $this->findModel($id);
-        
-        // set scenario so we load and save the correct fields
-        $model->setScenario($this->scenario);
 
-		// load default values
-		$model->loadDefaultValues();
+        // Get the defaults for the model
+        $model = $this->loadModel($model);
 
 		// populate the model with any GET data
 		$model->load(\Yii::$app->request->post(),"");
