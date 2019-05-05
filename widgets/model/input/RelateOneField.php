@@ -98,18 +98,12 @@ class RelateOneField extends BaseField
                         'text' => 'application/json'
                     ],
                     'dataType' => 'json',
-                    'method' => 'post',
+                    'method' => 'get',
                     'data' => new JsExpression('
                         function(params) {
                             '.$filterCode.'
                             var request = {
-                                _vals:{
-                                    '.$searchAttribute.': params.term
-                                },
-                                _ops: {
-                                    '.$searchAttribute.': "~"
-                                },
-                                _cols: ["_id", "'.$searchAttribute.'"],
+                                '.$searchAttribute.': params.term
                             };
                             if (fieldFilter)
                                 request._ff = fieldFilter;

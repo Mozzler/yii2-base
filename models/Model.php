@@ -697,21 +697,26 @@ class Model extends ActiveRecord
      * Build a DataProvider that has a query filtering by the
      * data provided in $params
      */
-    public function search($params = [])
+    public function search($params = [], $scenario=self::SCENARIO_SEARCH)
     {
         // create a query from the parent model
-        $query = $this->find();
+        $model = clone $this;
+        $model->setScenario($scenario);
+        $query = $model->find();
 
         // load the parameters into this model and continue
         // if the model validates
-        if ($this->load($params)) {
+        if ($model->load($params)) {
             // iterate through the search attributes building a generic filter array
             $filterParams = ['and' => []];
             $attributeFilters = [];
-            foreach ($this->attributes() as $attribute) {
+
+            $searchAttributes = $model->attributes();
+
+            foreach ($searchAttributes as $attribute) {
                 $modelField = $this->getModelField($attribute);
-                if ($this->$attribute) {
-                    $attributeFilters[] = $modelField->generateFilter($this, $attribute);
+                if ($model->$attribute) {
+                    $attributeFilters[] = $modelField->generateFilter($model, $attribute);
                 }
             }
 
@@ -722,7 +727,7 @@ class Model extends ActiveRecord
 
                 $params = ['filter' => $filterParams];
                 $dataFilter = new ActiveDataFilter([
-                    'searchModel' => $this
+                    'searchModel' => $model
                 ]);
 
                 $filterCondition = null;
