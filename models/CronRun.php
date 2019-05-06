@@ -60,10 +60,6 @@ class CronRun extends BaseModel
                     'default' => ['value' => []]
                 ]
             ],
-            'logSize' => [
-                'label' => 'Log Size',
-                'type' => 'Text',
-            ],
             'status' => [
                 'type' => 'SingleSelect',
                 'label' => 'Status',
@@ -120,15 +116,6 @@ class CronRun extends BaseModel
                     'grant' => false
                 ]
             ]
-        ]);
-    }
-
-    public function behaviors()
-    {
-        return ArrayHelper::merge(parent::behaviors(), [
-            'SetLogSizeBehaviour' => [
-                'class' => SetLogSizeBehaviour::class,
-            ],
         ]);
     }
 

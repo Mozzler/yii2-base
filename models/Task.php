@@ -90,10 +90,6 @@ class Task extends BaseModel
                 // Used by the TaskController command
                 // You can set to 0 if you want it to run indefinitely, but doing so could cause stuck processes which could cause the server to crash so would be a VERY bad idea
             ],
-            'logSize' => [
-                'label' => 'Log Size',
-                'type' => 'Text',
-            ]
         ]);
     }
 
@@ -148,15 +144,6 @@ class Task extends BaseModel
                     'grant' => false
                 ]
             ]
-        ]);
-    }
-
-    public function behaviors()
-    {
-        return ArrayHelper::merge(parent::behaviors(), [
-            'SetLogSizeBehaviour' => [
-                'class' => SetLogSizeBehaviour::class,
-            ],
         ]);
     }
 
