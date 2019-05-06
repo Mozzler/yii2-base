@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models;
 
+use mozzler\base\models\behaviors\SetLogSizeBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
@@ -59,6 +60,10 @@ class CronRun extends BaseModel
                     'default' => ['value' => []]
                 ]
             ],
+            'logSize' => [
+                'label' => 'Log Size',
+                'type' => 'Text',
+            ],
             'status' => [
                 'type' => 'SingleSelect',
                 'label' => 'Status',
@@ -80,14 +85,15 @@ class CronRun extends BaseModel
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = ['timestamp', 'stats', 'status', 'log'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['timestamp', 'status'];
+        $scenarios[self::SCENARIO_LIST] = ['timestamp', 'status', 'logSize'];
         $scenarios[self::SCENARIO_VIEW] = ['timestamp', 'stats', 'status', 'log'];
         $scenarios[self::SCENARIO_SEARCH] = ['status'];
 
         return $scenarios;
     }
 
-    public static function rbac() {
+    public static function rbac()
+    {
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
                 'find' => [
@@ -114,6 +120,15 @@ class CronRun extends BaseModel
                     'grant' => false
                 ]
             ]
+        ]);
+    }
+
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'SetLogSizeBehaviour' => [
+                'class' => SetLogSizeBehaviour::class,
+            ],
         ]);
     }
 

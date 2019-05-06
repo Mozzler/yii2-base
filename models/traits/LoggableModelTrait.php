@@ -1,4 +1,5 @@
 <?php
+
 namespace mozzler\base\models\traits;
 
 trait LoggableModelTrait
@@ -38,7 +39,7 @@ trait LoggableModelTrait
             } else {
                 $message = json_encode($logEntry['message']); // Sometimes a boolean or something else
             }
-            
+
             if ($logEntry['type'] === "error") {
                 $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n";
             } else {
@@ -47,6 +48,12 @@ trait LoggableModelTrait
             }
         }
         return $logLines;
+    }
+
+    public function returnLogSize()
+    {
+
+        return (is_array($this->log) ? count($this->log) : 0) . ':' . number_format(strlen(json_encode($this->log)), 0);
     }
 
 }
