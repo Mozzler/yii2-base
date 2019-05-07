@@ -24,8 +24,9 @@ class JsonField extends BaseField
         $config = parent::config();
         if (!empty($config['attribute']) && !empty($config['model'])) {
             $attribute = $config['attribute'];
-            // -- Create a nice JSON output with spacing
-            $config['prettyJson'] = json_encode($config['model']->$attribute, JSON_PRETTY_PRINT);
+            // -- Create a nice JSON output with spacing and line breaks
+            $config['prettyJson'] = str_replace('\n', '
+          ', json_encode($config['model']->$attribute, JSON_PRETTY_PRINT));
             $config['options']['class'] .= " view-model-field-json--$attribute";
             $config['options']['class'] = trim($config['options']['class']);
         }

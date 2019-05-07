@@ -2,6 +2,11 @@
 
 namespace mozzler\base\models;
 
+use app\models\behaviors\QuoteCalculatedAttributesBehavior;
+use app\models\behaviors\QuoteSetCalculatorIdBehavior;
+use app\models\behaviors\QuoteSetStatusForDeliveryBehavior;
+use app\models\behaviors\QuoteSetSubscriptionCostBehavior;
+use mozzler\base\models\behaviors\SetLogSizeBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
@@ -84,9 +89,10 @@ class Task extends BaseModel
                 'type' => 'Integer',
                 // Used by the TaskController command
                 // You can set to 0 if you want it to run indefinitely, but doing so could cause stuck processes which could cause the server to crash so would be a VERY bad idea
-            ]
+            ],
         ]);
     }
+
 
     /**
      * @return array the validation rules.
@@ -103,7 +109,7 @@ class Task extends BaseModel
         $scenarios[self::SCENARIO_CREATE] = ['scriptClass', 'status', 'triggerType', 'config', 'timeoutSeconds'];
 //        $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
         $scenarios[self::SCENARIO_UPDATE] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds']; // You shouldn't really be able to edit them
-        $scenarios[self::SCENARIO_LIST] = ['scriptClass', 'status', 'triggerType', 'createdAt'];
+        $scenarios[self::SCENARIO_LIST] = ['scriptClass', 'status', 'triggerType', 'createdAt', 'logSize'];
         $scenarios[self::SCENARIO_VIEW] = ['scriptClass', 'status', 'triggerType', 'timeoutSeconds', 'createdAt', 'updatedAt', 'log'];
         $scenarios[self::SCENARIO_SEARCH] = ['scriptClass', 'status'];
 
