@@ -103,7 +103,9 @@ class RelateOneField extends BaseField
                         function(params) {
                             '.$filterCode.'
                             var request = {
-                                '.$searchAttribute.': params.term
+                                '.$relatedModel->formName().': {
+                                    '.$searchAttribute.': params.term
+                                }
                             };
                             if (fieldFilter)
                                 request._ff = fieldFilter;
