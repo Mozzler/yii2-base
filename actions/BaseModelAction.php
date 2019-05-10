@@ -88,12 +88,6 @@ class BaseModelAction extends BaseAction
 
         return $model;
     }
-
-    public function loadData($data, $model) {
-        // Override this to send custom data to the create or update actions
-        $data['model'] = $model;
-        return $data;
-    }
 }
 
 

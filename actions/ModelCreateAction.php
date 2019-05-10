@@ -3,7 +3,6 @@
 namespace mozzler\base\actions;
 
 use mozzler\base\models\Model;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 class ModelCreateAction extends BaseModelAction
@@ -48,8 +47,8 @@ class ModelCreateAction extends BaseModelAction
                 throw new \yii\web\ForbiddenHttpException('You do not have permission to perform this operation');
             }
         }
+        $this->controller->data['model'] = $model;
 
-        $this->controller->data = $this->loadData($this->controller->data, $model);
         return parent::run();
     }
 

@@ -42,7 +42,9 @@ class ModelUpdateAction extends BaseModelAction
 	            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
 	        }
         }
-        $this->controller->data = $this->loadData($this->controller->data, $model);
+        
+        $this->controller->data['model'] = $model;
+
 		return parent::run();
     }
 }
