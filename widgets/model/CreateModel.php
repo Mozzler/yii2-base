@@ -10,7 +10,7 @@ class CreateModel extends BaseWidget {
 		return [
 			'tag' => 'div',
 			'options' => [
-				'class' => 'widget-model-create'
+				'class' => 'widget-model-create row'
 			],
 			'container' => [
 				'tag' => 'div',

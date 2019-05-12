@@ -10,7 +10,7 @@ class UpdateModel extends BaseWidget {
 		return [
 			'tag' => 'div',
 			'options' => [
-				'class' => 'widget-model-update'
+				'class' => 'widget-model-update row'
 			],
 			'container' => [
 				'tag' => 'div',
