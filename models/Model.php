@@ -12,7 +12,7 @@ use mozzler\base\helpers\FieldHelper;
 use mozzler\base\helpers\ModelHelper;
 
 use yii\data\ActiveDataProvider;
-use yii\data\ActiveDataFilter;
+use mozzler\base\yii\data\ActiveDataFilter;
 use yii\helpers\UnsetArrayValue;
 
 class Model extends ActiveRecord
