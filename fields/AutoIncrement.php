@@ -5,7 +5,7 @@ class AutoIncrement extends Integer {
 	
     public $type = 'AutoIncrement';
 
-    public $operator = '=';
+    public $filterType = '=';
 	
 }
 

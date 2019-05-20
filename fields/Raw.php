@@ -11,7 +11,7 @@ namespace mozzler\base\fields;
 class Raw extends Base {
 	
 	public $type = 'Raw';
-	public $operator = "=";
+	public $filterType = "LIKE";
 	
 	public function defaultRules() {return [];}
 	
