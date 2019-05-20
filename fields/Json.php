@@ -5,6 +5,6 @@ class Json extends Base
 {
 
     public $type = 'Json';
-    public $operator = "~";
+    public $filterType = "LIKE";
 
 }

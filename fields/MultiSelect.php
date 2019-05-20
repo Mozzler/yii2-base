@@ -7,7 +7,7 @@ class MultiSelect extends Base
 {
 
     public $type = 'MultiSelect';
-    public $operator = "=";
+    public $filterType = "=";
     public $options = [];
 
     public function defaultRules()

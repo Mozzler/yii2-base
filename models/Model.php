@@ -732,16 +732,11 @@ class Model extends ActiveRecord
 
                 $filterCondition = null;
                 $dataFilter->load($params);
-                if ($dataFilter->validate()) {
-                    $filterCondition = $dataFilter->build();
+                $filterCondition = $dataFilter->build(false);
 
-                    // if we have a valid filter condition, add it to the query
-                    if ($filterCondition !== null) {
-                        $query->andWhere($filterCondition);
-                    }
-                } else {
-                    \Yii::warning('Search filter isn\'t valid: ' . print_r($dataFilter->getErrors()['filter'], true));
-                    \Yii::warning(print_r($filterParams, true));
+                // if we have a valid filter condition, add it to the query
+                if ($filterCondition !== null) {
+                    $query->andWhere($filterCondition);
                 }
             }
         }

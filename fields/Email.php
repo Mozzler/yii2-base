@@ -4,7 +4,7 @@ namespace mozzler\base\fields;
 class Email extends Base {
 	
 	public $type = 'Email';
-	public $operator = "LIKE";
+	public $filterType = "LIKE";
 	
 	public function defaultRules() {
 		return [

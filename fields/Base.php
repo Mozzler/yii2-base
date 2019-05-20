@@ -93,11 +93,10 @@ class Base extends Component {
 	}
 	
 	/**
-     * Helper method that generates a query filter based on the `$operator`
-     * property of this field
+     * Helper method that generates a query filter based
      */
 	public function generateFilter($model, $attribute) {
-    	switch ($this->operator) {
+    	switch ($this->filterType) {
         	case '=':
         	    return [$attribute => $model->$attribute];
         	    break;

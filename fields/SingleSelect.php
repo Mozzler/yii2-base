@@ -7,7 +7,7 @@ class SingleSelect extends Base
 {
 
     public $type = 'SingleSelect';
-    public $operator = "=";
+    public $filterType = "=";
     public $options = [];
 
     public function defaultRules()
