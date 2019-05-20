@@ -28,9 +28,13 @@ class TaskManager extends \yii\base\Component
     public static $gcAgeDays = 30;
 
     /**
-     * @param $taskClassName
-     * @param array $taskConfig
-     * @param bool $runNow if true then trigger the CLI TaskController command striaght away
+     * @param string $scriptClassName
+     * @param array $scriptConfig
+     * @param int $scriptTimeout
+     * @param bool $runNow if true then trigger the CLI TaskController command straight away
+     * @return Task
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\NotSupportedException
      */
     public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = false)
     {
