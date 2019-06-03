@@ -15,6 +15,17 @@ use yii\data\ActiveDataProvider;
 use mozzler\base\yii\data\ActiveDataFilter;
 use yii\helpers\UnsetArrayValue;
 
+/**
+ * Class Model
+ * @package mozzler\base\models
+ *
+ * @property string $_id
+ * @property string $name
+ * @property integer $createdAt
+ * @property integer $updatedAt
+ * @property \app\models\User $createdUserId
+ * @property \app\models\User $updatedUserId
+ */
 class Model extends ActiveRecord
 {
 
