@@ -2,10 +2,7 @@
 
 namespace mozzler\base\models;
 
-use app\models\behaviors\QuoteCalculatedAttributesBehavior;
-use app\models\behaviors\QuoteSetCalculatorIdBehavior;
-use app\models\behaviors\QuoteSetStatusForDeliveryBehavior;
-use app\models\behaviors\QuoteSetSubscriptionCostBehavior;
+use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
 use mozzler\base\models\behaviors\SetLogSizeBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
@@ -144,6 +141,14 @@ class Task extends BaseModel
                     'grant' => false
                 ]
             ]
+        ]);
+    }
+
+
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'garbagecollection' => GarbageCollectionBehaviour::class
         ]);
     }
 
