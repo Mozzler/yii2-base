@@ -23,10 +23,6 @@ use yii\helpers\ArrayHelper;
 class TaskManager extends \yii\base\Component
 {
 
-    public static $gcPercent = 1;
-
-    public static $gcAgeDays = 30;
-
     /**
      * @param string $scriptClassName
      * @param array $scriptConfig
@@ -138,12 +134,6 @@ class TaskManager extends \yii\base\Component
             \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
             exec($runCommand);
         }
-        self::gc();
-    }
-
-    protected static function gc()
-    {
-        // 1% of the time delete all records that are older than 30 days
     }
 
 }

@@ -35,16 +35,6 @@ use \yii\base\Component;
 class CronManager extends Component
 {
 
-    /**
-     * @var int the probability (parts per million) that garbage collection (GC) should be performed
-     * when running the cron.
-     * Defaults to 10000, meaning 1% chance.
-     * This number should be between 0 and 1000000. A value 0 meaning no GC will be performed at all.
-     */
-    public static $gcProbability = 10000;
-
-    public static $gcAgeDays = 30;
-
     public $entries = [];
 
     /**
@@ -127,11 +117,6 @@ class CronManager extends Component
             }
         }
 
-        // TODO: look at gc into a Trait
-
-        $gcRan = self::gc();
-        $stats['Garbage Collection Ran'] = json_encode($gcRan);
-
         $cronRun->stats = $stats;
         $cronRun->status = 'complete';
         if (!$cronRun->save()) {
@@ -140,31 +125,6 @@ class CronManager extends Component
         }
 
         return $stats;
-    }
-
-    /**
-     * Garbage Collection
-     *
-     * @param bool $force
-     * @return bool
-     * @throws \yii\base\InvalidConfigException
-     *
-     * Deletes all Task records that are older than self::$gcAgeDays
-     */
-    public static function gc($force = false)
-    {
-        if ($force || mt_rand(0, 1000000) < self::$gcProbability) {
-            // 1% of the time delete all Task records that are older than 30 days
-
-            /** @var Task $taskModel */
-            $taskModel = \Yii::createObject(Task::class);
-            $unixTimeOfGC = time() - (self::$gcAgeDays * 86400);
-            \Yii::$app->rbac->ignoreCollection(Task::collectionName()); // Get around RBAC issues
-            $taskModel->deleteAll(['<', 'createdAt', $unixTimeOfGC]);
-            \Yii::$app->rbac->dontIgnoreCollection(Task::collectionName());
-            return true;
-        }
-        return false;
     }
 
     /**
