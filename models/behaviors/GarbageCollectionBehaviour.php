@@ -62,7 +62,6 @@ class GarbageCollectionBehaviour extends Behavior
             \Yii::$app->rbac->dontIgnoreCollection($model::collectionName());
             return true;
         }
-        \Yii::debug("NOT Triggering the garbage collection run. Removing " . self::class . " items older than {$this->gcAgeDays} days ago");
         return false;
     }
 }
