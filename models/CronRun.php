@@ -122,12 +122,10 @@ class CronRun extends BaseModel
         ]);
     }
 
-
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
             'garbagecollection' => GarbageCollectionBehaviour::class
         ]);
     }
-
 }
