@@ -2,8 +2,11 @@
 
 namespace mozzler\base\models;
 
-use mozzler\base\models\behaviors\SetLogSizeBehaviour;
+use mozzler\base\models\behaviors\AutoIncrementBehavior;
+use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
 use mozzler\base\models\Model as BaseModel;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -119,4 +122,10 @@ class CronRun extends BaseModel
         ]);
     }
 
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'garbagecollection' => GarbageCollectionBehaviour::class
+        ]);
+    }
 }
