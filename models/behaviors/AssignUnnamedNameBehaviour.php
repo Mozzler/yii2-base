@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models\behaviours;
+namespace mozzler\base\models\behaviors;
 
 use MongoDB\BSON\ObjectId;
 use mozzler\base\components\Tools;
