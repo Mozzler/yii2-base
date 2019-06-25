@@ -75,7 +75,7 @@ class ModelViewAction extends BaseModelAction
     public function run()
     {
 		$id = \Yii::$app->request->get('id');
-	    $model = $this->findModel($id);
+		$model = $this->findModel($id);
         
         if ($model) {
 	        $model->setScenario($this->scenario);

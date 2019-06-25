@@ -708,12 +708,16 @@ class Model extends ActiveRecord
      * Build a DataProvider that has a query filtering by the
      * data provided in $params
      */
-    public function search($params = [], $scenario=self::SCENARIO_DEFAULT)
+    public function search($params=[], $scenario=self::SCENARIO_DEFAULT, $queryFilter=[])
     {
         // create a query from the parent model
         $model = clone $this;
         $model->setScenario($scenario);
         $query = $model->find();
+
+        if ($queryFilter && is_array($queryFilter)) {
+            $query->andWhere($queryFilter);
+        }
 
         // load the parameters into this model and continue
         // if the model validates

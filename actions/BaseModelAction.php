@@ -46,14 +46,30 @@ class BaseModelAction extends BaseAction
         $emptyModel = \Yii::createObject($modelClass);
         $modelClass = $emptyModel::className();
         $keys = $modelClass::primaryKey();
+
+        $queryFilter = [];
+
         if (count($keys) > 1) {
             $values = explode(',', $id);
             if (count($keys) === count($values)) {
-                $model = $modelClass::findOne(array_combine($keys, $values));
+                $queryFilter = array_combine($keys, $values);
             }
         } elseif ($id !== null) {
-            $model = $modelClass::findOne($id);
+            $queryFilter = [
+                '_id' => $id
+            ];
         }
+
+        $query = $modelClass::find();
+        $query->andWhere($queryFilter);
+
+        // Apply RBAC filter to the find model query
+        $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
+        if ($rbacFilter && is_array($rbacFilter)) {
+            $query->andWhere($rbacFilter);
+        }
+
+        $model = $query->one();
 
         if (isset($model)) {
             return $model;

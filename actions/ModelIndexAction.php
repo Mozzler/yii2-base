@@ -28,7 +28,8 @@ class ModelIndexAction extends BaseModelAction
         $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
         
-        $dataProvider = $model->search(\Yii::$app->request->get());
+        $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
+        $dataProvider = $model->search(\Yii::$app->request->get(), null, $rbacFilter ? $rbacFilter : null);
 
         $this->controller->templateData['dataProvider'] = $dataProvider;
 		$this->controller->templateData['model'] = $model;
