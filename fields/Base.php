@@ -29,7 +29,7 @@ class Base extends Component {
 	//public $filter;
 	//public $help;
 	//public $multiple;
-	//public $readOnly;
+	public $readOnly = false;
 	
 	public function init() {
 		parent::init();
