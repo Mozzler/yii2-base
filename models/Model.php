@@ -51,6 +51,7 @@ class Model extends ActiveRecord
     const SCENARIO_UPDATE_API = 'update-api';
     const SCENARIO_LIST_API = 'list-api';
     const SCENARIO_VIEW_API = 'view-api';
+    const SCENARIO_SEARCH_API = 'search-api';
 
     public function init()
     {
@@ -706,11 +707,12 @@ class Model extends ActiveRecord
 
     /**
      * Build a DataProvider that has a query filtering by the
-     * data provided in $params
+     * data provided in $params (supplied by a form, so is keyed by
+     * $form->formName)
      */
-    public function search($params=[], $scenario=self::SCENARIO_DEFAULT, $queryFilter=[])
+    public function search($params=[], $scenario=self::SCENARIO_DEFAULT, $queryFilter=[], $dataProviderConfig=[])
     {
-        // create a query from the parent model
+        // Create a query from the parent model
         $model = clone $this;
         $model->setScenario($scenario);
         $query = $model->find();
@@ -719,46 +721,46 @@ class Model extends ActiveRecord
             $query->andWhere($queryFilter);
         }
 
-        // load the parameters into this model and continue
-        // if the model validates
-        if ($model->load($params)) {    
-            // iterate through the search attributes building a generic filter array
-            $filterParams = ['and' => []];
-            $attributeFilters = [];
+        // Load any form parameters into this model
+        $model->load($params);
 
-            $searchAttributes = $model->attributes();
+        // Iterate through the search attributes building a generic filter array
+        $filterParams = ['and' => []];
+        $attributeFilters = [];
 
-            foreach ($searchAttributes as $attribute) {
-                $modelField = $this->getModelField($attribute);
-                if ($model->$attribute) {
-                    $attributeFilters[] = $modelField->generateFilter($model, $attribute);
-                }
-            }
+        $searchAttributes = $model->attributes();
 
-            // if we have filters to apply, build a filter condition that can
-            // be added to the query
-            if (sizeof($attributeFilters) > 0) {
-                $filterParams['and'] = $attributeFilters;
-
-                $params = ['filter' => $filterParams];
-                $dataFilter = new ActiveDataFilter([
-                    'searchModel' => $model
-                ]);
-
-                $filterCondition = null;
-                $dataFilter->load($params);
-                $filterCondition = $dataFilter->build(false);
-
-                // if we have a valid filter condition, add it to the query
-                if ($filterCondition !== null) {
-                    $query->andWhere($filterCondition);
-                }
+        foreach ($searchAttributes as $attribute) {
+            $modelField = $this->getModelField($attribute);
+            if ($model->$attribute) {
+                $attributeFilters[] = $modelField->generateFilter($model, $attribute);
             }
         }
 
-        return new ActiveDataProvider([
+        // If we have filters to apply, build a filter condition that can
+        // be added to the query
+        if (sizeof($attributeFilters) > 0) {
+            $filterParams['and'] = $attributeFilters;
+
+            $params = ['filter' => $filterParams];
+            $dataFilter = new ActiveDataFilter([
+                'searchModel' => $model
+            ]);
+
+            $filterCondition = null;
+            $dataFilter->load($params);
+            $filterCondition = $dataFilter->build(false);
+
+            // if we have a valid filter condition, add it to the query
+            if ($filterCondition !== null) {
+                $query->andWhere($filterCondition);
+            }
+        }
+
+        // Return an ActiveDataProvider merging any default data provider config
+        return new ActiveDataProvider(ArrayHelper::merge($dataProviderConfig, [
             'query' => $query,
-        ]);
+        ]));
     }
 
     /**

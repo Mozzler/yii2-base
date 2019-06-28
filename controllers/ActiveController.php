@@ -142,4 +142,8 @@ class ActiveController extends BaseActiveController
             ]
         ]);
     }
+
+    public function getModel() {
+		return \Yii::createObject($this->modelClass);
+	}
 }

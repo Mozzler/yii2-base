@@ -11,6 +11,7 @@ class ActiveIndexAction extends \yii\rest\IndexAction
 
     public $scenario = [Model::SCENARIO_LIST_API, Model::SCENARIO_LIST];
     public $resultScenario = [Model::SCENARIO_LIST_API, Model::SCENARIO_LIST];
+    public $searchScenario = [Model::SCENARIO_SEARCH_API, Model::SCENARIO_SEARCH];
 
     public $pageSizeMaxLimit = 500;
 
@@ -52,9 +53,14 @@ class ActiveIndexAction extends \yii\rest\IndexAction
             $query->andWhere($filter);
         }
 
-        return Yii::createObject([
-            'class' => ActiveDataProvider::className(),
-            'query' => $query,
+        // Load any request params into the model
+        $model = $this->controller->getModel();
+        $model->setScenario($this->scenario);
+        $model->load($requestParams,'');
+
+        // Specify default data provider config that adheres to max page
+        // size limit and applies any sorting in requestParams
+        $dataProviderConfig = [
             'pagination' => [
                 'pageSizeLimit' => [1, $this->pageSizeMaxLimit],
                 'params' => $requestParams,
@@ -62,7 +68,13 @@ class ActiveIndexAction extends \yii\rest\IndexAction
             'sort' => [
                 'params' => $requestParams,
             ],
-        ]);
+        ];
+
+        // Fetch an RBAC filter to apply based on this user's permissions
+        $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
+
+        // Return data provider built from model search function
+        return $model->search(null, $this->searchScenario, $rbacFilter ? $rbacFilter : null, $dataProviderConfig);
     }
 
 }
