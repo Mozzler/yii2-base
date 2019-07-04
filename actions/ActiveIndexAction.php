@@ -67,6 +67,7 @@ class ActiveIndexAction extends \yii\rest\IndexAction
             ],
             'sort' => [
                 'params' => $requestParams,
+                'attributes' => $model->activeAttributes()
             ],
         ];
 
