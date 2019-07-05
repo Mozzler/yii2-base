@@ -710,8 +710,12 @@ class Model extends ActiveRecord
      * data provided in $params (supplied by a form, so is keyed by
      * $form->formName)
      */
-    public function search($params=[], $scenario=self::SCENARIO_DEFAULT, $queryFilter=[], $dataProviderConfig=[])
+    public function search($params=[], $scenario=null, $queryFilter=[], $dataProviderConfig=[])
     {
+        if (!$scenario) {
+            $scenario = self::SCENARIO_DEFAULT;
+        }
+
         // Create a query from the parent model
         $model = clone $this;
         $model->setScenario($scenario);
