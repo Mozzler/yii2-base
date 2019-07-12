@@ -27,6 +27,7 @@ class ApiMetadataController extends ApiController {
         $modelClassList = $indexManager->buildModelClassList(['@app/models/', '@mozzler/base/models/', '@mozzler/auth/models/']);
 
         $result = [
+            'userId' => \Yii::$app->user->getIdentity()->id,
             'models' => []
         ];
 
