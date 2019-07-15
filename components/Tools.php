@@ -89,19 +89,23 @@ class Tools extends Component
     /**
      * Create an empty model.
      *
-     * @param string $className Class name of the model to create (eg: `mozzler\auth\user`).
-     * @param array $data Default data to populate the model
-     * @return    \mozzler\base\models\Model    Returns a new model
+     * @param string $className             Class name of the model to create (eg: `mozzler\auth\user`).
+     * @param array $data                   Default data to populate the model
+     * @return \mozzler\base\models\Model   Returns a new model
      * @throws \yii\base\InvalidConfigException
      */
     public static function createModel($className, $data = [])
     {
+        /** @var \mozzler\base\models\Model $model */
         $model = Yii::createObject(self::getClassName($className));
 
-        if ($data)
+        if ($data) {
             $model->load($data, "");
+        }
+
 
         $model->scenario = "create";
+        $model->loadDefaultValues();
 
         return $model;
     }
