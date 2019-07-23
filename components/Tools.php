@@ -116,7 +116,7 @@ class Tools extends Component
     public static function getModel($className, $filter = [], $checkPermissions = true)
     {
         $model = static::createModel($className);
-        if (is_string($filter)) {
+        if (!is_array($filter)) {
             $filter = ['_id' => self::ensureId($filter)];
         }
         return $model->findOne($filter, $checkPermissions);
