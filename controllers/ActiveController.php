@@ -59,6 +59,10 @@ class ActiveController extends BaseActiveController
             'delete' => [
                 'class' => 'mozzler\base\actions\ActiveDeleteAction',
                 'modelClass' => $this->modelClass
+            ],
+            'deleteMany' => [
+                'class' => 'mozzler\base\actions\ActiveDeleteManyAction',
+                'modelClass' => $this->modelClass
             ]
         ]);
     }
@@ -80,7 +84,10 @@ class ActiveController extends BaseActiveController
 		        ],
 		        'delete' => [
 		            'grant' => false
-		        ]
+                ],
+                'deleteMany' => [
+                    'grant' => false
+                ]
             ],
             'admin' => [
 				'create' => [
@@ -97,7 +104,10 @@ class ActiveController extends BaseActiveController
 		        ],
 		        'delete' => [
 		            'grant' => true
-		        ]
+		        ],
+                'deleteMany' => [
+                    'grant' => true
+                ]
             ],
 	        'registered' => [
 				'create' => [
@@ -114,7 +124,10 @@ class ActiveController extends BaseActiveController
 		        ],
 		        'delete' => [
 		            'grant' => false
-		        ]
+		        ],
+                'deleteMany' => [
+                    'grant' => false
+                ]
 	        ]
 	    ];
 	}
