@@ -1,6 +1,7 @@
 <?php
 namespace mozzler\base\controllers;
 
+use yii\base\InvalidConfigException;
 use yii\rest\ActiveController as BaseActiveController;
 
 use mozzler\base\models\Model;
