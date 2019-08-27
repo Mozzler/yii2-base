@@ -1,6 +1,6 @@
 <?php
 
-namespace mozzler\base;
+namespace mozzler\base\base;
 
 use yii\base\Security as SecurityComponent;
 
@@ -15,7 +15,7 @@ use yii\base\Security as SecurityComponent;
  * 'container' => [
  *  'definitions' => [
  *   'yii\base\Security' => [
- *    'class' => 'mozzler\base\Security'
+ *    'class' => 'mozzler\base\base\Security'
  * ]]]
  *
  * Usage:
