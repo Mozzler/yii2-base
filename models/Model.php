@@ -431,9 +431,9 @@ class Model extends ActiveRecord
      *
      * Defaults to returning a relative URL.
      *
-     * @param    string $action Page action to obtain URL from (eg: view, list or update)
-     * @param    array $params Array of additional GET parameters to append to the URL
-     * @param    boolean $absolute Whether to return an absolute path
+     * @param string $action Page action to obtain URL from (eg: view, list or update)
+     * @param array $params Array of additional GET parameters to append to the URL
+     * @param boolean $absolute Whether to return an absolute path
      * @return    string    URL for the requested action on this model
      */
     public function getUrl($action = 'view', $params = [], $absolute = false)
@@ -493,13 +493,13 @@ class Model extends ActiveRecord
     /**
      * Get related models
      *
-     * @param    string $attribute Related field attribute to get (excluding `_id`)
-     * @param    array $filter MongoDB filter to apply to the query
-     * @param    int $limit Maximum number of results to return
-     * @param    int $offset Offset position for results
-     * @param    array $orderBy The columns (and the directions) to be ordered by. (eg `{_id: r.getConstant("db.SORT_ASC)}`)
-     * @param	array	$fields        Array of fields to return. Returns all if empty array supplied (default).
-     * @param    boolean $checkPermissions Whether to check permissions based on the logged in user when running the query
+     * @param string $attribute Related field attribute to get (excluding `_id`)
+     * @param array $filter MongoDB filter to apply to the query
+     * @param int $limit Maximum number of results to return
+     * @param int $offset Offset position for results
+     * @param array $orderBy The columns (and the directions) to be ordered by. (eg `{_id: r.getConstant("db.SORT_ASC)}`)
+     * @param    array    $fields        Array of fields to return. Returns all if empty array supplied (default).
+     * @param boolean $checkPermissions Whether to check permissions based on the logged in user when running the query
      * @return    array    Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
      */
     public function getRelated($attribute, $filter = [], $limit = null, $offset = null, $orderBy = null, $fields = null, $checkPermissions = null)
@@ -562,9 +562,9 @@ class Model extends ActiveRecord
     }
 
     /**
-     * @todo Can this be protected?
-     * @see getRelated()
      * @return    array    Returns an array of related models. If none found, returns an empty array. If no matching related field found, returns `false`.
+     * @see getRelated()
+     * @todo Can this be protected?
      */
     public function getRelatedMany($modelClass, $fieldFrom, $fieldTo, $filter = [], $limit = 20, $offset = null, $orderBy = [], $fields = [], $checkPermissions = true)
     {
@@ -640,8 +640,8 @@ class Model extends ActiveRecord
     /**
      * Add support for permission checks
      *
+     * @param boolean $checkPermissions Whether to check permissions based on the current logged in user.
      * @see \yii\base\Model::beforeSave()
-     * @param    boolean $checkPermissions Whether to check permissions based on the current logged in user.
      */
     public static function find($checkPermissions = true, $applyDefaultFilter = true)
     {
@@ -659,11 +659,11 @@ class Model extends ActiveRecord
     /**
      * Returns all the found results, instead of the query itself
      *
-     * @see \yii\base\Model::beforeSave()
-     * @param    array $condition The filtering to do
-     * @param    boolean $checkPermissions Whether to check permissions based on the current logged in user.
-     * @param    boolean $applyDefaultFilter If the default filter should apply (RBAC)
+     * @param array $condition The filtering to do
+     * @param boolean $checkPermissions Whether to check permissions based on the current logged in user.
+     * @param boolean $applyDefaultFilter If the default filter should apply (RBAC)
      * @return \mozzler\base\models\Model[] Returns an array containing the requested objects
+     * @see \yii\base\Model::beforeSave()
      */
     public static function findAll($condition, $checkPermissions = true, $applyDefaultFilter = true)
     {
@@ -673,8 +673,8 @@ class Model extends ActiveRecord
     /**
      * Add support for permission checks
      *
+     * @param boolean $checkPermissions Whether to check permissions based on the current logged in user.
      * @see \yii\base\Model::beforeSave()
-     * @param    boolean $checkPermissions Whether to check permissions based on the current logged in user.
      */
     public static function findOne($condition, $checkPermissions = true, $applyDefaultFilter = true)
     {
@@ -684,9 +684,9 @@ class Model extends ActiveRecord
     /**
      * Add support for permission checks
      *
-     * @ignore
+     * @param boolean $checkPermissions Whether to check permissions based on the current logged in user.
      * @see \yii\base\Model::beforeSave()
-     * @param    boolean $checkPermissions Whether to check permissions based on the current logged in user.
+     * @ignore
      */
     protected static function findByCondition($condition, $checkPermissions = true, $applyDefaultFilter = true)
     {
@@ -710,7 +710,7 @@ class Model extends ActiveRecord
      * data provided in $params (supplied by a form, so is keyed by
      * $form->formName)
      */
-    public function search($params=[], $scenario=null, $queryFilter=[], $dataProviderConfig=[])
+    public function search($params = [], $scenario = null, $queryFilter = [], $dataProviderConfig = [])
     {
         if (!$scenario) {
             $scenario = self::SCENARIO_DEFAULT;
@@ -773,6 +773,14 @@ class Model extends ActiveRecord
     public function setScenario($scenario)
     {
         parent::setScenario(ModelHelper::getModelScenario($this, $scenario));
+    }
+
+
+    public function toScenarioArray(array $fields = [], array $expand = [], $recursive = true)
+    {
+        // NB: This assumes that the set scenario is a valid one that's been defined
+        $fields = ArrayHelper::merge($this->scenarios()[$this->getScenario()], $fields); // Add the current scenario to the fields being requested
+        return $this->toArray($fields, $expand, $recursive);
     }
 
     public function save($runValidation = true, $attributeNames = null, $checkPermissions = true)
