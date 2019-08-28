@@ -280,7 +280,6 @@ class Tools extends Component
         $config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], $config);
 
         if (isset($config['from'])) {
-            \Yii::trace(print_r($config['from'], true));
             $message->setFrom($config['from']);
         }
 
