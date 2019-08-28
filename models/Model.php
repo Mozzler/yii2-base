@@ -776,10 +776,25 @@ class Model extends ActiveRecord
     }
 
 
+    /**
+     * To Scenario Array
+     *
+     * @param array $fields
+     * @param array $expand
+     * @param bool $recursive
+     * @return mixed
+     *
+     * Unlike the toArray() method, this automatically adds the fields defined in the scenario.
+     * This assumes that the set scenario is a valid one that's been defined.
+     *
+     * Example usage:
+     *  $user->setScenario(User::SCENARIO_AUTHENTICATE);
+     *  return $user->toScenarioArray();
+     */
     public function toScenarioArray(array $fields = [], array $expand = [], $recursive = true)
     {
-        // NB: This assumes that the set scenario is a valid one that's been defined
-        $fields = ArrayHelper::merge($this->scenarios()[$this->getScenario()], $fields); // Add the current scenario to the fields being requested
+        // Add the current scenario to the fields being requested
+        $fields = ArrayHelper::merge($this->scenarios()[$this->getScenario()], $fields);
         return $this->toArray($fields, $expand, $recursive);
     }
 
