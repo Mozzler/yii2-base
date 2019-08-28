@@ -8,8 +8,6 @@ use yii\web\ServerErrorHttpException;
 
 class ActiveCreateAction extends \yii\rest\CreateAction
 {
-	
-    public $scenario = [Model::SCENARIO_CREATE_API, Model::SCENARIO_CREATE];
 
     public $resultScenario = [Model::SCENARIO_VIEW_API, Model::SCENARIO_VIEW];
 	

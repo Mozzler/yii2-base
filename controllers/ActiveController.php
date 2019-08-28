@@ -51,11 +51,14 @@ class ActiveController extends BaseActiveController
             ],
             'create' => [
                 'class' => 'mozzler\base\actions\ActiveCreateAction',
-                'modelClass' => $this->modelClass
+                'modelClass' => $this->modelClass,
+                'scenario' => [Model::SCENARIO_CREATE_API, Model::SCENARIO_CREATE]
             ],
             'update' => [
                 'class' => 'mozzler\base\actions\ActiveUpdateAction',
-                'modelClass' => $this->modelClass
+                'scenario' => 'update-api',
+                'modelClass' => $this->modelClass,
+                'scenario' => [Model::SCENARIO_UPDATE_API, Model::SCENARIO_UPDATE]
             ],
             'delete' => [
                 'class' => 'mozzler\base\actions\ActiveDeleteAction',
