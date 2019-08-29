@@ -88,7 +88,7 @@ class SystemLog extends BaseModel
             ],
             'response' => [
                 'type' => 'Json',
-                'label' => 'Request',
+                'label' => 'Response',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\PreField',
@@ -97,21 +97,16 @@ class SystemLog extends BaseModel
             ],
             'data' => [
                 'type' => 'Json',
-                'label' => 'Request',
+                'label' => 'Data',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\PreField',
                     ]
                 ]
             ],
-            'code' => [
-                'type' => 'Integer',
-                'label' => 'Code',
-                'required' => false
-            ],
-            'namespace' => [
+            'category' => [
                 'type' => 'Text',
-                'label' => 'Namespace',
+                'label' => 'Category',
                 'required' => false,
                 'widgets' => [
                     'view' => [

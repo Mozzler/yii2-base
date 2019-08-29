@@ -31,39 +31,23 @@ class SystemLogTarget extends Target
     {
         foreach ($this->messages as $messageIndex => $message) {
 
-
-//            $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
-//            $summary = $this->collectRequest();
+            list($text, $level, $category, $timestamp) = $message;
+            $level = Logger::getLevelName($level);
             /** @var SystemLog $systemLog */
             $systemLog = Tools::createModel(SystemLog::class, [
-
-                'request' => $this->collectRequest(),
-                'message' => $this->formatMessage($message)
-                'data' =>
-
+                'type' => $level,
+                'request' => $this->collectRequest(), // This can be removed if the getContextMessage() returns enough info
+                'message' => $this->formatMessage($message),
+                'data' => $this->getContextMessage(),
+                'category' => $category
             ]);
+            // @todo: Work out how to batch save multiple systemLog entries?
             $save = $systemLog->save(true, null, false);
             if (!$save) {
                 throw new LogRuntimeException('Unable to export SystemLog - ' . json_encode($systemLog->getErrors()));
             }
         }
     }
-
-//    /**
-//     * Writes log messages to syslog.
-//     * Starting from version 2.0.14, this method throws LogRuntimeException in case the log can not be exported.
-//     * @throws LogRuntimeException
-//     */
-//    public function export()
-//    {
-//        openlog($this->identity, $this->options, $this->facility);
-//        foreach ($this->messages as $message) {
-//            if (syslog($this->_syslogLevels[$message[1]], $this->formatMessage($message)) === false) {
-//                throw new LogRuntimeException('Unable to export log through system log!');
-//            }
-//        }
-//        closelog();
-//    }
 
 
     /**
@@ -95,28 +79,6 @@ class SystemLogTarget extends Target
 
         return $summary;
     }
-
-
-//
-//    /**
-//     * {@inheritdoc}
-//     */
-//    public function formatMessage($message)
-//    {
-//        list($text, $level, $category, $timestamp) = $message;
-//        $level = Logger::getLevelName($level);
-//        if (!is_string($text)) {
-//            // exceptions may not be serializable if in the call stack somewhere is a Closure
-//            if ($text instanceof \Throwable || $text instanceof \Exception) {
-//                $text = (string)$text;
-//            } else {
-//                $text = VarDumper::export($text);
-//            }
-//        }
-//
-//        $prefix = $this->getMessagePrefix($message);
-//        return "{$prefix}[$level][$category] $text";
-//    }
 
     /**
      * @return string
