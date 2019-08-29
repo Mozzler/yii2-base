@@ -67,7 +67,7 @@ class SystemLog extends BaseModel
                 'required' => true
             ],
             'message' => [
-                'type' => 'TextLarge',
+                'type' => 'Json',
                 'label' => 'Message',
                 'required' => true,
                 'widgets' => [

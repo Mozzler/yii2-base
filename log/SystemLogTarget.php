@@ -6,6 +6,7 @@ namespace mozzler\base\log;
 use mozzler\base\components\Tools;
 use mozzler\base\models\SystemLog;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\log\Logger;
 use yii\log\LogRuntimeException;
@@ -59,6 +60,16 @@ class SystemLogTarget extends Target
         }
     }
 
+    /**
+     * Generates the context information to be logged.
+     * The default implementation will dump user information, system variables, etc.
+     * @return array the context information. If empty, it means there's no context information.
+     */
+    protected function getContextMessage()
+    {
+        return ArrayHelper::filter($GLOBALS, $this->logVars);
+    }
+
 
     /**
      * Formats a log message for display as a string or as an array.
@@ -72,7 +83,6 @@ class SystemLogTarget extends Target
         $level = Logger::getLevelName($level);
 
 
-
         if (!is_string($text)) {
             // exceptions may not be serializable if in the call stack somewhere is a Closure
             if ($text instanceof \Throwable || $text instanceof \Exception) {
@@ -83,13 +93,12 @@ class SystemLogTarget extends Target
                     $text = Tools::returnExceptionAsString($text);
                 }
             } else if (is_array($text)) {
-                // Add the interesting stuff to the array
+                // Save the provided array
+            } else {
+                $text = VarDumper::export($text);
             }
-            $text = VarDumper::export($text);
         }
-
-return $text;
-
+        return $text;
     }
 
     /**
@@ -106,37 +115,38 @@ return $text;
         $response = Yii::$app->getResponse();
 
         $senderIp = $request->getUserIP(); // Most likely a proxy server
-        $userIP = self::getRealIpAddr(); // Most likely the actual user's IP
+        $userIp = self::getRealIpAddr(); // Most likely the actual user's IP
         $userId = null;
         $userName = null;
         try {
-            $user = \Yii::$app->user->getIdentity();
 
             /* @var $user \yii\web\User */
             $user = Yii::$app->has('user', true) ? Yii::$app->get('user') : null;
             if ($user && ($identity = $user->getIdentity(false))) {
                 $userId = $identity->getId();
-                $userName = $identity->name;
+                $userName = $identity->name; // This might not be defined
             }
-            /* @var $session \yii\web\Session */
-            $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
-            $sessionID = $session && $session->getIsActive() ? $session->getId() : '-';
+//            /* @var $session \yii\web\Session */
+//            $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
+//            $sessionID = $session && $session->getIsActive() ? $session->getId() : '-';
 
         } catch (\Throwable $exception) {
-            // Don't really care about this.
+            // Don't really care about this not working
             // If the app is such that there's no user defined then we don't want to break the system log capabilities
         }
+
+
         $summary = [
             'url' => $request->getUrl(),
             'ajax' => json_encode($request->getIsAjax()),
             'method' => $request->getMethod(),
             'userAgent' => $request->getUserAgent(),
             'absoluteUrl' => $request->getAbsoluteUrl(),
-            'userIP' => ($senderIp === $userIP) ? $userIP : "{$userIP}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
+            'userIp' => ($senderIp === $userIp) ? $userIp : "{$userIp}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
             'time' => isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : time(),
             'statusCode' => $response->statusCode,
-            'userId' => !empty($user) && !empty($user->getId()) ? $user->getId() : null, // The logged in user
-            'userName' => !empty($user) && !empty($user->name) ? $user->name : null, // Expecting the user to have a name set, this is just a nice to have
+            'userId' => $userId, // The logged in user
+            'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
         ];
 
         return $summary;
