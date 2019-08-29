@@ -13,6 +13,8 @@ class SystemLog extends BaseModel
 {
     protected static $collectionName = 'app.systemLog';
     public const TYPE_DEBUG = 'debug';
+    public const TYPE_TRACE = 'trace';
+    public const TYPE_PROFILE = 'profile';
     public const TYPE_INFO = 'info';
     public const TYPE_WARNING = 'warning';
     public const TYPE_ERROR = 'error';
@@ -46,6 +48,8 @@ class SystemLog extends BaseModel
                 'label' => 'Type',
                 'options' => [
                     self::TYPE_DEBUG => 'Debug',
+                    self::TYPE_TRACE => 'Trace',
+                    self::TYPE_PROFILE => 'Profile',
                     self::TYPE_INFO => 'Info',
                     self::TYPE_WARNING => 'Warning',
                     self::TYPE_ERROR => 'Error',

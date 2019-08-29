@@ -2,7 +2,6 @@
 
 
 namespace mozzler\base\log;
-use app\components\GeneralTools;
 use mozzler\base\components\Tools;
 use mozzler\base\models\SystemLog;
 use Yii;
@@ -69,24 +68,6 @@ class SystemLogTarget extends Target
         return $summary;
     }
 
-
-    /**
-     * @param $params
-     * @return array
-     */
-    public static function sanitiseParamsPassword($params)
-    {
-        if (empty($params)) {
-            return $params;
-        }
-        if (!empty($params['password'])) {
-            $params['password'] = "*****";
-        }
-        if (!empty($params['passwordHash'])) {
-            $params['passwordHash'] = "*******";
-        }
-        return $params;
-    }
 
     protected function getTrace() {
 
