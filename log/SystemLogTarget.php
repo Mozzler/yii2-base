@@ -39,7 +39,7 @@ class SystemLogTarget extends Target
                 'type' => $level,
                 'request' => $this->collectRequest(), // This can be removed if the getContextMessage() returns enough info
                 'message' => $this->formatMessage($message),
-                'data' => $this->getContextMessage(),
+                'data' => $this->getContextMessage($message),
                 'category' => $category
             ]);
             // @todo: Work out how to batch save multiple systemLog entries?
@@ -48,15 +48,6 @@ class SystemLogTarget extends Target
                 throw new LogRuntimeException('Unable to export SystemLog - ' . json_encode($systemLog->getErrors()));
             }
 
-            $prefix = $this->getMessagePrefix($message);
-            //         $this->getTime($timestamp) . " {$prefix}[$level][$category] $text"
-            //            . (empty($traces) ? '' : "\n    " . implode("\n    ", $traces));
-            //        $traces = [];
-//        if (isset($message[4])) {
-//            foreach ($message[4] as $trace) {
-//                $traces[] = "in {$trace['file']}:{$trace['line']}";
-//            }
-//        }
         }
     }
 
@@ -65,9 +56,18 @@ class SystemLogTarget extends Target
      * The default implementation will dump user information, system variables, etc.
      * @return array the context information. If empty, it means there's no context information.
      */
-    protected function getContextMessage()
+    protected function getContextMessage($message)
     {
-        return ArrayHelper::filter($GLOBALS, $this->logVars);
+        $vars = ArrayHelper::filter($GLOBALS, $this->logVars);
+
+        $traces = [];
+        if (isset($message[4])) {
+            foreach ($message[4] as $trace) {
+                $traces[] = "in {$trace['file']}:{$trace['line']}";
+            }
+        }
+        $vars['traces'] = $traces;
+        return $vars;
     }
 
 
@@ -118,6 +118,7 @@ class SystemLogTarget extends Target
         $userIp = self::getRealIpAddr(); // Most likely the actual user's IP
         $userId = null;
         $userName = null;
+        $sessionId = null;
         try {
 
             /* @var $user \yii\web\User */
@@ -126,9 +127,9 @@ class SystemLogTarget extends Target
                 $userId = $identity->getId();
                 $userName = $identity->name; // This might not be defined
             }
-//            /* @var $session \yii\web\Session */
-//            $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
-//            $sessionID = $session && $session->getIsActive() ? $session->getId() : '-';
+            /* @var $session \yii\web\Session */
+            $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
+            $sessionId = $session && $session->getIsActive() ? $session->getId() : '-';
 
         } catch (\Throwable $exception) {
             // Don't really care about this not working
@@ -147,6 +148,7 @@ class SystemLogTarget extends Target
             'statusCode' => $response->statusCode,
             'userId' => $userId, // The logged in user
             'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
+            'sessionId' => $sessionId, // Expecting the user to have a name set, this is just a nice to have
         ];
 
         return $summary;

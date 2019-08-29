@@ -12,10 +12,8 @@ use yii\helpers\ArrayHelper;
  * @property string $type
  * @property string $message
  * @property array $request
- * @property array $response
  * @property array $data
- * @property integer $code
- * @property string $namespace
+ * @property string $category
  */
 class SystemLog extends BaseModel
 {
@@ -41,6 +39,9 @@ class SystemLog extends BaseModel
         return ArrayHelper::merge(parent::modelIndexes(), [
             'createdAt' => [
                 'columns' => ['createdAt' => 1],
+            ],
+            'category' => [
+                'columns' => ['category' => 1],
             ],
             'type' => [
                 'columns' => ['type' => 1],
@@ -72,7 +73,7 @@ class SystemLog extends BaseModel
                 'required' => true,
                 'widgets' => [
                     'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\PreField',
+                        'class' => 'mozzler\base\widgets\model\view\JsonField',
                     ]
                 ]
             ],
@@ -82,16 +83,7 @@ class SystemLog extends BaseModel
                 'required' => true,
                 'widgets' => [
                     'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\PreField',
-                    ]
-                ]
-            ],
-            'response' => [
-                'type' => 'Json',
-                'label' => 'Response',
-                'widgets' => [
-                    'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\PreField',
+                        'class' => 'mozzler\base\widgets\model\view\JsonField',
                     ]
                 ]
             ],
@@ -100,7 +92,7 @@ class SystemLog extends BaseModel
                 'label' => 'Data',
                 'widgets' => [
                     'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\PreField',
+                        'class' => 'mozzler\base\widgets\model\view\JsonField',
                     ]
                 ]
             ],
@@ -117,48 +109,14 @@ class SystemLog extends BaseModel
         ]);
     }
 
-
-    /**
-     * At any level of authorisation you should be able to create a new SystemLog entry
-     */
-    public static function rbac()
-    {
-        return ArrayHelper::merge(parent::rbac(), [
-            'registered' => [
-                'insert' => [
-                    'grant' => true
-                ]
-            ],
-            'public' => [
-                'insert' => [
-                    'grant' => true
-                ]
-            ],
-            'admin' => [
-                'insert' => [
-                    'grant' => true
-                ],
-                'view' => [
-                    'grant' => true
-                ],
-                'update' => [
-                    'grant' => true
-                ],
-                'delete' => [
-                    'grant' => true
-                ],
-            ],
-        ]);
-    }
-
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'code', 'request', 'namespace'];
+        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'request', 'data', 'category'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['type', 'code', 'namespace', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['type', 'code', 'message', 'request', 'namespace', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt', '_id'];
-        $scenarios[self::SCENARIO_SEARCH] = ['type', 'code', 'namespace', 'message'];
+        $scenarios[self::SCENARIO_LIST] = ['type', 'category', 'createdAt'];
+        $scenarios[self::SCENARIO_VIEW] = ['type', 'message', 'data', 'request', 'category', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt', '_id'];
+        $scenarios[self::SCENARIO_SEARCH] = ['type', 'category'];
 
         return $scenarios;
     }
