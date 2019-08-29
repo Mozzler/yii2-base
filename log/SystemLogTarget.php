@@ -56,22 +56,30 @@ class SystemLogTarget extends Target
      * The default implementation will dump user information, system variables, etc.
      * @return array the context information. If empty, it means there's no context information.
      */
-    protected function getContextMessage($message)
+    protected function getContextMessage()
     {
-        $vars = ArrayHelper::filter($GLOBALS, $this->logVars);
-
-        $traces = [];
-        if (isset($message[4])) {
-            foreach ($message[4] as $trace) {
-                $traces[] = "in {$trace['file']}:{$trace['line']}";
+        $context = ArrayHelper::filter($GLOBALS, $this->logVars);
+        foreach ($this->maskVars as $var) {
+            if (ArrayHelper::getValue($context, $var) !== null) {
+                ArrayHelper::setValue($context, $var, '***');
             }
         }
-        $vars['traces'] = $traces;
-        return $vars;
+        return $context;
     }
 
 
     /**
+     * Format Message
+     *
+     * Note that the $message usually consists of:
+     * [
+     *   [0] => message (mixed, can be a string or some complex data, such as an exception object)
+     *   [1] => level (integer)
+     *   [2] => category (string)
+     *   [3] => timestamp (float, obtained by microtime(true))
+     *   [4] => traces (array, debug backtrace, contains the application code call stacks)
+     *   [5] => memory usage in bytes (int, obtained by memory_get_usage()), available since version 2.0.11.
+     * ]
      * Formats a log message for display as a string or as an array.
      * @param array $message the log message to be formatted.
      * The message structure follows that in [[Logger::messages]].
@@ -79,9 +87,15 @@ class SystemLogTarget extends Target
      */
     public function formatMessage($message)
     {
-        list($text, $level, $category, $timestamp) = $message;
-        $level = Logger::getLevelName($level);
+        $text = $message[0];
 
+        // -- Add in any traces if it's from an exceptions
+        $traces = [];
+        if (isset($message[4])) {
+            foreach ($message[4] as $trace) {
+                $traces[] = "in {$trace['file']}:{$trace['line']}";
+            }
+        }
 
         if (!is_string($text)) {
             // exceptions may not be serializable if in the call stack somewhere is a Closure
@@ -92,10 +106,13 @@ class SystemLogTarget extends Target
                     // If the Mozzler tools aren't defined as 't' as expected.
                     $text = Tools::returnExceptionAsString($text);
                 }
+                $text .= empty($traces) ? "" : "\n\nTraces: " . implode("\n    ", $traces);
             } else if (is_array($text)) {
-                // Save the provided array
+                // Add Traces to the provided array (using an underscore to reduce the chances of a clash)
+                $text['_traces'] = $traces;
             } else {
                 $text = VarDumper::export($text);
+                $text .= empty($traces) ? "" : "\n\nTraces: " . implode("\n    ", $traces);
             }
         }
         return $text;
