@@ -1,26 +1,27 @@
 {
-    "name": "mozzler/yii2-base",
-    "description": "mozzler core",
-    "type": "yii2-extension",
-    "authors": [
-        {
-            "name": "Chris Were",
-            "email": "chris@mozzler.com.au"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {
-        "yiisoft/yii2": "~2.0.14",
-        "kartik-v/yii2-grid": "dev-master",
-        "kartik-v/yii2-widget-select2": "dev-master",
-        "kartik-v/yii2-datecontrol": "^1.9",
-        "kartik-v/yii2-widget-datepicker": "^1.4",
-        "kartik-v/yii2-widget-datetimepicker": "^1.4",
-        "openbuildings/swiftmailer-css-inliner": "^0.5.2"
-    },
-    "autoload": {
-        "psr-4": {
-            "mozzler\\base\\": ""
-        }
+  "name": "mozzler/yii2-base",
+  "description": "mozzler core",
+  "type": "yii2-extension",
+  "authors": [
+    {
+      "name": "Chris Were",
+      "email": "chris@mozzler.com.au"
     }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "yiisoft/yii2": "~2.0.14",
+    "kartik-v/yii2-grid": "dev-master",
+    "kartik-v/yii2-widget-select2": "dev-master",
+    "kartik-v/yii2-datecontrol": "^1.9",
+    "kartik-v/yii2-widget-datepicker": "^1.4",
+    "kartik-v/yii2-widget-datetimepicker": "^1.4",
+    "openbuildings/swiftmailer-css-inliner": "^0.5.2",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "mozzler\\base\\": ""
+    }
+  }
 }

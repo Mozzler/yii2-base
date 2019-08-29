@@ -8,6 +8,14 @@ use yii\helpers\ArrayHelper;
 /**
  * Class SystemLog
  * @package mozzler\base\models
+ *
+ * @property string $type
+ * @property string $message
+ * @property array $request
+ * @property array $response
+ * @property array $data
+ * @property integer $code
+ * @property string $namespace
  */
 class SystemLog extends BaseModel
 {
