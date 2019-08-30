@@ -141,8 +141,9 @@ class SystemLogTarget extends Target
             /* @var $user \yii\web\User */
             $user = Yii::$app->has('user', true) ? Yii::$app->get('user') : null;
             if ($user && ($identity = $user->getIdentity(false))) {
+                /** @var \mozzler\auth\models\User $identity */
                 $userId = $identity->getId();
-                $userName = $identity->name; // This might not be defined
+                $userName = $identity->{$identity::$usernameField}; // This might not be defined
             }
             /* @var $session \yii\web\Session */
             $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
