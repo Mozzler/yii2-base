@@ -65,31 +65,58 @@ class SystemLog extends BaseModel
                     self::TYPE_EXCEPTION => 'Exception',
                 ],
                 'default' => self::TYPE_ERROR,
-                'required' => true
+                'required' => true,
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\CodeField',
+                    ]
+                ]
             ],
             'message' => [
-                'type' => 'Json',
+                'type' => 'TextLarge',
                 'label' => 'Message',
                 'required' => true,
+            ],
+            'endpoint' => [
+                'type' => 'Text',
+                'label' => 'Endpoint',
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\LinkField',
+                    ]
+                ]
+            ],
+            'messageData' => [
+                'type' => 'Json',
+                'label' => 'Message Data',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\JsonField',
                     ]
                 ]
             ],
-            'request' => [
+            'trace' => [
                 'type' => 'Json',
-                'label' => 'Request',
-                'required' => true,
+                'label' => 'Trace',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\JsonField',
                     ]
                 ]
             ],
-            'data' => [
+            'requestData' => [
                 'type' => 'Json',
-                'label' => 'Data',
+                'label' => 'Request Data',
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\JsonField',
+                    ]
+                ]
+            ],
+            'systemData' => [
+                'type' => 'Json',
+                'label' => 'System Data',
+                'hint' => 'The log vars data',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\JsonField',
@@ -99,7 +126,6 @@ class SystemLog extends BaseModel
             'category' => [
                 'type' => 'Text',
                 'label' => 'Category',
-                'required' => false,
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\CodeField',
@@ -112,11 +138,11 @@ class SystemLog extends BaseModel
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'request', 'data', 'category'];
+        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'endpoint', 'messageData', 'systemData', 'requestData', 'trace', 'category'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['type', 'category', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['type', 'message', 'data', 'request', 'category', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt', '_id'];
-        $scenarios[self::SCENARIO_SEARCH] = ['type', 'category'];
+        $scenarios[self::SCENARIO_LIST] = ['type', 'category', 'createdAt', 'message', 'endpoint'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'type', 'message', 'endpoint', 'messageData', 'requestData', 'systemData', 'trace', 'category', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['type', 'category', 'message', 'endpoint'];
 
         return $scenarios;
     }

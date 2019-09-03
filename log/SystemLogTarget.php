@@ -19,6 +19,8 @@ use yii\log\Target;
 class SystemLogTarget extends Target
 {
 
+    public $disableInfoCollection = true; // By default Yii outputs an 'info' message even if you are only tracking 'error', this is our attempt at stopping it
+
     /**
      * Initializes the route.
      * This method is invoked after the route is created by the route manager.
@@ -34,12 +36,18 @@ class SystemLogTarget extends Target
 
             list($text, $level, $category, $timestamp) = $message;
             $level = Logger::getLevelName($level);
+            if ($this->disableInfoCollection && 'info' === $level) {
+                return false; // Skipping the creation of info system log entries
+            }
             /** @var SystemLog $systemLog */
             $systemLog = Tools::createModel(SystemLog::class, [
                 'type' => $level,
-                'request' => $this->collectRequest(), // This can be removed if the getContextMessage() returns enough info
+                'requestData' => $this->collectRequest(),
                 'message' => $this->formatMessage($message),
-                'data' => $this->getContextMessage($message),
+                'messageData' => $this->getMessageData($message),
+                'trace' => $this->getTrace($message),
+                'systemData' => $this->getContextMessage($message),
+                'endpoint' => $this->getEndpoint(),
                 'category' => $category
             ]);
             // @todo: Work out how to batch save multiple systemLog entries?
@@ -71,6 +79,8 @@ class SystemLogTarget extends Target
     /**
      * Format Message
      *
+     * Returns the basic message string
+     *
      * Note that the $message usually consists of:
      * [
      *   [0] => message (mixed, can be a string or some complex data, such as an exception object)
@@ -83,39 +93,117 @@ class SystemLogTarget extends Target
      * Formats a log message for display as a string or as an array.
      * @param array $message the log message to be formatted.
      * The message structure follows that in [[Logger::messages]].
-     * @return string|array the message to be used
+     * @return string the message to be saved
      */
     public function formatMessage($message)
     {
         $text = $message[0];
+        if (!is_string($text)) {
+            if ($text instanceof \Throwable || $text instanceof \Exception) {
+                // Exception
+                $text = $text->getMessage();
+            } else if (is_array($text) && isset($text['message'])) {
+                // If it's an array containing 'message' return just that
+                $text = $text['message'];
+            } else {
+                // Not sure what it is, so return it all
+                $text = VarDumper::export($text);
+            }
+        }
+        return $text;
+    }
+
+    /**
+     * Format Message Data
+     *
+     * Note that the $message usually consists of:
+     * [
+     *   [0] => message (mixed, can be a string or some complex data, such as an exception object)
+     *   [1] => level (integer)
+     *   [2] => category (string)
+     *   [3] => timestamp (float, obtained by microtime(true))
+     *   [4] => traces (array, debug backtrace, contains the application code call stacks)
+     *   [5] => memory usage in bytes (int, obtained by memory_get_usage()), available since version 2.0.11.
+     * ]
+     * Formats a log message for an array (or string if needed).
+     * @param array $message the log message to be formatted.
+     * The message structure follows that in [[Logger::messages]].
+     * @return string|array the message data to be saved
+     */
+    public function getMessageData($message)
+    {
+        $messageContents = $message[0];
+
+        // -- Use the ['messageData'] key if available
+        // e.g  Yii2::error::message.messageData (if supplied) OR Yii2::error::message IF array without key messageData
+        if (is_array($messageContents) && isset($messageContents['messageData'])) {
+            $messageContents = $messageContents['messageData'];
+        }
+
+        if (is_string($messageContents)) {
+            // We are already saving the string representation to the message field
+            $messageData = null;
+        } else if ($messageContents instanceof \Throwable || $messageContents instanceof \Exception) {
+            // Exception info
+            $exception = $messageContents;
+            $messageData = [
+                'Type' => get_class($exception),
+                'Code' => $exception->getCode(),
+                'Message' => $exception->getMessage(),
+                'Line' => $exception->getLine(),
+                'File' => $exception->getFile(),
+//                'Trace' => $exception->getTraceAsString(),
+            ];
+        } else if (is_array($messageContents)) {
+            // e.g  Yii2::error::message.messageData (if supplied) OR Yii2::error::message IF array without key messageData
+            $messageData = $messageContents;
+        } else {
+            // It's possibly some weird thing, like a closure or object
+            $messageData = strip_tags(VarDumper::export($messageContents));
+        }
+        return $messageData;
+    }
+
+    public function getTrace($message)
+    {
 
         // -- Add in any traces if it's from an exceptions
         $traces = [];
         if (isset($message[4])) {
-            foreach ($message[4] as $trace) {
-                $traces[] = "in {$trace['file']}:{$trace['line']}";
+//            return VarDumper::export($message[4]); // This is for testing what the trace information contains
+
+            // Return the whole trace
+            $traces['trace'] = $message[4];
+
+            // -- Return just the trace information as well formatted lines
+//            foreach ($message[4] as $trace) {
+//                $traces['trace'][] = "in {$trace['file']}:{$trace['line']}";
+//            }
+
+        }
+
+        // -- Add in the full Exception information if available
+        $exception = $message[0];
+        if ($exception instanceof \Throwable || $exception instanceof \Exception) {
+            $traces['exception'] = self::getExceptionAsString($exception);
+            if (!empty($exception->getPrevious())) {
+                // Exception Chaining... Technically there could be more than 2 levels, but that's unlikely and not currently supported
+                // Change to a recursive function if you think it'll be useful
+                $traces['previousException'] = self::getExceptionAsString($exception->getPrevious());
             }
         }
 
-        if (!is_string($text)) {
-            // exceptions may not be serializable if in the call stack somewhere is a Closure
-            if ($text instanceof \Throwable || $text instanceof \Exception) {
-                try {
-                    $text = \Yii::$app->t->returnExceptionAsString($text);
-                } catch (\Throwable $exception) {
-                    // If the Mozzler tools aren't defined as 't' as expected.
-                    $text = Tools::returnExceptionAsString($text);
-                }
-                $text .= empty($traces) ? "" : "\n\nTraces: " . implode("\n    ", $traces);
-            } else if (is_array($text)) {
-                // Add Traces to the provided array (using an underscore to reduce the chances of a clash)
-                $text['_traces'] = $traces;
-            } else {
-                $text = VarDumper::export($text);
-                $text .= empty($traces) ? "" : "\n\nTraces: " . implode("\n    ", $traces);
-            }
+        return $traces;
+    }
+
+    public static function getExceptionAsString($exception)
+    {
+        try {
+            return \Yii::$app->t->returnExceptionAsString($exception);
+        } catch (\Throwable $exception) {
+            // If the Mozzler tools aren't defined as 't' as expected we invoke them directly
+            return Tools::returnExceptionAsString($exception);
         }
-        return $text;
     }
 
     /**
@@ -163,6 +251,7 @@ class SystemLogTarget extends Target
             'absoluteUrl' => $request->getAbsoluteUrl(),
             'userIp' => ($senderIp === $userIp) ? $userIp : "{$userIp}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
             'time' => isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : time(),
+            'processingTime' => defined('YII_BEGIN_TIME') ? number_format(microtime(true) - YII_BEGIN_TIME, 4) . 's' : null,
             'statusCode' => $response->statusCode,
             'userId' => $userId, // The logged in user
             'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
@@ -170,6 +259,20 @@ class SystemLogTarget extends Target
         ];
 
         return $summary;
+    }
+
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function getEndpoint()
+    {
+        if (Yii::$app === null) {
+            return null;
+        }
+        $request = Yii::$app->getRequest();
+        return $request->getAbsoluteUrl();
+
     }
 
     /**
