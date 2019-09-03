@@ -6,6 +6,7 @@ namespace mozzler\base\log;
 use mozzler\base\components\Tools;
 use mozzler\base\models\SystemLog;
 use Yii;
+use yii\base\Arrayable;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\log\Logger;
@@ -97,20 +98,30 @@ class SystemLogTarget extends Target
      */
     public function formatMessage($message)
     {
-        $text = $message[0];
-        if (!is_string($text)) {
-            if ($text instanceof \Throwable || $text instanceof \Exception) {
+        $messageText = $message[0];
+        $formattedMessage = $messageText;
+        if (!is_string($messageText)) {
+            if ($messageText instanceof \Throwable || $messageText instanceof \Exception) {
                 // Exception
-                $text = $text->getMessage();
-            } else if (is_array($text) && isset($text['message'])) {
-                // If it's an array containing 'message' return just that
-                $text = $text['message'];
+                $formattedMessage = $messageText->getMessage();
+            } else if (is_array($messageText)) {
+
+                if (isset($messageText['message'])) {
+                    // If it's an array containing 'message' return just that
+                    $formattedMessage = (string)$messageText['message'];
+                } else {
+                    $formattedMessage = "Array containing: " . implode(', ', array_keys($messageText));
+                }
             } else {
-                // Not sure what it is, so return it all
-                $text = VarDumper::export($text);
+                // Not sure what it is, so the messageData can return it
+                if (in_array(gettype($messageText), ['boolean', 'integer', 'double', 'NULL'])) {
+                    $formattedMessage = VarDumper::dumpAsString($messageText); // Get a string representation
+                } else {
+                    $formattedMessage = "Type: " . gettype($messageText);
+                }
             }
         }
-        return $text;
+        return $formattedMessage;
     }
 
     /**
@@ -154,12 +165,22 @@ class SystemLogTarget extends Target
                 'File' => $exception->getFile(),
 //                'Trace' => $exception->getTraceAsString(),
             ];
+        } else if ($messageContents instanceof Arrayable) {
+            // E.g If it's a model
+            $messageData = $messageContents->toArray();
+
+            if (method_exists($messageContents, 'getErrors')) {
+                // If it's a model and there's errors
+                if (!empty($messageContents->getErrors())) {
+                    $messageData = ArrayHelper::merge($messageData, ['_modelErrors' => $messageContents->getErrors()]);
+                }
+            }
         } else if (is_array($messageContents)) {
             // e.g  Yii2::error::message.messageData (if supplied) OR Yii2::error::message IF array without key messageData
             $messageData = $messageContents;
         } else {
             // It's possibly some weird thing, like a closure or object
-            $messageData = strip_tags(VarDumper::export($messageContents));
+            $messageData = strip_tags(VarDumper::dumpAsString($messageContents)); // NB: strip_tags is included as you can get weird things like xdebug entries which contain HTML that screw up the rest of the page
         }
         return $messageData;
     }
