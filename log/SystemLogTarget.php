@@ -16,6 +16,51 @@ use yii\log\Target;
 /**
  * Class SystemLogTarget
  * @package mozzler\base\log
+ *
+ *
+ * This is the Log target for saving entries to the System Log.
+ *
+ * Configuration should be done in your config/common.php file.
+ *
+ * 'log' => [
+ * 'traceLevel' => YII_DEBUG ? 3 : 0,
+ * 'targets' => [
+ * // ... (other log targets, like file and email)
+ * [
+ * // Log errors to the system log
+ * 'class' => 'mozzler\base\log\SystemLogTarget',
+ * 'levels' => ['error'], // Careful if adding 'warning', 'info', 'trace'
+ * 'disableInfoCollection' => true, // By default if there's any error entries then an info entry is also added by Yii, this prevents the unneeded info entries
+ * ]]],
+ *
+ *
+ * -----------------
+ *   Usage
+ * -----------------
+ * It's expected that you'll set the levels to 'error' so you capture all errors. Yii2 will also capture all the exceptions.
+ *
+ * You can use `\Yii:error("This is a simple error message");`
+ * Should you want to get a basic string as the error message.
+ *
+ * If you throw an exception that's logged automatically but you can also provide it directly to the error.
+ * You can also provide specific information by providing an array with 'message' and 'messageData'. Being saved to the respective fields.
+ * e.g `\Yii:error(["message": "There was an unexpected issue saving the user", "messageData": $user);`
+ * In this example the messageData is a User model and the SystemLog will contain both information about the model and in the response a _modelErrors field.
+ *
+ * If the tracelevel is set, then there should be some trace information provided for Yii::error (or Yii::warning and the like if you are logging them) entries.
+ * The traceLevel defines how many levels deep of the debug backtrace you get. The more there are, the more you can see what methods and functions were called to get to that point
+ *
+ * In the trace JSON array, if dealing with an exception then the exception traceAsString will be saved there, with the exception message as the main message.
+ * If the exception had a $previous (exception/Throwable) set, then that will also be provided in the trace. But it only goes back one level of error chaining (you could add support for more chaining if needed)
+ *
+ * If you provide a random array of data then the message lists the array keys. e.g `\Yii::error(['this' => 'has some info', 'model' => $model, 'otherStuff' => $kindaUsefulInfo])` then the message  will be
+ * `Array containing: this, model, otherStuff`
+ *
+ * You can change the systemData (Globals) being saved by adjusting the $logVars, by default it's the Globals: ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'];
+ * You can also set the fields to be hidden (replaced with ****) by changing the maskVars which defaults to  '_SERVER.HTTP_AUTHORIZATION', '_SERVER.PHP_AUTH_USER', '_SERVER.PHP_AUTH_PW'
+ * The maskVars uses the ArrayHelper::setValue format so you can use dot syntax
+ *
+ * For more information check out https://www.yiiframework.com/doc/guide/2.0/en/runtime-logging
  */
 class SystemLogTarget extends Target
 {
