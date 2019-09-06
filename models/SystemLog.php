@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property string $message
  * @property array $request
  * @property array $data
- * @property string $category
+ * @property string $namespace
  *
  * @see log/SystemLogTarget.php For information on how to use this check out log/SystemLogTarget.php
  */
@@ -38,10 +38,17 @@ class SystemLog extends BaseModel
 
     public static function rbac()
     {
+        // -- The System Log shouldn't be created by a user but by the SystemLog Target
+        // If your registered users are Admin Control Panel users instead of normal users then you likely want them to have find and view enabled
+        // You can update the RBAC in your project by extending the Model and then in the config/common.php file setting something like:
+        //    'container' => [
+        //        'definitions' => [
+        //            // Set ACP User RBAC
+        //            'mozzler\base\models\SystemLog' => [
+        //                'class' => 'app\models\SystemLog'
+        //            ]]]
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
-                // -- The System Log shouldn't be created by a user but by the SystemLog Target
-                // NB: If your registered users are Admin Control Panel users then you likely want them to have find and view
                 'insert' => ['grant' => false],
                 'update' => ['grant' => false],
                 'find' => ['grant' => false],
