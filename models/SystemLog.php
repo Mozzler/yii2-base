@@ -34,6 +34,21 @@ class SystemLog extends BaseModel
         ];
     }
 
+    public static function rbac()
+    {
+        return ArrayHelper::merge(parent::rbac(), [
+            'registered' => [
+                // -- The System Log shouldn't be created by a user but by the SystemLog Target
+                // NB: If your registered users are Admin Control Panel users then you likely want them to have find and view
+                'insert' => ['grant' => false],
+                'update' => ['grant' => false],
+                'find' => ['grant' => false],
+                'view' => ['grant' => false],
+                'delete' => ['grant' => false]
+            ]
+        ]);
+    }
+
     public function modelIndexes()
     {
         return ArrayHelper::merge(parent::modelIndexes(), [
