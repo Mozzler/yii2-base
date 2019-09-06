@@ -14,6 +14,8 @@ use yii\helpers\ArrayHelper;
  * @property array $request
  * @property array $data
  * @property string $category
+ *
+ * @see log/SystemLogTarget.php For information on how to use this check out log/SystemLogTarget.php
  */
 class SystemLog extends BaseModel
 {
