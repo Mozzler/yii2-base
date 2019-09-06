@@ -88,12 +88,13 @@ class SystemLogTarget extends Target
             /** @var SystemLog $systemLog */
             $systemLog = Tools::createModel(SystemLog::class, [
                 'type' => $level,
-                'requestData' => $this->collectRequest(),
+                'requestData' => $this->collectRequest($message, $category),
                 'message' => $this->formatMessage($message),
                 'messageData' => $this->getMessageData($message),
                 'trace' => $this->getTrace($message),
                 'systemData' => $this->getContextMessage($message),
                 'endpoint' => $this->getEndpoint(),
+                'namespace' => $this->getNamespace($message, $category),
                 'category' => $category
             ]);
             // @todo: Work out how to batch save multiple systemLog entries?
@@ -236,16 +237,8 @@ class SystemLogTarget extends Target
         // -- Add in any traces if it's from an exceptions
         $traces = [];
         if (isset($message[4])) {
-//            return VarDumper::export($message[4]); // This is for testing what the trace information contains
-
             // Return the whole trace
             $traces['trace'] = $message[4];
-
-            // -- Return just the trace information as well formatted lines
-//            foreach ($message[4] as $trace) {
-//                $traces['trace'][] = "in {$trace['file']}:{$trace['line']}";
-//            }
-
         }
 
         // -- Add in the full Exception information if available
@@ -253,7 +246,7 @@ class SystemLogTarget extends Target
         if ($exception instanceof \Throwable || $exception instanceof \Exception) {
             $traces['exception'] = self::getExceptionAsString($exception);
             if (!empty($exception->getPrevious())) {
-                // Exception Chaining... Technically there could be more than 2 levels, but that's unlikely and not currently supported
+                // Exception Chaining... Technically there could be more than 1 other exception, but that's unlikely and not currently supported
                 // Change to a recursive function if you think it'll be useful
                 $traces['previousException'] = self::getExceptionAsString($exception->getPrevious());
             }
@@ -276,7 +269,7 @@ class SystemLogTarget extends Target
      * Collects summary data of current request.
      * @return array
      */
-    protected function collectRequest()
+    protected function collectRequest($message, $category)
     {
         if (Yii::$app === null) {
             return [];
@@ -313,6 +306,7 @@ class SystemLogTarget extends Target
             'url' => $request->getUrl(),
             'ajax' => json_encode($request->getIsAjax()),
             'method' => $request->getMethod(),
+            'category' => $category,
             'userAgent' => $request->getUserAgent(),
             'absoluteUrl' => $request->getAbsoluteUrl(),
             'userIp' => ($senderIp === $userIp) ? $userIp : "{$userIp}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
@@ -338,7 +332,6 @@ class SystemLogTarget extends Target
         }
         $request = Yii::$app->getRequest();
         return $request->getAbsoluteUrl();
-
     }
 
     /**
@@ -358,5 +351,41 @@ class SystemLogTarget extends Target
             $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $ip;
+    }
+
+    /**
+     * @param $message
+     * @param $category string
+     * @return string
+     *
+     * Due to the way Yii deals with Exceptions by default if you want to change the status code
+     * you need to extend from the \yii\web\HttpException however if you do then the Category
+     * is set to yii\web\HttpException:<statusCode> instead of your custom exception name.
+     *
+     * This sets the Exceptions to use get_class
+     * If the exception also has a statusCode defined then it will include that
+     * e.g app\exceptions\SMSFailureException:502
+     *
+     * This defaults to the Yii Logger provided $category
+     */
+    protected function getNamespace($message, $category)
+    {
+        $possibleException = $message[0];
+
+        // -- Use the ['messageData'] key if available
+        if (is_array($possibleException) && isset($possibleException['messageData'])) {
+            $possibleException = $possibleException['messageData'];
+        }
+
+        if ($possibleException instanceof \Throwable || $possibleException instanceof \Exception) {
+            // Use the actual Exception, not something like yii\web\HttpException:502 if the exception is a custom ApiFaliureException or some such
+            $category = get_class($possibleException);
+
+            if (property_exists($possibleException, 'statusCode')) {
+                // Add in the statusCode, if defined
+                $category .= ':' . $possibleException->statusCode;
+            }
+        }
+        return $category;
     }
 }

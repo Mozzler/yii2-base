@@ -57,8 +57,8 @@ class SystemLog extends BaseModel
             'createdAt' => [
                 'columns' => ['createdAt' => 1],
             ],
-            'category' => [
-                'columns' => ['category' => 1],
+            'namespace' => [
+                'columns' => ['namespace' => 1],
             ],
             'type' => [
                 'columns' => ['type' => 1],
@@ -140,9 +140,9 @@ class SystemLog extends BaseModel
                     ]
                 ]
             ],
-            'category' => [
+            'namespace' => [
                 'type' => 'Text',
-                'label' => 'Category',
+                'label' => 'Namespace',
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\CodeField',
@@ -155,11 +155,11 @@ class SystemLog extends BaseModel
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'endpoint', 'messageData', 'systemData', 'requestData', 'trace', 'category'];
+        $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'namespace', 'endpoint', 'messageData', 'systemData', 'requestData', 'trace'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['type', 'category', 'createdAt', 'message', 'endpoint'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'message', 'type', 'category', 'createdAt', 'endpoint', 'messageData', 'requestData', 'systemData', 'trace', 'createdUserId', 'updatedUserId', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['type', 'category', 'message', 'endpoint'];
+        $scenarios[self::SCENARIO_LIST] = ['type', 'namespace', 'createdAt', 'message', 'endpoint'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'namespace', 'message', 'type', 'createdAt', 'endpoint', 'messageData', 'requestData', 'systemData', 'trace', 'createdUserId', 'updatedUserId', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['type', 'namespace', 'message', 'endpoint'];
 
         return $scenarios;
     }
