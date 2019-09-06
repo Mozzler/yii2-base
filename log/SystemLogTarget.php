@@ -95,7 +95,6 @@ class SystemLogTarget extends Target
                 'systemData' => $this->getContextMessage($message),
                 'endpoint' => $this->getEndpoint(),
                 'namespace' => $this->getNamespace($message, $category),
-                'category' => $category
             ]);
             // @todo: Work out how to batch save multiple systemLog entries?
             $save = $systemLog->save(true, null, false);
