@@ -52,6 +52,10 @@ class DataController extends BaseController
     }
 
     /**
+     * Preload Data
+     *
+     * Loads the /config/preload-data.php models
+     *
      * @return int
      * @throws \yii\mongodb\Exception
      */
