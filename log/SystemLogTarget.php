@@ -201,6 +201,7 @@ class SystemLogTarget extends Target
             $messageData = null;
         } else if ($messageContents instanceof \Throwable || $messageContents instanceof \Exception) {
             // Exception info
+            /** @var \mozzler\base\exceptions\BaseException $exception */
             $exception = $messageContents;
             $messageData = [
                 'Type' => get_class($exception),
@@ -208,7 +209,8 @@ class SystemLogTarget extends Target
                 'Message' => $exception->getMessage(),
                 'Line' => $exception->getLine(),
                 'File' => $exception->getFile(),
-//                'Trace' => $exception->getTraceAsString(),
+                // If available then get extra info from the Exception
+                'ContextualInfo' => method_exists($exception, 'toSystemLog') ? $exception->toSystemLog() : null,
             ];
         } else if ($messageContents instanceof Arrayable) {
             // E.g If it's a model
