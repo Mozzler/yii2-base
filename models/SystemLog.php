@@ -164,7 +164,7 @@ class SystemLog extends BaseModel
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'namespace', 'endpoint', 'messageData', 'systemData', 'requestData', 'trace'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['type', 'namespace', 'createdAt', 'message', 'endpoint'];
+        $scenarios[self::SCENARIO_LIST] = ['namespace', 'message', 'endpoint', 'createdAt'];
         $scenarios[self::SCENARIO_VIEW] = ['_id', 'namespace', 'message', 'type', 'createdAt', 'endpoint', 'messageData', 'requestData', 'systemData', 'trace', 'createdUserId', 'updatedUserId', 'updatedAt'];
         $scenarios[self::SCENARIO_SEARCH] = ['type', 'namespace', 'message', 'endpoint'];
 
