@@ -272,6 +272,8 @@ class Tools extends Component
      */
     public static function sendEmail($to, $subject, $template, $data = [], $config = [])
     {
+        Yii::$app->mailer->view->params = \Yii::$app->params;
+        
         $mailer = \Yii::$app->mailer;
         $message = $mailer->compose($template, $data)
             ->setTo($to)
