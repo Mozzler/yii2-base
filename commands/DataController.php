@@ -73,14 +73,25 @@ class DataController extends BaseController
             $newlyAddedCount = 0;
             foreach ($seedData as $indexTmp => $rowData) {
                 /* @var \mozzler\base\models\Model $model */
-                $model = $baseTools->getModel($className, $rowData, false);
+                if (!empty($rowData['_id'])) {
+                    // If an ID is specified just check against that. Helps in scenarios where there's dynamic fields or even the passwordHash
+                    $model = $baseTools->getModel($className, $rowData['_id'], false);
+                } else {
+                    $model = $baseTools->getModel($className, $rowData, false);
+                }
 
                 if (null === $model) {
                     $model = new $className();
                     $model->load([(substr($className, strrpos($className, '\\') + 1)) => $rowData]);
 
                     if (!$model->save(true, null, false)) {
-                        echo sprintf("Row index %d failed, data \n %s \n", $indexTmp, print_r($rowData, true));
+                        // Output the error
+                        $this->stdout("## Row index $indexTmp failed to insert a ", Console::FG_RED);
+                        $this->stdout($className, Console::FG_CYAN);
+                        $this->stdout(" ##\nSave Error: \n", Console::FG_RED);
+                        $this->stdout(json_encode($model->getErrors(), JSON_PRETTY_PRINT), Console::FG_YELLOW);
+                        $this->stdout("\nData trying to be saved:\n", Console::FG_RED);
+                        $this->stdout(print_r($rowData, true), Console::FG_PURPLE);
                     } else {
                         $newlyAddedCount++;
                     }
