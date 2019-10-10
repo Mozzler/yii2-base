@@ -6,8 +6,7 @@ class Date extends Base {
 	public $type = 'Date';
 	
 	/**
-	 * Force a given time value to be midnight on the requested date in the
-	 * application timezone.
+	 * Force a given time value to be midnight on the requested date in UTC
 	 */
 	public function setValue($value) {
 		$value = parent::setValue($value);
@@ -16,14 +15,14 @@ class Date extends Base {
 			return null;
 		}
 
-		$timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
+		$timezone = new \DateTimeZone('UTC');
 		
 		// Create a datetime object for the requested time
 		$valueDatetime = new \DateTime();
 		$valueDatetime->setTimestamp($value);
 		
 		// if we already have a timestamp, create a datetime object
-		// and force midnight in the current application timezone
+		// and force midnight in UTC
 		$valueDatetime->setTimezone($timezone);
 		
 		// Force the time to be midnight on the requested date

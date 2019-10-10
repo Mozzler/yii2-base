@@ -17,11 +17,13 @@ class DateTime extends Base {
 		// handle a string value
 		if (is_string($value)) {
 			// if $value is a string containing an integer, return the integer
-			if (strval(intval($value)) == $value)
+			if (strval(intval($value)) == $value) {
 				return intval($value);
+			}
 			
 			$timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
 			$epoch = (new \DateTime($value, $timezone))->format("U");
+
 			return intval($epoch);
 		}
 		
