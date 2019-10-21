@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models;
 
+use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
@@ -169,6 +170,18 @@ class SystemLog extends BaseModel
         $scenarios[self::SCENARIO_SEARCH] = ['type', 'namespace', 'message', 'endpoint'];
 
         return $scenarios;
+    }
+
+
+
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'garbage' => [
+                'class' => GarbageCollectionBehaviour::className(),
+                'gcAgeDays' => 7
+            ],
+        ]);
     }
 
 }
