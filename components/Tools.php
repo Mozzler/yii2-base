@@ -275,12 +275,13 @@ class Tools extends Component
         Yii::$app->mailer->view->params = \Yii::$app->params;
         
         $mailer = \Yii::$app->mailer;
-        $message = $mailer->compose($template, $data)
+        // Adding in the params to the data. mainly for access to something like {{ _params.emailAssetsUrl }} for a Url to where you might store files on a CDN
+        $message = $mailer->compose($template,  ArrayHelper::merge(['_params' => \Yii::$app->params], $data))
             ->setTo($to)
             ->setSubject($subject);
 
-        // Add in the config and params. Params are mainly for access to something like {{params.emailAssetsUrl}} where you might store files on a CDN
-        $config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], ['params' => \Yii::$app->params], $config);
+
+        $config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], $config);
 
         if (isset($config['from'])) {
             $message->setFrom($config['from']);
