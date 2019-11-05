@@ -279,7 +279,8 @@ class Tools extends Component
             ->setTo($to)
             ->setSubject($subject);
 
-        $config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], $config);
+        // Add in the config and params. Params are mainly for access to something like {{params.emailAssetsUrl}} where you might store files on a CDN
+        $config = ArrayHelper::merge(\Yii::$app->params['mozzler.base']['email'], ['params' => \Yii::$app->params], $config);
 
         if (isset($config['from'])) {
             $message->setFrom($config['from']);
