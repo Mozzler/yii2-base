@@ -36,6 +36,9 @@ class Cache extends BaseModel
                     'unique' => 1
                 ],
                 'duplicateMessage' => ['id already exists']
+            ],
+            'cacheExpires' => [
+                'columns' => ['expire' => 1]
             ]
         ]);
     }
