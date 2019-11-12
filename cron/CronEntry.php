@@ -29,6 +29,8 @@ class CronEntry extends Component
 
     public $timeoutSeconds = 120; // In seconds
 
+    public $threadName = ''; // Put something custom here for each thread if you need to run multiple versions of the same task (e.g a queue processing script). It could simply be a number or a semi-useful name.
+
 
     /**
      * @param integer $utcUnixTimestamp Unixtimestamp (in seconds)

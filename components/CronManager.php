@@ -56,6 +56,7 @@ class CronManager extends Component
             'dayWeek' => '*',
             'timezone' => 'Australia/Adelaide',
             'active' => true,
+            'customThreadName' => '',
         ]];
 
     public function run()
@@ -107,7 +108,7 @@ class CronManager extends Component
             }
 
             if ($cronObject->shouldRunCronAtTime()) {
-                $task = \Yii::$app->taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true);
+                $task = \Yii::$app->taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
 
                 $stats['Entries Run']++;
                 $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');

@@ -24,7 +24,8 @@ class TaskManager extends \yii\base\Component
 {
 
     /**
-     * @param string $scriptClassName
+     * @param string $scriptClassName The script::class
+     * @param string $threadName If you need to execute multiple tasks at the same time, then you need to give each a name or number
      * @param array $scriptConfig
      * @param int $scriptTimeout
      * @param bool $runNow if true then trigger the CLI TaskController command straight away
@@ -32,7 +33,7 @@ class TaskManager extends \yii\base\Component
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
      */
-    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = false)
+    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = false, $threadName = '')
     {
         $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
         $taskConfig =
@@ -41,7 +42,7 @@ class TaskManager extends \yii\base\Component
                 'scriptClass' => $scriptClassName,
                 'timeoutSeconds' => $scriptTimeout,
                 'status' => Task::STATUS_PENDING,
-                'name' => "{$unixTimestampMinuteStarted}-" . ($runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND) . "-{$scriptClassName}",
+                'name' => "{$unixTimestampMinuteStarted}-" . ($runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND) . "-{$scriptClassName}" . (empty($threadName) ? '' : '-' . $threadName),
                 'triggerType' => $runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND
             ];
 
@@ -103,8 +104,8 @@ class TaskManager extends \yii\base\Component
      * Called by the schedule command
      *
      * @param $taskObject \mozzler\base\models\Task - An instance of a task which should have the
-     * @throws \yii\base\InvalidConfigException
      * @return boolean
+     * @throws \yii\base\InvalidConfigException
      */
     protected static function triggerTask($taskObject)
     {
