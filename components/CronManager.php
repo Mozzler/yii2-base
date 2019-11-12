@@ -56,13 +56,14 @@ class CronManager extends Component
             'dayWeek' => '*',
             'timezone' => 'Australia/Adelaide',
             'active' => true,
-            'customThreadName' => '',
+            'threadName' => '',
         ]];
 
     public function run()
     {
+        /** @var CronRun $cronRun */
         $cronRun = $this->createCronRun();
-        
+
         // Cron has already been run for this interval, so do nothing
         if (!$cronRun) {
             return false;
@@ -85,7 +86,7 @@ class CronManager extends Component
 
             if (empty($cronEntry) || (!isset($cronEntry['class']) && !isset($cronEntry['scriptClass']))) {
                 $stats['Errors']++;
-                $cronRun->addLog("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true),'error');
+                $cronRun->addLog("The cronEntry is empty or invalid, can't process: " . var_export($cronEntry, true), 'error');
             }
 
             // -- Create the Cron Entry
@@ -102,13 +103,13 @@ class CronManager extends Component
             }
 
             if (empty($cronObject)) {
-                $cronRun->addLog("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true),'error');
+                $cronRun->addLog("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true), 'error');
                 $stats['Errors']++;
                 continue;
             }
 
             if ($cronObject->shouldRunCronAtTime()) {
-                $task = \Yii::$app->taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
+                $task = $taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
 
                 $stats['Entries Run']++;
                 $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
@@ -121,10 +122,12 @@ class CronManager extends Component
         $cronRun->stats = $stats;
         $cronRun->status = 'complete';
         if (!$cronRun->save()) {
-            $cronRun->addLog('TODO: Shit!!', 'error');
+            $error = "Unable to save the cronRun. Error: " . json_encode($cronRun->getErrors());
+            \Yii::error($error);
+            $cronRun->addLog($error, 'error');
+            $stats['Error'] = $error;
             $stats['Errors']++;
         }
-
         return $stats;
     }
 
@@ -132,7 +135,8 @@ class CronManager extends Component
      * @return CronRun|boolean
      * @throws \yii\base\InvalidConfigException
      */
-    protected function createCronRun() {
+    protected function createCronRun()
+    {
         $nearestMinuteTimestamp = round(floor(time() / 60) * 60);
 
         /** @var CronRun $cronRun */
@@ -140,7 +144,7 @@ class CronManager extends Component
         $cronRun->load([
             'timestamp' => $nearestMinuteTimestamp,
             'stats' => [],
-        ],"");
+        ], "");
 
         // @todo: try/catch this and gracefully deal with the Exception 'yii\mongodb\Exception' example message: 'E11000 duplicate key error collection: viterra.app.cronRun index: timestampUniqueId dup key: { : 1550638500 }'
         if (!$cronRun->save()) {
