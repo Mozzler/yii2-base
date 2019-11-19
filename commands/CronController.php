@@ -16,10 +16,11 @@ class CronController extends BaseController
      */
     public function actionRun()
     {
+        $this->stdout("Cron Run\n---------------\nStarted: " . date('r') . "\n");
         /** @var \mozzler\base\components\CronManager $cronManager */
         $cronManager = \Yii::$app->cronManager;
         $cronStats = $cronManager->run();
-        $this->stdout("Cron Run\n---------------\n" . print_r($cronStats, true));
+        $this->stdout("Finished: " . date('r') . "\n-- Stats --\n" . print_r($cronStats, true));
 
         return ExitCode::OK;
     }

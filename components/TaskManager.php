@@ -127,12 +127,16 @@ class TaskManager extends \yii\base\Component
         //  Run Async
         // -------------------
         if ($isWindows) {
-            $runCommand = "\"$filePath\" \"task/run\" " . escapeshellarg($taskId);
+            $runCommand = "start /B \"Task $taskId\" \"$filePath\" task/run {$taskId}"; // Note: This runs asyncronously, but is likely to cause "The process tried to write to a nonexistent pipe." errors
             \Yii::info("Task {$taskObject->name}\nRunning Windows command: {$runCommand}");
+            $taskObject->addLog("Running the Windows command: $runCommand");
+            $taskObject->save();
             pclose(popen($runCommand, "r"));
         } else {
             $runCommand = "'{$filePath}' task/run " . escapeshellarg($taskId) . ' > /dev/null &';
             \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
+            $taskObject->addLog("Running the Linux command: $runCommand");
+            $taskObject->save();
             exec($runCommand);
         }
     }

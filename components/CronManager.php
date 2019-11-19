@@ -109,7 +109,12 @@ class CronManager extends Component
             }
 
             if ($cronObject->shouldRunCronAtTime()) {
-                $task = $taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
+                try {
+                    $task = $taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
+                } catch (\Throwable $exception) {
+                    $stats['Error'] = Tools::returnExceptionAsString($exception);
+                    $stats['Errors']++;
+                }
 
                 $stats['Entries Run']++;
                 $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
@@ -117,6 +122,7 @@ class CronManager extends Component
             } else {
                 $stats['Entries Skipped']++;
             }
+            $cronRun->save();
         }
 
         $cronRun->stats = $stats;
