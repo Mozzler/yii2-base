@@ -66,7 +66,7 @@ class CronManager extends Component
 
         // Cron has already been run for this interval, so do nothing
         if (!$cronRun) {
-            return false;
+            return "Cron has already been run this minute, wait ". ( 60 - date('s') ) . "s to run it again";
         }
 
         $stats = [

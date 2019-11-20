@@ -120,14 +120,29 @@ class TaskManager extends \yii\base\Component
 
         $filePath = \Yii::getAlias('@app') . DIRECTORY_SEPARATOR . "Yii" . (true === $isWindows ? '.bat' : ''); // e.g D:\www\bapp.viterra.com.au\commands
 
-        // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
-        // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
 
         // -------------------
         //  Run Async
         // -------------------
         if ($isWindows) {
-            $runCommand = "start /B \"Task $taskId\" \"$filePath\" task/run {$taskId}"; // Note: This runs asyncronously, but is likely to cause "The process tried to write to a nonexistent pipe." errors
+            // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
+            // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
+
+            // == To run async tasks on Windows ==
+            // 1. You need to download psexec from https://docs.microsoft.com/en-au/sysinternals/downloads/psexec
+            // 2. You need to extract it to a folder on the computer/server
+            // 3. You need to set the path in the Windows -> Control Panel -> System -> Advanced System Settings -> Environment Variables -> System Variables [Path]
+            // 4. You need to manually open up the cmd prompt, run 'psexec' and click [OK] to the alert box which appears (only needs to be done once per machine)
+
+            if (self::windowsCommandExists('psexec')) {
+                // -- This allows multiple tasks to run in parallel
+                // Note that we are currently ignoring the default psexec output including which Process ID it was created with
+                $runCommand = "psexec -d \"$filePath\" task/run {$taskId} > null  2>&1";
+            } else {
+                // -- The following will wait for the command to complete, so tasks are run serially
+                $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
+            }
+
             \Yii::info("Task {$taskObject->name}\nRunning Windows command: {$runCommand}");
             $taskObject->addLog("Running the Windows command: $runCommand");
             $taskObject->save();
@@ -139,6 +154,31 @@ class TaskManager extends \yii\base\Component
             $taskObject->save();
             exec($runCommand);
         }
+
+        return $runCommand;
+    }
+
+
+    /**
+     * @param $programName string
+     * @return bool
+     *
+     * A basic check to see if a command can be run from the command line
+     * This is really only for checking if psexec is installed, it's very basic
+     *
+     * Windows error suppression based on https://stackoverflow.com/a/1262726/7299352
+     *
+     * Uses the 'where' command which is similar to 'which' on Linux.
+     * But needs error supression otherwise it outputs to stderror (at least on Windows 10):
+     *      "INFO: Could not find files for the given pattern(s)."
+     */
+    protected static function windowsCommandExists($programName)
+    {
+        $wherePsexec = []; // We don't need this
+        $wherePsexecReturnVal = null; // This is what we are interested in // 1 = Not found, 0 = found
+        exec("where {$programName} > nul 2>&1", $wherePsexec, $wherePsexecReturnVal);
+
+        return $wherePsexecReturnVal === 0 ? true : false;
     }
 
 }
