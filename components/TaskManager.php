@@ -128,17 +128,50 @@ class TaskManager extends \yii\base\Component
             // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
             // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
 
+
+//            https://ss64.com/vb/run.html
+
+            // First, try and see if the COM extension can be used
+            if (extension_loaded('com_dotnet')) {
+                $WshShell = new \COM("WScript.Shell");
+                $runCommand = "\"$filePath\" task/run {$taskId}";
+
+                \Yii::info("Task {$taskObject->name}\nRunning Windows command: {$runCommand}");
+                $taskObject->addLog("Running the Windows command via WScript.Shell: $runCommand");
+                $taskObject->save();
+                $oExec = $WshShell->Run($runCommand, 0, false);
+
+                return $runCommand;
+                /*
+                 * Run(strCommand, intWindowStyle, bWaitOnReturn)
+                 * Settings for intWindowStyle:
+                 *
+                 * 0 Hide the window (and activate another window.)
+                 * 1 Activate and display the window. (restore size and position) Specify this flag when displaying a window for the first time.
+                 * 2 Activate & minimize.
+                 * 3 Activate & maximize.
+                 * 4 Restore. The active window remains active.
+                 * 5 Activate & Restore.
+                 * 6 Minimize & activate the next top-level window in the Z order.
+                 * 7 Minimize. The active window remains active.
+                 * 8 Display the window in its current state. The active window remains active.
+                 * 9 Restore & Activate. Specify this flag when restoring a minimized window.
+                 * 10 Sets the show-state based on the state of the program that started the application.
+                 */
+            }
+//            else if (self::windowsCommandExists('psexec')) {
+//                // -- This allows multiple tasks to run in parallel
+            // ### UNFORTUNATELY THIS DOESN'T WORK WHEN RUN FROM THE WINDOWS TASK SCHEDULER ###
+//                $runCommand = "psexec -d \"$filePath\" task/run {$taskId} > null 2>&1"; // A bad version
+
             // == To run async tasks on Windows ==
             // 1. You need to download psexec from https://docs.microsoft.com/en-au/sysinternals/downloads/psexec
             // 2. You need to extract it to a folder on the computer/server
             // 3. You need to set the path in the Windows -> Control Panel -> System -> Advanced System Settings -> Environment Variables -> System Variables [Path]
             // 4. You need to manually open up the cmd prompt, run 'psexec' and click [OK] to the alert box which appears (only needs to be done once per machine)
 
-            if (self::windowsCommandExists('psexec')) {
-                // -- This allows multiple tasks to run in parallel
-                // Note that we are currently ignoring the default psexec output including which Process ID it was created with
-                $runCommand = "psexec -d \"$filePath\" task/run {$taskId} > null  2>&1";
-            } else {
+//            }
+            else {
                 // -- The following will wait for the command to complete, so tasks are run serially
                 $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
             }
