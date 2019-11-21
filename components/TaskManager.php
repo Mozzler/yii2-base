@@ -19,6 +19,8 @@ use yii\helpers\ArrayHelper;
  *
  * \Yii::$app->taskManager->schedule('app\scripts\MyCustomScript', ['option1' => true, 'option2' => false]);
  *
+ * Note: Even admin users aren't allowed to update a Task, so the saves are done without permission checks.
+ *
  */
 class TaskManager extends \yii\base\Component
 {
@@ -72,12 +74,12 @@ class TaskManager extends \yii\base\Component
     {
         if (Task::STATUS_PENDING !== $task->status) {
             $task->addLog("Refusing to re-run task as it is not in a pending state", 'error');
-            $task->save();
+            $task->save(true, null, false);
             return $task;
         }
 
         $task->status = $task::STATUS_INPROGRESS;
-        $task->save();
+        $task->save(true, null, false);
 
         try {
             /** @var ScriptBase $script */
@@ -86,7 +88,7 @@ class TaskManager extends \yii\base\Component
         } catch (\Throwable $exception) {
             $task->status = Task::STATUS_ERROR;
             $task->addLog(Tools::returnExceptionAsString($exception), 'error');
-            $task->save();
+            $task->save(true, null, false);
             return $task;
         }
 
@@ -95,7 +97,7 @@ class TaskManager extends \yii\base\Component
             $task->status = Task::STATUS_COMPLETE;
         }
 
-        $task->save();
+        $task->save(true, null, false);
         return $task;
     }
 
@@ -135,9 +137,9 @@ class TaskManager extends \yii\base\Component
                 $WshShell = new \COM("WScript.Shell");
                 $runCommand = "\"$filePath\" task/run {$taskId}";
 
-                \Yii::info("Task {$taskObject->name}\nRunning Windows command: {$runCommand}");
+                \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell:  {$runCommand}");
                 $taskObject->addLog("Running the Windows command via WScript.Shell: $runCommand");
-                $taskObject->save();
+                $taskObject->save(true, null, false);
                 $oExec = $WshShell->Run($runCommand, 0, false);
 
                 return $runCommand;
@@ -164,15 +166,15 @@ class TaskManager extends \yii\base\Component
                 $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
             }
 
-            \Yii::info("Task {$taskObject->name}\nRunning Windows command: {$runCommand}");
+            \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell: {$runCommand}");
             $taskObject->addLog("Running the Windows command: $runCommand");
-            $taskObject->save();
+            $taskObject->save(true, null, false);
             pclose(popen($runCommand, "r"));
         } else {
             $runCommand = "'{$filePath}' task/run " . escapeshellarg($taskId) . ' > /dev/null &';
             \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
             $taskObject->addLog("Running the Linux command: $runCommand");
-            $taskObject->save();
+            $taskObject->save(true, null, false);
             exec($runCommand);
         }
 
