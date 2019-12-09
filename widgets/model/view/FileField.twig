@@ -1,0 +1,5 @@
+{% if widget.model[widget.attribute] %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] }}</{{ widget.tag }}>
+{% else  %}
+    <{{ widget.tag }}Unable to find file</{{ widget.tag }}>
+{% endif %}

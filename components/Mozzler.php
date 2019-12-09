@@ -24,6 +24,7 @@ class Mozzler extends Component {
         'MultiSelect' => 'mozzler\base\fields\MultiSelect',
         'Json' => 'mozzler\base\fields\Json',
         'Double' => 'mozzler\base\fields\Double',
+        'File' => 'mozzler\base\fields\File',
 	];
 	
 }
