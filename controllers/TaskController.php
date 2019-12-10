@@ -43,5 +43,3 @@ class TaskController extends BaseController
     }
 
 }
-
-?>

@@ -45,6 +45,10 @@ class ModelCreateAction extends BaseModelAction
                             \Yii::info("Saving the $fieldName file field");
 
                             $uploadFile = UploadedFile::getInstance($model, $fieldName);
+                            if (empty($uploadFile)) {
+                                \Yii::warning("Couldn't find the uploaded file for: $fieldName");
+                                continue; // Skip this
+                            }
                             $fileInfo = $model->uploadFile($fieldName, $uploadFile);
                             /** @var \mozzler\base\models\File $fileInfoModel */
                             $fileInfoModel = \Yii::$app->t::createModel(\mozzler\base\models\File::class, $fileInfo);

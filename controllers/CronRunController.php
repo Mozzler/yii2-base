@@ -43,5 +43,3 @@ class CronRunController extends BaseController
     }
 
 }
-
-?>

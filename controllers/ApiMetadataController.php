@@ -111,5 +111,3 @@ class ApiMetadataController extends ApiController {
         return $finalFilter;
     }
 }
-
-?>
