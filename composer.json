@@ -18,7 +18,8 @@
     "kartik-v/yii2-widget-datetimepicker": "^1.4",
     "openbuildings/swiftmailer-css-inliner": "^0.5.2",
     "ext-json": "*",
-    "creocoder/yii2-flysystem": "^0.9.3"
+    "creocoder/yii2-flysystem": "^0.9.3",
+    "ext-mbstring": "*"
   },
   "autoload": {
     "psr-4": {
