@@ -15,18 +15,6 @@ use League\Flysystem\AdapterInterface;
  */
 class FileUploadBehaviour extends Behavior
 {
-
-    /**
-     *
-     * @var int $gcProbability the probability (parts per million) that garbage collection (GC) should be performed
-     * when running the cron.
-     * Defaults to 10000, meaning 1% chance.
-     * This number should be between 0 and 1000000. A value 0 meaning no GC will be performed at all.
-     */
-
-    /** @var string $baseFolder */
-    public $baseFolder = 'uploads';
-
     /** @var string $filesystemComponentName */
     public $filesystemComponentName = 'fs';
 
@@ -52,7 +40,6 @@ class FileUploadBehaviour extends Behavior
      */
     public function uploadFile($event)
     {
-        \Yii::info("The uploadFile is being run");
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
@@ -60,7 +47,7 @@ class FileUploadBehaviour extends Behavior
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
         $file = self::getFileInfo();
         if (!empty($file)) {
-            \Yii::debug("The filepond file information is: " . json_encode($file));
+            \Yii::debug("The file information is: " . json_encode($file));
         } else {
             throw new BaseException("No file uploaded", 400, null, ['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $file]);
         }
@@ -85,7 +72,7 @@ class FileUploadBehaviour extends Behavior
         $md5DirectoryChars = $md5[0] . $md5[1]; // Get the first 2 characters as the directory name
         $filename = $md5 . '.' . $this->getExtension($file['name']);
         $filepath = $md5DirectoryChars . '/' . $filename;
-        \Yii::debug("creating the directory: {$md5DirectoryChars} as part of the filepath: $filepath");
+        \Yii::debug("Creating the directory: {$md5DirectoryChars} as part of the filepath: $filepath (it could already exist)");
         $fs->createDir($md5DirectoryChars);
         $visibilty = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
 
@@ -187,8 +174,6 @@ class FileUploadBehaviour extends Behavior
 
         };
         $file['fieldName'] = isset($fieldName) ? $fieldName : null;
-
-        \Yii::debug("The file is: " . json_encode($file, JSON_PRETTY_PRINT));
         return $file;
     }
 
