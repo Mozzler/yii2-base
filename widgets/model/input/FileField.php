@@ -16,7 +16,7 @@ class FileField extends BaseField
     {
         $config = $this->config();
         \Yii::debug("The filefield config is: " . json_encode($config));
-        $config['widgetConfig'] = ArrayHelper::merge($config['widgetConfig'], ['class' => 'mozzler-filepond', 'name' => 'filepond']);
+//        $config['widgetConfig'] = ArrayHelper::merge($config['widgetConfig'], ['class' => 'mozzler-filepond']);
 
         // JS
         $view = \Yii::$app->controller->getView();
@@ -42,33 +42,44 @@ class FileField extends BaseField
         // <script src="https://unpkg.com/jquery-filepond/filepond.jquery.js"></script>
 
         $view->registerJs('
+    if (typeof FilePond === "undefined") {
+        console.error("ERROR: FilePond isn\'t installed");
+    } else {
+        console.debug("Adding FilePond file upload support");
         FilePond.setOptions({
             allowDrop: true,
             allowReplace: true,
             instantUpload: true,
             allowMultiple: false,
             server: {
-                // url: \'http://192.168.33.10\',
                 process: \'/file/create\',
-                revert: \'/flie/delete\',
-                // restore: \'/file/update?id=\',
-                // fetch: \'./file/list\'
-            }
+                revert: \'/file/delete\', // Allow deleting uploaded files
+                restore: null,
+                fetch: null,
+            },
+//            onprocessfile: function (error, file) {
+//                // Get the associated hidden input
+//                // @warning: This process doesn\'t allow multiple file uploads on the same page as it\'ll only get the first filepond... not sure how to select the one associated with this specific instance.
+//                $(\'.filepond--root\').siblings(\'input[type=hidden]\').val(file.serverId);
+//            }
         });
 
         // First register any plugins
         $.fn.filepond.registerPlugin(FilePondPluginImagePreview);
 
-        // Turn input element into a pond
-        $(\'input.mozzler-filepond\').filepond();
+        var $mozzlerFilePond = $(\'input[type=file]\');
+        // Turn input element into a filepond
+        $mozzlerFilePond.filepond();
 
         // Listen for addfile event
-        $(\'input.mozzler-filepond\').on(\'FilePond:addfile\', function(e) {
-            console.log(\'file added event\', e);
+        $mozzlerFilePond.on(\'FilePond:onprocessfile\', function (e) {
+            console.log(\'file processed with event\', e);
         });
+    }
         ', WebView::POS_READY, 'filepond-setup');
 
         $field = $config['form']->field($config['model'], $config['attribute']);
+//        \Yii::warning("Returning the activeHiddenInput fileInput: " . $field->activeHiddenInput($config['widgetConfig']));
         return $field->fileInput($config['widgetConfig']);
     }
 

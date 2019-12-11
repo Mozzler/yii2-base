@@ -2,10 +2,13 @@
 
 namespace mozzler\base\controllers;
 
+use mozzler\base\components\Tools;
 use mozzler\base\controllers\ModelController as BaseController;
 use mozzler\base\exceptions\BaseException;
+use mozzler\base\models\behaviors\FileUploadBehaviour;
 use mozzler\base\models\File;
 use yii\helpers\ArrayHelper;
+use yii\helpers\UnsetArrayValue;
 use yii\web\HttpException;
 
 
@@ -34,69 +37,43 @@ class FileController extends BaseController
     {
         return ArrayHelper::merge(parent::rbac(), [
             'registered' => [
-                'index' => [
-                    'grant' => true
-                ],
-                'view' => [
-                    'grant' => true
-                ],
-                'create' => [
-                    'grant' => true
-                ],
-                'update' => [
-                    'grant' => true
-                ],
-                'delete' => [
-                    'grant' => true
-                ]
+                'index' => ['grant' => true],
+                'view' => ['grant' => true],
+                'create' => ['grant' => true],
+                'update' => ['grant' => true],
+                'delete' => ['grant' => true]
             ],
             'admin' => [
-                'create' => [
-                    'grant' => true
-                ],
-                'update' => [
-                    'grant' => true
-                ],
-                'delete' => [
-                    'grant' => true
-                ]
+                'index' => ['grant' => true],
+                'view' => ['grant' => true],
+                'create' => ['grant' => true],
+                'update' => ['grant' => true],
+                'delete' => ['grant' => true]
             ]
         ]);
     }
 
     public function actions()
     {
-        return [
-//			'create' => [
-//	            'class' => 'mozzler\base\actions\ModelCreateAction'
-//	        ],
-            'view' => [
-                'class' => 'mozzler\base\actions\ModelViewAction'
-            ],
-//	        'update' => [
-//	            'class' => 'mozzler\base\actions\ModelUpdateAction'
-//	        ],
-            'index' => [
-                'class' => 'mozzler\base\actions\ModelIndexAction'
-            ],
-//	        'delete' => [
-//	            'class' => 'mozzler\base\actions\ModelDeleteAction'
-//	        ]
-        ];
+        return ArrayHelper::merge(parent::actions(), [
+            // Manually setting create and delete to be what's used by the filepond uploader
+            'create' => new UnsetArrayValue(),
+            'delete' => new UnsetArrayValue(),
+        ]);
     }
 
     public function actionCreate()
     {
 
-        if (!empty($_FILES) && !empty($_FILES['filepond'])) {
-            \Yii::debug("The filepond file information is: " . json_encode($_FILES['filepond']));
+        // Example $file = {"modelType":"Client","name":"!Ikigai - A reason for Being.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpuLPa2S","error":0,"size":109927,"fieldName":"driversLicenceFile"}
+        $file = FileUploadBehaviour::getFileInfo();
+        if (!empty($file)) {
+            \Yii::debug("The filepond file information is: " . json_encode($file));
         } else {
-            \Yii::error("No filepond file uploaded: " . json_encode($_FILES));
+            \Yii::error("No file uploaded: " . json_encode($_FILES));
             throw new BaseException("No filepond file uploaded", null, null, ['Mozzler Base Filepond Uploader' => 'Create Action in the File Controller', 'Files' => $_FILES]);
         }
 
-        // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
-        $file = $_FILES['filepond'];
 
         if ($file['error'] > 0) {
             // As per https://www.php.net/manual/en/features.file-upload.errors.php
@@ -123,6 +100,10 @@ class FileController extends BaseController
             'originalFilename' => $file['name'],
             'size' => $file['size'],
             'mimeType' => $file['type'],  // Could also use: \yii\helpers\FileHelper::getMimeType($file['tmp_name']),
+            'other' => [
+                'fieldName' => isset($file['fieldName']) ? $file['fieldName'] : null,
+                'modelType' => isset($file['modelType']) ? $file['modelType'] : null,
+            ]
         ]);
         // Use the fileUpload Behaviour on the model to do the file processing
         $saved = $fileObject->save(true, null, false); // Save without checking permissions
@@ -137,9 +118,21 @@ class FileController extends BaseController
 
     public function actionDelete()
     {
-        \Yii::error("Filepond file to be deleted: " . json_encode(['REQUEST' => $_REQUEST]));
-
-        return true;
+        // We get a DELETE request with the contents being the id of the file to be deleted
+        $request = \Yii::$app->request;
+        if ($request->isDelete && !empty($request->getRawBody())) {
+            $fileIdToDelete = $request->getRawBody();
+            /** @var File $fileToDelete */
+            $fileToDelete = \Yii::$app->t::getModel(File::class, $fileIdToDelete);
+            if (empty($fileToDelete)) {
+                throw new BaseException("Can't file {$fileIdToDelete} to Delete", 404);
+            }
+            \Yii::info("Deleting file with ID: $fileIdToDelete");
+            $deleted = $fileToDelete->delete();
+            return $deleted;
+        }
+        return false;
     }
+
 
 }

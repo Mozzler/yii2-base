@@ -38,12 +38,13 @@ class FileUploadBehaviour extends Behavior
         return [
             BaseActiveRecord::EVENT_BEFORE_INSERT => 'uploadFile',
             BaseActiveRecord::EVENT_BEFORE_UPDATE => 'uploadFile',
+            BaseActiveRecord::EVENT_BEFORE_DELETE => 'deleteFile',
         ];
     }
 
 
     /**
-     * @return array
+     * @return bool
      * Deal with the file saving
      *
      * You can override this in your model to do more fancy file saving.
@@ -52,19 +53,17 @@ class FileUploadBehaviour extends Behavior
      */
     public function uploadFile($event)
     {
-        \Yii::error("Filepond uploadFile behaviour");
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
         // -- Basic file validation checks
-        if (!empty($_FILES) && !empty($_FILES['filepond'])) {
-            \Yii::debug("The filepond file information is: " . json_encode($_FILES['filepond']));
-        } else {
-            \Yii::error("No filepond file uploaded: " . json_encode($_FILES));
-            return false;
-        }
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
-        $file = $_FILES['filepond'];
+        $file = self::getFileInfo();
+        if (!empty($file)) {
+            \Yii::debug("The filepond file information is: " . json_encode($file));
+        } else {
+            throw new BaseException("No file uploaded", 400, null, ['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $file]);
+        }
         if (!is_file($file['tmp_name'])) {
             throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$file['tmp_name']} could not be found", 'file' => $file]);
         }
@@ -77,12 +76,11 @@ class FileUploadBehaviour extends Behavior
         $fsName = $this->filesystemComponentName;
         $fs = \Yii::$app->$fsName;
         // If you have defined a filesystem component using https://github.com/creocoder/yii2-flysystem
-        \Yii::info("Using the Flysystem Filesystem you've defined");
+        \Yii::info("Using the $fsName Flysystem Filesystem you've defined");
 
         // ----------------------------------
         //   Prepare the file
         // ----------------------------------
-
         $md5 = md5_file($file['tmp_name']);
         $md5DirectoryChars = $md5[0] . $md5[1]; // Get the first 2 characters as the directory name
         $filename = $md5 . '.' . $this->getExtension($file['name']);
@@ -91,57 +89,53 @@ class FileUploadBehaviour extends Behavior
         $fs->createDir($md5DirectoryChars);
         $visibilty = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
 
-        // ----------------------------------
-        //   Save the file
-        // ----------------------------------
-
-        $stream = fopen($file['tmp_name'], 'r+');
-        $fs->writeStream($filepath, $stream, ['visibility' => $visibilty]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
-
+        $exists = $fs->has($filepath);
+        if (!$exists) {
+            // ----------------------------------
+            //   Save the file
+            // ----------------------------------
+            $stream = fopen($file['tmp_name'], 'r+');
+            $fs->writeStream($filepath, $stream, ['visibility' => $visibilty]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
+        } else {
+            // This is a duplicate file
+            \Yii::warning("This is a duplicate file, you've already uploaded {$filepath}");
+        }
 
         // ----------------------------------
         //   Save the File fields
         // ----------------------------------
-
         $fileModel->filename = $filename;
         $fileModel->filepath = $filepath;
 
         return true;
+    }
 
-        // Optional way of doing it locally without the fs filesystem
-        /*
-//        $folder = "uploads/"; // Will default to the 'web' folder and this will be public
-//        // -------------------------
-//        //  Sort out the folder
-//        // -------------------------
-//        $modelConfig = $this->modelConfig();
-//        if (!empty($modelConfig['label'])) {
-//            // Add the model name
-//            $folder .= strtolower(str_ireplace(' ', '_', $modelConfig['label'])) . "/";
-//        }
-//        // Add the field name
-//        $folder .= "{$fieldName}/";
-//
-//        // Create the directory if needed
-//        if (!is_dir($folder)) {
-//            \Yii::info("Creating the folder {$folder}");
-//            mkdir($folder, 0777, true);
-//        }
-//
-//        $filename = "{$md5}.{$file->extension}";
-//        $filePath = $folder . $filename;
-//        $file->saveAs($filePath);
-//        // Return the fields used in the file: 'filename', 'filepath', 'type', 'mimeType', 'size', 'version', 'other'
-//        return [
-//            'filename' => $filename,
-//            'filepath' => $filePath,
-//            'type' => File::TYPE_LOCAL,
-//            'size' => $file->size,
-//            'mimeType' => \yii\helpers\FileHelper::getMimeType($filePath),
-//            'originalFilename' => $file->name,
-//        ]; // Return the info saved to the file model
-        return true;
-        */
+    public function deleteFile($event)
+    {
+        /** @var File $fileModel */
+        $fileModel = $this->owner;
+
+        // -- Check the FileSystem has been defined
+        if (!\Yii::$app->has($this->filesystemComponentName)) {
+            throw new BaseException("Unable to find the {$this->filesystemComponentName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$this->filesystemComponentName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
+        }
+
+        // Use the FlySystem that's been defined
+        $fsName = $this->filesystemComponentName;
+        $fs = \Yii::$app->$fsName;
+
+
+        $exists = $fs->has($fileModel->filepath);
+        if ($exists) {
+            $deleted = $fs->delete($fileModel->filepath);
+            \Yii::error("Deleted file {$fileModel->filepath} based on the File ID: {$fileModel->getId()}");
+            // Note: There could be other file documents pointing to the same file (multiple uploads of the same file).
+            // Might need to delete the other duplicate File entries? (If so, trigger that in the FileController actionDelete method, not here)
+            return $deleted;
+        } else {
+            \Yii::error("Can't find so thus can't delete {$fileModel->filepath}");
+        }
+        return false; // Doesn't stop the processing
     }
 
 
@@ -167,6 +161,35 @@ class FileUploadBehaviour extends Behavior
     public function getExtension($originalFilename)
     {
         return strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * Get File Info
+     *
+     * Only expecting a single file response
+     * @return array|bool
+     *
+     * Example response: {"modelType":"Client","name":"!Ikigai - A reason for Being.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpuLPa2S","error":0,"size":109927,"fieldName":"driversLicenceFile"}
+     */
+    public static function getFileInfo()
+    {
+        // Example $_FILES = {"Client":{"name":{"driversLicenceFile":"!!72484913_10156718971467828_53539529008611328_n.jpg"},"type":{"driversLicenceFile":"image\/jpeg"},"tmp_name":{"driversLicenceFile":"\/tmp\/phpmypYid"},"error":{"driversLicenceFile":0},"size":{"driversLicenceFile":35420}}}
+        if (empty($_FILES)) {
+            return false;
+        }
+        $modelType = key($_FILES);
+        $file = ['modelType' => $modelType];
+        foreach ($_FILES[$modelType] as $fieldField => $infoEntry) {
+
+            $fieldName = key($infoEntry);
+            // e.g name = image.jpg
+            $file[$fieldField] = $infoEntry[$fieldName];
+
+        };
+        $file['fieldName'] = isset($fieldName) ? $fieldName : null;
+
+        \Yii::debug("The file is: ". json_encode($file, JSON_PRETTY_PRINT));
+        return $file;
     }
 
 }

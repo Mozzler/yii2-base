@@ -25,24 +25,6 @@ class File extends BaseModel
 {
     protected static $collectionName = 'app.file';
 
-    // Type is where the file is stored. See https://github.com/thephpleague/flysystem for more info
-    public const TYPE_LOCAL = 'local'; // Local to the webserver
-    public const TYPE_S3 = 'amazonS3';
-    public const TYPE_NULL = 'null';
-    public const TYPE_AZURE_BLOB = 'azureBlob';
-    public const TYPE_MEMORY = 'memory';
-    public const TYPE_PHPCR = 'PHPCR';
-    public const TYPE_RACKSPACE = 'rackspace';
-    public const TYPE_FTP = 'FTP';
-    public const TYPE_SFTP = 'SFTP';
-    public const TYPE_WEBDAV = 'webDAV';
-    public const TYPE_ZIP = 'zip';
-    public const TYPE_BACKBLAZE = 'backblaze';
-    public const TYPE_DROPBOX = 'dropbox';
-    public const TYPE_DATABASE = 'database'; // A generic entry
-    public const TYPE_OTHER = 'other'; // For anything else not listed
-
-
     protected function modelConfig()
     {
         return [
@@ -100,27 +82,6 @@ class File extends BaseModel
                     ]
                 ]
             ],
-            'type' => [
-                'type' => 'SingleSelect',
-                'label' => 'Type',
-                'options' => [
-                    self::TYPE_LOCAL => 'Local',
-                    self::TYPE_S3 => 'Amazon S3',
-                    self::TYPE_NULL => 'Null',
-                    self::TYPE_AZURE_BLOB => 'Azure Blob',
-                    self::TYPE_MEMORY => 'Memory',
-                    self::TYPE_PHPCR => 'PHPCR',
-                    self::TYPE_RACKSPACE => 'Rackspace',
-                    self::TYPE_FTP => 'FTP',
-                    self::TYPE_SFTP => 'SFTP',
-                    self::TYPE_WEBDAV => 'WebDAV',
-                    self::TYPE_ZIP => 'Zip',
-                    self::TYPE_BACKBLAZE => 'Backblaze',
-                    self::TYPE_DROPBOX => 'Dropbox',
-                    self::TYPE_DATABASE => 'Database',
-                    self::TYPE_OTHER => 'Other',
-                ]
-            ],
             'mimeType' => [
                 'type' => 'Text',
                 'label' => 'MIME Type',
@@ -167,6 +128,8 @@ class File extends BaseModel
             // Save any previous file versions, esp for S3 saves, file updates, etc..
             'auditLog' => [
                 'class' => AuditLogBehaviour::class,
+                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
+                'skipUpdateOnClean' => true,
             ],
             'fileUpload' => [
                 'class' => FileUploadBehaviour::class
