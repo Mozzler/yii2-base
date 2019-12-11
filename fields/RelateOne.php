@@ -29,5 +29,3 @@ class RelateOne extends MongoId {
 	public $linkField = '_id';
 	
 }
-
-?>
