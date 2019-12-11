@@ -13,7 +13,6 @@ use yii\helpers\ArrayHelper;
  *
  * @package mozzler\base\models
  *
- * @property string $type
  * @property string $originalFilename
  * @property string $filename required
  * @property string $filepath required
@@ -114,11 +113,11 @@ class File extends BaseModel
     {
 
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'type', 'mimeType', 'size', 'version', 'other'];
-        $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
+        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'version'];
+        $scenarios[self::SCENARIO_UPDATE] = ['originalFilename']; // The original filename is used as what's sent to the browser on download
         $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'type', 'mimeType', 'size', 'version', 'other', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'type', 'mimeType', 'size'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'mimeType', 'size'];
 
         return $scenarios;
     }

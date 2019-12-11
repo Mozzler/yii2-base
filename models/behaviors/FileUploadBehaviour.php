@@ -49,7 +49,8 @@ class FileUploadBehaviour extends Behavior
         if (!empty($file)) {
             \Yii::debug("The file information is: " . json_encode($file));
         } else {
-            throw new BaseException("No file uploaded", 400, null, ['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $file]);
+            \Yii::error("No file uploaded" . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $file]));
+            return false;
         }
         if (!is_file($file['tmp_name'])) {
             throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$file['tmp_name']} could not be found", 'file' => $file]);
