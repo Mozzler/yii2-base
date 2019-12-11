@@ -3,6 +3,7 @@
 namespace mozzler\base\models;
 
 use mozzler\base\models\behaviors\AuditLogBehaviour;
+use mozzler\base\models\behaviors\FileUploadBehaviour;
 use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
@@ -152,9 +153,9 @@ class File extends BaseModel
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'type', 'mimeType', 'size', 'version', 'other'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['filename', 'size', 'createdAt'];
+        $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'createdAt'];
         $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'type', 'mimeType', 'size', 'version', 'other', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'type', 'mimeType', 'size'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'type', 'mimeType', 'size'];
 
         return $scenarios;
     }
@@ -167,6 +168,9 @@ class File extends BaseModel
             'auditLog' => [
                 'class' => AuditLogBehaviour::class,
             ],
+            'fileUpload' => [
+                'class' => FileUploadBehaviour::class
+            ]
         ]);
     }
 

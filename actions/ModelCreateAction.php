@@ -37,29 +37,6 @@ class ModelCreateAction extends BaseModelAction
         // Populate the model with any POST data
         if ($model->load(\Yii::$app->request->post())) {
             try {
-                if ($model->validate()) {
-                    // -- Check if has a file
-                    foreach ($model->modelFields() as $fieldName => $fieldAttributes) {
-                        if (isset($fieldAttributes['type']) && 'File' === $fieldAttributes['type']) {
-                            // Found a file field, check the uploads as per https://www.yiiframework.com/doc/guide/2.0/en/input-file-upload
-                            \Yii::info("Saving the $fieldName file field");
-
-                            $uploadFile = UploadedFile::getInstance($model, $fieldName);
-                            if (empty($uploadFile)) {
-                                \Yii::warning("Couldn't find the uploaded file for: $fieldName");
-                                continue; // Skip this
-                            }
-                            $fileInfo = $model->uploadFile($fieldName, $uploadFile);
-                            /** @var \mozzler\base\models\File $fileInfoModel */
-                            $fileInfoModel = \Yii::$app->t::createModel(\mozzler\base\models\File::class, $fileInfo);
-                            $saved = $fileInfoModel->save(true, null, false);
-
-                            \Yii::info("Uploaded: " . json_encode(['uploaded info' => $fileInfo, 'savedCorrectly' => $saved, 'saveErrors' => $fileInfoModel->getErrors()]));
-                            $model->$fieldName = $fileInfoModel->_id; // Save the relation
-                        }
-                    }
-                }
-
                 if ($model->save()) {
                     $response = \Yii::$app->getResponse();
                     $response->setStatusCode(201);
