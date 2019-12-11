@@ -14,8 +14,9 @@ use yii\helpers\ArrayHelper;
  * @package mozzler\base\models
  *
  * @property string $type
- * @property string $filename
- * @property string $filepath
+ * @property string $originalFilename
+ * @property string $filename required
+ * @property string $filepath required
  * @property string $mimeType
  * @property string $version
  * @property integer $size
@@ -69,18 +70,19 @@ class File extends BaseModel
                 'label' => 'Filename',
                 'required' => true,
             ],
-            'originalFilename' => [
-                'type' => 'Text',
-                'label' => 'Original Filename',
-            ],
             'filepath' => [
                 'type' => 'Text',
                 'label' => 'Filepath',
+                'required' => true,
                 'widgets' => [
                     'view' => [
                         'class' => 'mozzler\base\widgets\model\view\CodeField',
                     ]
-                ]
+                ],
+            ],
+            'originalFilename' => [
+                'type' => 'Text',
+                'label' => 'Original Filename',
             ],
             'mimeType' => [
                 'type' => 'Text',

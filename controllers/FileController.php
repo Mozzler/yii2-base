@@ -62,6 +62,55 @@ class FileController extends BaseController
         ]);
     }
 
+    public function actionDownload()
+    {
+        $fileId = \Yii::$app->request->get('id');
+
+        if (!$fileId) {
+            throw new \yii\web\NotFoundHttpException("No File ID specified");
+        }
+        /** @var File $fileModel */
+        $fileModel = \Yii::$app->t::getModel(File::class, $fileId);
+        if (empty($fileModel)) {
+            throw new \yii\web\NotFoundHttpException("File with ID {$fileId} not found");
+        }
+        /** @var FileUploadBehaviour $FileUploadBehaviour */
+        $FileUploadBehaviour = \Yii::createObject(FileUploadBehaviour::class);
+
+        $filesystemComponentName = $FileUploadBehaviour->filesystemComponentName; // 'fs' by default
+        // -- Check the FileSystem has been defined
+        if (!\Yii::$app->has($filesystemComponentName)) {
+            throw new BaseException("Unable to find the {$filesystemComponentName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$filesystemComponentName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
+        }
+
+        // Use the FlySystem that's been defined
+        $fsName = $filesystemComponentName;
+        /** @var \creocoder\flysystem\LocalFilesystem $fs */
+        $fs = \Yii::$app->$fsName;
+
+        $exists = $fs->has($fileModel->filepath);
+        if (!$exists) {
+            throw new \yii\web\NotFoundHttpException("File with Id {$fileId} not found");
+        }
+
+        $handle = $fs->readStream($fileModel->filepath);
+        $options = [
+            'size' => empty($fileModel->size) ? $fs->getSize($fileModel->filepath) : $fileModel->size,
+            'inline' => true, // Show the file in the browser (assuming it's an image, or something)
+            'mimeType' => empty($fileModel->mimeType) ? $fs->getMimetype($fileModel->filepath) : $fileModel->mimeType
+        ];
+        if ('application/octet-stream' === $options['mimeType']) {
+            $options['inline'] = false; // Don't show unknown files in the browser, force the user to try and download them
+        }
+
+        $filename = empty($fileModel->originalFilename) ? $fileModel->filename : $fileModel->originalFilename; // Use the original filename if available
+
+        // --------------------------------------
+        //  Send file (as a stream)
+        // --------------------------------------
+        \Yii::$app->response->sendStreamAsFile($handle, $filename, $options);
+    }
+
     public function actionCreate()
     {
 

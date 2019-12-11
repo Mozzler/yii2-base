@@ -1,5 +1,2 @@
-{% if widget.model[widget.attribute] %}
-    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] }}</{{ widget.tag }}>
-{% else  %}
-    <{{ widget.tag }}Unable to find file</{{ widget.tag }}>
-{% endif %}
+<{{ widget.tag }}{{ html.renderTagAttributes(widget.options) }}>{% if widget.link %}<a href="{{ widget.link }}" target="_blank" title="The file is {{ widget.size }}">{{ widget.value }}</a>
+{% else %}{{ widget.value }}{% endif %}</{{ widget.tag }}>
