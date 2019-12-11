@@ -42,17 +42,17 @@ class FileUploadBehaviour extends Behavior
         ];
     }
 
-
     /**
-     * @return bool
      * Deal with the file saving
      *
-     * You can override this in your model to do more fancy file saving.
-     * @var $file \yii\web\UploadedFile
-     * @var $fieldName string
+     * You can replace this with a different behaviour to do more fancy file saving if you want.
+     * @param $event
+     * @return bool
+     * @throws BaseException
      */
     public function uploadFile($event)
     {
+        \Yii::info("The uploadFile is being run");
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
@@ -188,7 +188,7 @@ class FileUploadBehaviour extends Behavior
         };
         $file['fieldName'] = isset($fieldName) ? $fieldName : null;
 
-        \Yii::debug("The file is: ". json_encode($file, JSON_PRETTY_PRINT));
+        \Yii::debug("The file is: " . json_encode($file, JSON_PRETTY_PRINT));
         return $file;
     }
 
