@@ -16,7 +16,9 @@ class FileField extends BaseField
     {
         $config = $this->config();
         \Yii::debug("The filefield config is: " . json_encode($config));
-//        $config['widgetConfig'] = ArrayHelper::merge($config['widgetConfig'], ['class' => 'mozzler-filepond']);
+
+        //@todo: Need to show if a file has already been uploaded or not (esp in the update view as it'll cause the entry to be lost)
+
 
         // JS
         $view = \Yii::$app->controller->getView();
@@ -27,19 +29,6 @@ class FileField extends BaseField
         // CSS
         $view->registerCssFile('https://unpkg.com/filepond/dist/filepond.css', ['position' => WebView::POS_HEAD], 'filepond-styling');
         $view->registerCssFile('https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css', ['position' => WebView::POS_HEAD], 'filepond-styling-plugin-imagepreview');
-
-
-        //<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
-        //<link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
-
-        // Include FilePond library as per https://github.com/pqina/jquery-filepond
-        // <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>
-
-        // Include FilePond plugins
-        // <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js"></script>
-
-        // Include FilePond jQuery adapter -->
-        // <script src="https://unpkg.com/jquery-filepond/filepond.jquery.js"></script>
 
         $view->registerJs('
     if (typeof FilePond === "undefined") {

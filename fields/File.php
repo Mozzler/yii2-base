@@ -18,6 +18,10 @@ class File extends Base
 
     public function setValue($value)
     {
+        // ensureId doesn't like working on an empty field
+        if (empty($value)) {
+            return $value;
+        }
         return \Yii::$app->t::ensureId($value);
     }
 }
