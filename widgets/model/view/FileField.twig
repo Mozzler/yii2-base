@@ -1,2 +1,2 @@
 <{{ widget.tag }}{{ html.renderTagAttributes(widget.options) }}>{% if widget.link %}<a href="{{ widget.link }}" target="_blank" title="The file is {{ widget.size }}">{{ widget.value }}</a>
-{% else %}{{ widget.value }}{% endif %}</{{ widget.tag }}>
+{% else %}<span class="text-warning">Invalid File, upload again <span class="hidden">FileId: {{ widget.model.id }}</span></span>{% endif %}</{{ widget.tag }}>
