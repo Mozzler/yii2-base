@@ -98,8 +98,10 @@ class File extends BaseModel
             ],
             // Used for Amazon S3 uploads
             'version' => [
+                // Normal S3 versions are long strings, not numbers
                 'type' => 'Text',
                 'label' => 'Version Number',
+                'default' => "1" // NB: Has to be a string not integer otherwise this barfs
             ],
             'other' => [
                 // In case you want to save anything else

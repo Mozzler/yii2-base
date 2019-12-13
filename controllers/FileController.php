@@ -58,7 +58,9 @@ class FileController extends BaseController
         return ArrayHelper::merge(parent::actions(), [
             // Manually setting create and delete to be what's used by the filepond uploader
             'create' => new UnsetArrayValue(),
-            'delete' => new UnsetArrayValue(),
+            'delete' => [
+                'class' => 'mozzler\base\actions\FileDeleteAction'
+            ],
         ]);
     }
 
@@ -113,6 +115,14 @@ class FileController extends BaseController
                 'modelType' => isset($file['modelType']) ? $file['modelType'] : null,
             ]
         ]);
+
+        // Sanity validation check - Ensure we haven't stuffed up the config somewhere
+        $valid = $fileObject->validate();
+        if (!$valid) {
+            \Yii::error("Unable to start file upload, model validation failed: " . json_encode($fileObject->getErrors(), JSON_PRETTY_PRINT));
+            throw new BaseException("Validation Errors - Unable to save file", 500, null, ['message' => 'Unable to validate the File model before even trying to do any file processing. Error(s): ' . json_encode($fileObject->getErrors(), JSON_PRETTY_PRINT), 'messageData' => $fileObject]);
+        }
+
         // We use the fileUpload Behaviour on the model to do the file processing
         $saved = $fileObject->save(true, null, false); // Save without checking permissions
         if ($saved) {
@@ -121,32 +131,6 @@ class FileController extends BaseController
             throw new HttpException(500, "Unable to save file");
         }
 
-    }
-
-
-    /**
-     *
-     * DELETE
-     *
-     * @return bool
-     * @throws BaseException
-     */
-    public function actionDelete()
-    {
-        // We get a DELETE request with the contents being the id of the file to be deleted
-        $request = \Yii::$app->request;
-        if ($request->isDelete && !empty($request->getRawBody())) {
-            $fileIdToDelete = $request->getRawBody();
-            /** @var File $fileToDelete */
-            $fileToDelete = \Yii::$app->t::getModel(File::class, $fileIdToDelete);
-            if (empty($fileToDelete)) {
-                throw new BaseException("Can't file {$fileIdToDelete} to Delete", 404);
-            }
-            \Yii::info("Deleting file with ID: $fileIdToDelete");
-            $deleted = $fileToDelete->delete();
-            return $deleted;
-        }
-        return false;
     }
 
 

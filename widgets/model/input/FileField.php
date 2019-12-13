@@ -15,6 +15,7 @@ class FileField extends BaseField
     public function run()
     {
         $config = $this->config();
+
         \Yii::debug("The filefield config is: " . json_encode($config));
 
         //@todo: Need to show if a file has already been uploaded or not (esp in the update view as it'll cause the entry to be lost)
