@@ -2,6 +2,7 @@
 
 namespace mozzler\base\widgets\model\input;
 
+use mozzler\base\models\Model;
 use yii\helpers\ArrayHelper;
 use yii\web\View as WebView;
 
@@ -16,7 +17,13 @@ class FileField extends BaseField
     {
         $config = $this->config();
 
+        /** @var Model $model */
+        $model = $config['model'];
+        $attribute = $config['attribute'];
+
+
         \Yii::debug("The filefield config is: " . json_encode($config));
+        \Yii::debug("The model $attribute is set to: " . json_encode($model->$attribute));
 
         //@todo: Need to show if a file has already been uploaded or not (esp in the update view as it'll cause the entry to be lost)
 
@@ -32,45 +39,71 @@ class FileField extends BaseField
         $view->registerCssFile('https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css', ['position' => WebView::POS_HEAD], 'filepond-styling-plugin-imagepreview');
 
         $view->registerJs('
-    if (typeof FilePond === "undefined") {
-        console.error("ERROR: FilePond isn\'t installed");
-    } else {
-        console.debug("Adding FilePond file upload support");
-        FilePond.setOptions({
-            allowDrop: true,
-            allowReplace: true,
-            instantUpload: true,
-            allowMultiple: false,
-            server: {
-                process: \'/file/create\',
-                revert: \'/file/delete\', // Allow deleting uploaded files
-                restore: null,
-                fetch: null,
-            },
-//            onprocessfile: function (error, file) {
-//                // Get the associated hidden input
-//                // @warning: This process doesn\'t allow multiple file uploads on the same page as it\'ll only get the first filepond... not sure how to select the one associated with this specific instance.
-//                $(\'.filepond--root\').siblings(\'input[type=hidden]\').val(file.serverId);
-//            }
-        });
 
-        // First register any plugins
-        $.fn.filepond.registerPlugin(FilePondPluginImagePreview);
 
-        var $mozzlerFilePond = $(\'input[type=file]\');
-        // Turn input element into a filepond
-        $mozzlerFilePond.filepond();
+if (typeof FilePond === "undefined") {
+    console.error("ERROR: FilePond isn\'t installed");
+} else {
+	console.log("Adding FilePond file upload support");
+	FilePond.setOptions({
+	    allowDrop: true,
+	    allowReplace: true,
+	    instantUpload: true,
+	    allowMultiple: false,
+	    server: {
+	        process: \'/file/create\',
+	        revert: \'/file/delete\', // Allow deleting uploaded files
+	        load: \'/file/download?id=\', // Allow viewing previously uploaded files
+	        restore: \'/file/download?id=\',
+	        fetch: null,
+	    },
+	});
 
-        // Listen for addfile event
-        $mozzlerFilePond.on(\'FilePond:onprocessfile\', function (e) {
-            console.log(\'file processed with event\', e);
-        });
-    }
+	// Allow image previews
+	$.fn.filepond.registerPlugin(FilePondPluginImagePreview);
+
+	// ----------------------------------
+	//  Instanciate Filepond entries
+	// ----------------------------------
+	var $mozzlerFilePond = $(\'input.mozzler-filepond-fileinput\');
+	// Turn input element into a filepond
+	var filePonds = [];
+	$mozzlerFilePond.each(function(index, element) {
+
+	if (element.value) {
+	 console.log("There\'s already been a file uploaded");
+	 filePond = FilePond.create(element, {
+	 	\'files\': [
+	        {
+	            // The server file reference
+	            source: element.value,
+	            // Set type to indicate an already uploaded file
+	            options: {
+	                type: \'limbo\'
+	            }
+	        }
+	    ]
+	  });
+
+	} else {
+	 filePond = FilePond.create(element);
+	}
+	filePonds.push({\'element\': element, \'filePond\': filePond });
+
+	});
+
+	window.mozzler_filePonds = filePonds; // Make global var so devs can make their own changes if needed
+
+}
+
+
+
+
         ', WebView::POS_READY, 'filepond-setup');
 
-        $field = $config['form']->field($config['model'], $config['attribute']);
-//        \Yii::warning("Returning the activeHiddenInput fileInput: " . $field->activeHiddenInput($config['widgetConfig']));
-        return $field->fileInput($config['widgetConfig']);
+        /** @var \yii\widgets\ActiveField $field */
+        $field = $config['form']->field($config['model'], $config['attribute'], ArrayHelper::merge($config['widgetConfig'], ['inputOptions' => ['value' => (string)$model->$attribute]]));
+        return $field->hiddenInput(ArrayHelper::merge($config['widgetConfig'], ['class' => 'mozzler-filepond-fileinput'])); // 'mozzler-filepond-fileinput' is what we'll use for triggering the filepond uploader
     }
 
 }
