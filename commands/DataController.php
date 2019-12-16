@@ -81,8 +81,10 @@ class DataController extends BaseController
                 }
 
                 if (null === $model) {
-                    $model = new $className();
-                    $model->load([(substr($className, strrpos($className, '\\') + 1)) => $rowData]);
+                    $model = $baseTools::createModel($className, $rowData);
+                    // -- Or you could try manually creating it without the loadDefaultValues call that the createModel does:
+                    // $model = new $className();
+                    // $model->load([(substr($className, strrpos($className, '\\') + 1)) => $rowData]);
 
                     if (!$model->save(true, null, false)) {
                         // Output the error
