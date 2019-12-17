@@ -7,14 +7,18 @@ use yii\helpers\ArrayHelper;
 class Base extends Component {
 	
 	public $type = 'Base';
+	/** @var string $label */
 	public $label;
 	public $hint;
 	public $config = [];
 	public $rules = [];
+	/** @var \mozzler\base\models\Model $model */
 	public $model;
+	/** @var string $attribute */
 	public $attribute;
 	public $filterType = "=";
 	public $default = null;
+	/** @var bool $required */
 	public $required = false;
 	public $widgets = [];
 	public $hidden = false;

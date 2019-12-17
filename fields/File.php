@@ -24,4 +24,20 @@ class File extends Base
         }
         return \Yii::$app->t::ensureId($value);
     }
+
+
+    /**
+     * Updating the required whenclient to work with the Filepond style hidden input
+     * format: [validator, parameter => value]
+     */
+    public function rules()
+    {
+        $rules = parent::rules();
+        if ($this->required && isset($rules['required'])) {
+            $rules['required']['whenClient'] = "function (attribute, value) { return \"\" == $('input[name=\"{$this->model->formName()}[$this->attribute]\"]').val(); }"; // Hacking the whenClient to work with the Filepond style hidden input
+        }
+
+        return $rules;
+    }
+
 }
