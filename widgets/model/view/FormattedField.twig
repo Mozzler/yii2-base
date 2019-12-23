@@ -1,0 +1,5 @@
+{% if widget.formattedValue %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.formattedValue }}</{{ widget.tag }}>
+{% else %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] }}</{{ widget.tag }}>
+{% endif %}
