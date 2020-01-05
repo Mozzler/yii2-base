@@ -92,6 +92,7 @@ class RelateOneField extends BaseField
             'options' => ['placeholder' => 'Search for a '.$relatedModel->getModelConfig("label")],
             'pluginOptions' => [
                 'allowClear' => true,
+                'tags' => $modelField->allowUserDefined,
                 'ajax' => [
                     'url' => $listUrl,
                     'accepts' => [
@@ -116,7 +117,7 @@ class RelateOneField extends BaseField
                             return {id: d._id, text: d["'.$searchAttribute.'"]}
                         });
                         return {results: results}
-                    }'),
+                    }')
                 ],
             ],
             'initValueText' => $relatedModel->$searchAttribute

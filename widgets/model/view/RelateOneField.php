@@ -21,6 +21,16 @@ class RelateOneField extends BaseField {
     public function config($templatify=true)
 	{
         $config = parent::config(true);
+
+        $modelField = $config['model']->getModelField($config['attribute']);
+        $value = $config['model'][$config['attribute']];
+        try {
+			$value = new \MongoDB\BSON\ObjectId($value);
+		} catch (\MongoDB\Driver\Exception\InvalidArgumentException $e) {
+            if ($modelField->allowUserDefined) {
+                $config['userDefinedValue'] = $value;
+            }
+        }
         
 		return $config;
     }

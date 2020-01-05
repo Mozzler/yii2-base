@@ -27,5 +27,10 @@ class RelateOne extends MongoId {
 	public $relatedModelField;
 
 	public $linkField = '_id';
+
+	/**
+	 * Allow user defined values
+	 */
+	public $allowUserDefined = false;
 	
 }

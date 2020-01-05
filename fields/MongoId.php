@@ -14,8 +14,16 @@ class MongoId extends Base {
 	public function setValue($value) {
 		if (!$value)
 			return null;
-			
-		return new \MongoDB\BSON\ObjectId($value);
+
+		try {
+			return new \MongoDB\BSON\ObjectId($value);
+		} catch (\MongoDB\Driver\Exception\InvalidArgumentException $e) {
+			if ($this->allowUserDefined) {
+				return $value;
+			}
+
+			throw $e;
+		}
 	}
 	
 	public function generateFilter($model, $attribute) {
