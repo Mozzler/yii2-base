@@ -34,6 +34,19 @@ class FieldGridConfig {
 				'class' => \yii\grid\DataColumn::className(),
 				'format' => 'html',
 				'value' => function ($model, $key, $index, $column) {
+					$attribute = $column->attribute;
+					$value = $model->$attribute;
+					$modelField = $model->getModelField($column->attribute);
+					try {
+						$value = new \MongoDB\BSON\ObjectId($value);
+					} catch (\MongoDB\Driver\Exception\InvalidArgumentException $e) {
+						if ($modelField->allowUserDefined) {
+							return $value;
+						}
+
+						return "";
+					}
+
 					$relatedModel = $model->getRelated($column->attribute);
 					if (!$relatedModel) {
 						return "";
