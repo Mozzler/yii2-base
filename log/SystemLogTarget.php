@@ -279,7 +279,8 @@ class SystemLogTarget extends Target
         $request = Yii::$app->getRequest();
         $response = Yii::$app->getResponse();
 
-        $senderIp = $request->getUserIP(); // Most likely a proxy server
+
+        $senderIp = method_exists($request, 'getUserIP') ? $request->getUserIP() : 'N/A'; // Most likely a proxy server
         $userIp = self::getRealIpAddr(); // Most likely the actual user's IP
         $userId = null;
         $userName = null;
@@ -343,12 +344,13 @@ class SystemLogTarget extends Target
      */
     public static function getRealIpAddr()
     {
+        $ip = '';
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) //to check ip passed from proxy
         {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
+        } else if (!empty($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
         return $ip;
