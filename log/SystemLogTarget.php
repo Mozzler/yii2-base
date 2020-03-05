@@ -303,22 +303,31 @@ class SystemLogTarget extends Target
             // If the app is such that there's no user defined then we don't want to break the system log capabilities
         }
 
-
-        $summary = [
-            'url' => $request->getUrl(),
-            'ajax' => json_encode($request->getIsAjax()),
-            'method' => $request->getMethod(),
-            'category' => $category,
-            'userAgent' => $request->getUserAgent(),
-            'absoluteUrl' => $request->getAbsoluteUrl(),
-            'userIp' => ($senderIp === $userIp) ? $userIp : "{$userIp}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
-            'time' => isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : time(),
-            'processingTime' => defined('YII_BEGIN_TIME') ? number_format(microtime(true) - YII_BEGIN_TIME, 4) . 's' : null,
-            'statusCode' => $response->statusCode,
-            'userId' => $userId, // The logged in user
-            'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
-            'sessionId' => $sessionId, // Expecting the user to have a name set, this is just a nice to have
-        ];
+        if (method_exists($request, 'getUrl')) {
+            $summary = [
+                'url' => $request->getUrl(),
+                'ajax' => json_encode($request->getIsAjax()),
+                'method' => $request->getMethod(),
+                'category' => $category,
+                'userAgent' => $request->getUserAgent(),
+                'absoluteUrl' => $request->getAbsoluteUrl(),
+                'userIp' => ($senderIp === $userIp) ? $userIp : "{$userIp}, {$senderIp}", // More likely to show the actual users IP address first, then the proxy server,
+                'processingTime' => defined('YII_BEGIN_TIME') ? number_format(microtime(true) - YII_BEGIN_TIME, 4) . 's' : null,
+                'statusCode' => $response->statusCode,
+                'userId' => $userId, // The logged in user
+                'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
+                'sessionId' => $sessionId, // Expecting the user to have a name set, this is just a nice to have
+            ];
+        } else {
+            // It's likely a console request
+            $summary = [
+                'category' => $category,
+                'processingTime' => defined('YII_BEGIN_TIME') ? number_format(microtime(true) - YII_BEGIN_TIME, 4) . 's' : null,
+                'userId' => $userId, // The logged in user
+                'userName' => $userName, // Expecting the user to have a name set, this is just a nice to have
+                'sessionId' => $sessionId, // Expecting the user to have a name set, this is just a nice to have
+            ];
+        }
 
         return $summary;
     }
