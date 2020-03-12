@@ -342,7 +342,7 @@ class SystemLogTarget extends Target
             return null;
         }
         $request = Yii::$app->getRequest();
-        return method_exists($request, 'getAbsoluteUrl') ? $request->getAbsoluteUrl() : '';
+        return method_exists($request, 'getAbsoluteUrl') ? $request->getAbsoluteUrl() : 'N/A';
     }
 
     /**
