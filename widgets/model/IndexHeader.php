@@ -34,7 +34,7 @@ class IndexHeader extends BaseWidget {
 		$config['model']->load(\Yii::$app->request->get());
 		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'insert');
         $config['canExportModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'export');
-        
+
 		return $config;
 	}
 	

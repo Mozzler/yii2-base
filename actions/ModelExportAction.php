@@ -102,13 +102,14 @@ class ModelExportAction extends BaseModelAction
         //  Work out the Filename
         // ------------------------------------------
         $filename = empty($model->modelConfig['labelPlural']) ? $this->modelClass : $model->modelConfig['labelPlural'];
+//        $filename .= " x{$processedProducts}"; // If you wanted to add the count of entries
         // Add the current date (using the formatter if defined)
         if (\Yii::$app->formatter) {
-            $filename .= "_" . \Yii::$app->formatter->asDate(new \DateTime(), \Yii::$app->formatter::FORMAT_WIDTH_LONG);
+            $filename .= " " . \Yii::$app->formatter->asDate(new \DateTime(), \Yii::$app->formatter::FORMAT_WIDTH_LONG);
         } else {
-            $filename .= "_" . date('Y-m-d'); // e.g  2020-03-25
+            $filename .= " " . date('Y-m-d'); // e.g  2020-03-25
         }
-        $filename .= " x{$processedProducts}";
+
         $filename .= ".csv";
 
         \Yii::info("Now sending the file to the browser with the name '$filename'");
