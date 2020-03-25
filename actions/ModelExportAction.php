@@ -16,7 +16,7 @@ class ModelExportAction extends BaseModelAction
      */
     public $scenario = Model::SCENARIO_EXPORT;
 
-    public $limit = 5;
+    public $limit = 100;
 
     /**
      */
@@ -33,46 +33,18 @@ class ModelExportAction extends BaseModelAction
             throw new HttpException(403); // 403 unauthorised
         }
 
-        // ------------------------------------------
-        //  Work out the Filename
-        // ------------------------------------------
-        $filename = empty($model->modelConfig['labelPlural']) ? $this->modelClass : $model->modelConfig['labelPlural'];
-        // Add the current date (using the formatter if defined)
-        if (\Yii::$app->formatter) {
-            $filename .= "_" . \Yii::$app->formatter->asDate(new \DateTime(), \Yii::$app->formatter::FORMAT_WIDTH_LONG);
-        } else {
-            $filename .= "_" . date('Y-m-d'); // e.g  2020-03-25
-        }
-
-        $filename .= ".csv";
-
         // Partly inspired by https://appdividend.com/2019/05/09/php-array-values-example-php-array_values-function-tutorial/ and https://www.virendrachandak.com/techtalk/creating-csv-file-using-php-and-mysql/
-        // Create a file pointer connected to the output stream
-        $output = fopen('php://temp', 'w');
+        // The ob_start and ob_get_clean() was an important addition pointed out by https://stackoverflow.com/a/13474770/7299352
 
-        $model->setScenario($this->scenario);
-
-        // This will just contain the keys with null values as it's not a model that's been loaded up, but we just want the headers
-        $headings = $model->scenarios()[$this->scenario];
-        // Example $scenarioArray :
-        // [
-        //    'id' => '',
-        //    'name' => null,
-        //    'createdAt' => null,
-        //    'createdUserId' => null,
-        //    'updatedAt' => null,
-        //    'updatedUserId' => null,
-        // ]
-
-        \Yii::debug("The scenario Array is: " . VarDumper::export($headings));
-
-
-        // Output the column headings
-//        fputcsv($output, $headings);
-
+        // Create a file pointer connected to the output stream (but buffered because otherwise there's errors about not being able to set the headers)
+        ob_start();
+        $output = fopen('php://output', 'w');
         $modelCount = \Yii::$app->t::countModels($this->controller->modelClass);
         \Yii::debug("Loading up the {$modelCount} models");
 
+        // ------------------------------------------------------------------
+        //  Main Processing Loop
+        // ------------------------------------------------------------------
         $offset = 0;
         $processingProducts = true;
         $processedProducts = 0;
@@ -92,38 +64,55 @@ class ModelExportAction extends BaseModelAction
             foreach ($models as $modelIndex => $model) {
                 $model->setScenario($this->scenario);
                 $rowContents = $model->toScenarioArray();
-                if (!empty($rowContents['id']) && !empty($rowContents['_id'])) {
+                if (isset($rowContents['id']) && isset($rowContents['_id'])) {
                     // The toScenarioArray seems to output the _id and id fields, so you get the data duplicated, this removes that
                     unset($rowContents['id']);
                 }
                 if ($processedProducts === 0) {
                     // If the first entry then output the header (field names)
-                    fputcsv($output, array_keys($model->toScenarioArray()));
+                    fputcsv($output, array_keys($rowContents));
                 }
 
-
-                fputcsv($output, array_values($model->toScenarioArray()));
-//                \Yii::debug("Model #{$modelIndex} contains: " . VarDumper::export($model->toScenarioArray()));
+                $values = array_values($rowContents); // 0 indexed instead of key'd
+                foreach ($values as $index => $value) {
+                    if (is_array($value)) {
+                        // To prevent `Array to string conversion` we are converting non-strings to them here
+                        // Although you might want to use VarDumper instead of json_encode($value)
+//                        $values[$index] = VarDumper::export($value);
+                        $values[$index] = json_encode($value);
+                    }
+                }
+//                \Yii::debug("Model #$modelIndex : " . VarDumper::export($values));
+                fputcsv($output, $values);
                 $processedProducts++;
             }
-
 
             if ($processedProducts >= $modelCount) {
                 $processingProducts = false; // we've completed the set
             }
             $offset += $this->limit;
         }
+        \Yii::debug("Processed the {$processedProducts} {$this->controller->modelClass} models");
 
-        \Yii::debug("Processed the {$processedProducts} models ");
-
-
-        // Output headers so that the file is downloaded rather than displayed
-//        $headers = \Yii::$app->response->headers;
-//        $headers->add('Content-Type: text/csv; charset=utf-8');
-//        $headers->add("Content-Disposition: attachment; filename={$filename}");
-//        \Yii::$app->response->format = \Yii::$app->response::FORMAT_RAW;
-        \Yii::$app->response->sendStreamAsFile($output, $filename, ['mimeType' => 'text/csv', 'inline' => false]);
         fclose($output);
+        $csvContents = ob_get_clean();
+
+
+        // ------------------------------------------
+        //  Work out the Filename
+        // ------------------------------------------
+        $filename = empty($model->modelConfig['labelPlural']) ? $this->modelClass : $model->modelConfig['labelPlural'];
+        // Add the current date (using the formatter if defined)
+        if (\Yii::$app->formatter) {
+            $filename .= "_" . \Yii::$app->formatter->asDate(new \DateTime(), \Yii::$app->formatter::FORMAT_WIDTH_LONG);
+        } else {
+            $filename .= "_" . date('Y-m-d'); // e.g  2020-03-25
+        }
+        $filename .= " x{$processedProducts}";
+        $filename .= ".csv";
+
+        \Yii::info("Now sending the file to the browser with the name '$filename'");
+        \Yii::$app->response->sendContentAsFile($csvContents, $filename, ['mimeType' => 'text/csv', 'inline' => false]);
         return;
     }
 }

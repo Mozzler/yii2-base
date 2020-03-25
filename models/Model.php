@@ -34,7 +34,7 @@ class Model extends ActiveRecord
 
     protected static $collectionName;
     protected $modelFields;
-    protected $modelConfig;
+    public $modelConfig;
 
     const SCENARIO_CREATE = 'create';
     const SCENARIO_UPDATE = 'update';
@@ -146,7 +146,13 @@ class Model extends ActiveRecord
             self::SCENARIO_LIST => ['name', 'createdUserId', 'createdAt'],
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
-            self::SCENARIO_EXPORT => ['id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId'],
+            self::SCENARIO_EXPORT => array_keys(array_filter($this->modelFields(), function ($modelField, $modelKey) {
+                if ($modelKey === 'id') {
+                    return false; // Only want '_id' not 'id' otherwise it's doubling up
+                }
+                // This is used by the CSV export e.g model/export so you don't want to output fields that are relateMany
+                return $modelField['type'] === 'RelateMany' ? false : true;
+            }, ARRAY_FILTER_USE_BOTH)),
             self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
 
             self::SCENARIO_DEFAULT => array_keys($this->modelFields()),
