@@ -25,6 +25,9 @@ class File extends BaseModel
 {
     protected static $collectionName = 'app.file';
 
+    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and contains fileModel, extension, md5 and md5DirectoryChars
+    public static $folderpathTwigTemplate = '{{md5DirectoryChars}}/'; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename), md5 and md5DirectoryChars (first two characters of the MD5 hash)
+
     protected function modelConfig()
     {
         return [
