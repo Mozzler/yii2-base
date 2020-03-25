@@ -25,8 +25,14 @@ class File extends BaseModel
 {
     protected static $collectionName = 'app.file';
 
-    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and contains fileModel, extension, md5 and md5DirectoryChars
-    public static $folderpathTwigTemplate = '{{md5DirectoryChars}}/'; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename), md5 and md5DirectoryChars (first two characters of the MD5 hash)
+    // If you want to override these twig templates it's expected you'll setup your own File model and in your config/common.php file setup something like
+    //     'container' => [
+    //        'definitions' => [
+    //           '\mozzler\base\models\File' => [
+    //             'class' => 'app\models\File',
+    //     ]]],
+    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), md5 (the full md5 of the file contents) and md5DirectoryChars (first two characters of the MD5 hash, useful for storing in local folders which have max files per folder restrictions)
+    public static $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example: "{{md5DirectoryChars}}/"
 
     protected function modelConfig()
     {
