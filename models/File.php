@@ -31,8 +31,8 @@ class File extends BaseModel
     //           '\mozzler\base\models\File' => [
     //             'class' => 'app\models\File',
     //     ]]],
-    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), md5 (the full md5 of the file contents) and md5DirectoryChars (first two characters of the MD5 hash, useful for storing in local folders which have max files per folder restrictions)
-    public static $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example: "{{md5DirectoryChars}}/"
+    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), fsName (name of the filesystem)
+    public static $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
 
     protected function modelConfig()
     {

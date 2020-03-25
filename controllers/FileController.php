@@ -113,6 +113,7 @@ class FileController extends BaseController
             'other' => [
                 'fieldName' => isset($file['fieldName']) ? $file['fieldName'] : null,
                 'modelType' => isset($file['modelType']) ? $file['modelType'] : null,
+                'md5' => md5_file($file['tmp_name']),
             ]
         ]);
 

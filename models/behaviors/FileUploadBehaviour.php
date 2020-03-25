@@ -71,10 +71,8 @@ class FileUploadBehaviour extends Behavior
         // ----------------------------------
         //   Prepare the file
         // ----------------------------------
-        $md5 = md5_file($file['tmp_name']);
-        $md5DirectoryChars = $md5[0] . $md5[1]; // Get the first 2 characters as the directory name
         $extension = $this->getExtension($file['name'], $fileModel);
-        $twigData = ['fileModel' => $fileModel, 'md5' => $md5, 'md5DirectoryChars' => $md5DirectoryChars, 'extension' => $extension, 'fsName' => $fsName, 'fs' => $fs];
+        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fsName];
 
         $filename = \Yii::$app->t::renderTwig($fileModel::$filenameTwigTemplate, $twigData);
         $twigData['filename'] = $filename;
