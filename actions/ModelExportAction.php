@@ -16,7 +16,7 @@ class ModelExportAction extends BaseModelAction
      */
     public $scenario = Model::SCENARIO_EXPORT;
 
-    public $limit = 100;
+    public $limit = 100; // Batch size
 
     /**
      */
