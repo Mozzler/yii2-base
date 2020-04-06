@@ -63,7 +63,8 @@ class ModelExportAction extends BaseModelAction
 
             foreach ($models as $modelIndex => $model) {
                 $model->setScenario($this->scenario);
-                $rowContents = $model->toScenarioArray();
+                // If a custom export method has been added, use that
+                $rowContents = method_exists($model, 'toExportArray') ? $model->toExportArray() : $model->toScenarioArray();
                 if (isset($rowContents['id']) && isset($rowContents['_id'])) {
                     // The toScenarioArray seems to output the _id and id fields, so you get the data duplicated, this removes that
                     unset($rowContents['id']);
