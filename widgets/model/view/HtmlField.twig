@@ -1,0 +1,3 @@
+{% if widget.model[widget.attribute] %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] | raw }}</{{ widget.tag }}>
+{% endif %}
