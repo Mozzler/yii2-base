@@ -1,0 +1,5 @@
+{% if widget.prettyOutput %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.prettyOutput }}</{{ widget.tag }}>
+{% elseif widget.model[widget.attribute] %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>{{ widget.model[widget.attribute] | json_encode }}</{{ widget.tag }}>
+{% endif %}

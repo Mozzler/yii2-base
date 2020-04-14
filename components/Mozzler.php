@@ -23,6 +23,7 @@ class Mozzler extends Component {
         'SingleSelect' => 'mozzler\base\fields\SingleSelect',
         'MultiSelect' => 'mozzler\base\fields\MultiSelect',
         'Json' => 'mozzler\base\fields\Json',
+        'JsonArray' => 'mozzler\base\fields\JsonArray',
         'Double' => 'mozzler\base\fields\Double',
         'File' => 'mozzler\base\fields\File',
 	];
