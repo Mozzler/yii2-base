@@ -27,12 +27,6 @@ class ModelExportAction extends BaseModelAction
         $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
 
-        $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
-        if (true !== $rbacFilter) {
-            \Yii::error("Can't access the action as the RBAC filter contains: " . VarDumper::export($rbacFilter));
-            throw new HttpException(403); // 403 unauthorised
-        }
-
         // Partly inspired by https://appdividend.com/2019/05/09/php-array-values-example-php-array_values-function-tutorial/ and https://www.virendrachandak.com/techtalk/creating-csv-file-using-php-and-mysql/
         // The ob_start and ob_get_clean() was an important addition pointed out by https://stackoverflow.com/a/13474770/7299352
 
