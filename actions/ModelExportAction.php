@@ -27,13 +27,14 @@ class ModelExportAction extends BaseModelAction
         $model = $this->controller->getModel();
         $model->setScenario($this->scenario);
 
+        $filter = []; // @todo: Get any filters in the query string based on the search that was being done
         // Partly inspired by https://appdividend.com/2019/05/09/php-array-values-example-php-array_values-function-tutorial/ and https://www.virendrachandak.com/techtalk/creating-csv-file-using-php-and-mysql/
         // The ob_start and ob_get_clean() was an important addition pointed out by https://stackoverflow.com/a/13474770/7299352
 
         // Create a file pointer connected to the output stream (but buffered because otherwise there's errors about not being able to set the headers)
         ob_start();
         $output = fopen('php://output', 'w');
-        $modelCount = \Yii::$app->t::countModels($this->controller->modelClass);
+        $modelCount = \Yii::$app->t::countModels($this->controller->modelClass, $filter, [ 'checkPermissions' => true]);
         \Yii::debug("Loading up the {$modelCount} models");
 
         // ------------------------------------------------------------------
@@ -44,11 +45,10 @@ class ModelExportAction extends BaseModelAction
         $processedProducts = 0;
         while ($processingProducts === true) {
 
-            $models = \Yii::$app->t::getModels($this->controller->modelClass, [], [
+            $models = \Yii::$app->t::getModels($this->controller->modelClass, null, [
                 'limit' => $this->limit,
                 'offset' => $offset,
                 'orderBy' => ['_id' => 1], // Ensuring First to last
-                'checkPermissions' => true
             ]);
             if (empty($models)) {
                 $processingProducts = false;
