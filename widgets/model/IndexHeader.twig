@@ -3,7 +3,7 @@
 	    <{{ widget.buttonsContainer.tag }} {{ html.renderTagAttributes(widget.buttonsContainer.options) }}>
 	        <a href="#" class="btn btn-default btn-sm btn-filter" title="Filter the results"><span class="glyphicon glyphicon-filter"></span></a>
 			{% if widget.canExportModel %}
-				<a href="{{ widget.model.getUrl("export") }}" target="_blank" class="btn btn-default btn-sm" title="Download as .csv file">Export <span class="glyphicon glyphicon-download-alt"></span></a>
+				<a href="{{ widget.exportUrl }}" target="_blank" class="btn btn-default btn-sm" title="Download as .csv file">Export {{ widget.model.modelConfig('labelPlural') }} <span class="glyphicon glyphicon-download-alt"></span></a>
 			{% endif %}
 			{% if widget.canCreateModel %}
     			<a href="{{ widget.model.getUrl("create") }}" class="btn btn-primary btn-sm">Create {{ widget.model.modelConfig('label') }}</a>
