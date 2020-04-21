@@ -18,4 +18,3 @@ class DateField extends BaseField
 
 }
 
-?>

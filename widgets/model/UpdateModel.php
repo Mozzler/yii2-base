@@ -65,4 +65,3 @@ class UpdateModel extends BaseWidget {
 	
 }
 
-?>

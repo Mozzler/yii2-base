@@ -43,4 +43,3 @@ class SingleSelect extends Base
 
 }
 
-?>

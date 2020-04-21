@@ -20,5 +20,3 @@ class Boolean extends Base {
 	}
 	
 }
-
-?>

@@ -8,5 +8,3 @@ class AutoIncrement extends Integer {
     public $filterType = '=';
 	
 }
-
-?>

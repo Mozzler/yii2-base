@@ -46,4 +46,3 @@ class MultiSelect extends Base
 
 }
 
-?>

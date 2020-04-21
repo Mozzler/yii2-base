@@ -57,4 +57,3 @@ class RenderFieldLayout extends BaseField {
 	
 }
 
-?>

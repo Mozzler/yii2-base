@@ -16,5 +16,3 @@ class BaseField extends BaseWidget
     }
 
 }
-
-?>

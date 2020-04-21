@@ -21,4 +21,3 @@ class MultiSelectField extends SingleSelectField
 	
 }
 
-?>

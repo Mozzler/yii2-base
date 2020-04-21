@@ -63,4 +63,3 @@ class CreateModel extends BaseWidget {
 	
 }
 
-?>

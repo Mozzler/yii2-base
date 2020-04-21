@@ -73,4 +73,3 @@ class FilterModel extends BaseWidget {
 	}
 }
 
-?>

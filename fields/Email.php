@@ -15,5 +15,3 @@ class Email extends Base {
 	}
 	
 }
-
-?>

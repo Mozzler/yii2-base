@@ -92,4 +92,3 @@ class Columns extends BaseWidget {
 	
 }
 
-?>

@@ -16,4 +16,4 @@ class Text extends Base {
 	
 }
 
-?>
+

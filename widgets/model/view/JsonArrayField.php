@@ -36,4 +36,3 @@ class JsonArrayField extends BaseField
 
 }
 
-?>

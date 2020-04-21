@@ -19,4 +19,3 @@ class SingleSelectField extends BaseField {
 	
 }
 
-?>

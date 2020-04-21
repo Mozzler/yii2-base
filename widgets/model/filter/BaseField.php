@@ -5,4 +5,3 @@ use mozzler\base\widgets\BaseWidget;
 
 class BaseField extends BaseWidget {}
 
-?>

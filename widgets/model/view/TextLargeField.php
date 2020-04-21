@@ -6,4 +6,3 @@ use mozzler\base\widgets\model\view;
 class TextLargeField extends BaseField {
 }
 
-?>

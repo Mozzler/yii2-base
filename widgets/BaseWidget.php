@@ -129,4 +129,3 @@ class BaseWidget extends Widget {
 	
 }
 
-?>

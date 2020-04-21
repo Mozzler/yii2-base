@@ -36,5 +36,3 @@ class Date extends Base {
 	}
 	
 }
-
-?>

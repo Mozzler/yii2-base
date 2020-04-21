@@ -5,4 +5,3 @@ use mozzler\base\widgets\model\view;
 
 class MultiSelectField extends SingleSelectField {}
 
-?>

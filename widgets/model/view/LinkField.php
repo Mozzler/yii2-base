@@ -47,4 +47,3 @@ class LinkField extends BaseField
     }
 }
 
-?>

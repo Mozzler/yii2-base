@@ -16,5 +16,3 @@ class Password extends Base {
 	}
 	
 }
-
-?>

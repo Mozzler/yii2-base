@@ -12,4 +12,3 @@ class PasswordField extends BaseField
 	
 }
 
-?>

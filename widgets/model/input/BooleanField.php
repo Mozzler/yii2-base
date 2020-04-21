@@ -24,4 +24,3 @@ class BooleanField extends BaseField
 
 }
 
-?>

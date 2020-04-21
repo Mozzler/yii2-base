@@ -102,4 +102,3 @@ class ViewModel extends BaseWidget
 
 }
 
-?>

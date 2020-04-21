@@ -33,5 +33,3 @@ class Double extends Base {
 	}
 	
 }
-
-?>

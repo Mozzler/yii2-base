@@ -119,4 +119,3 @@ class IndexModel extends BaseWidget {
 	
 }
 
-?>

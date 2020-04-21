@@ -67,4 +67,3 @@ class Panel extends BaseWidget {
 	
 }
 
-?>

@@ -9,4 +9,3 @@ class RelateManyMany extends RelateMany {
 	
 }
 
-?>
