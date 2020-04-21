@@ -1,3 +1,6 @@
 .widget-model-update .panel-title .btn, .widget-model-update .panel-footer .btn {
 	margin-top: -4px;
 }
+.mozzler-json-array-field-input {
+    font-family: monospace;
+}
