@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models;
 
+use MongoDB\BSON\ObjectId;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
@@ -11,6 +12,13 @@ use yii\helpers\ArrayHelper;
  *
  * This is to support the AuditLogBehaviour and allow
  *
+ * @property $newValue
+ * @property $previousValue
+ * @property string $field
+ * @property ObjectId $entityId
+ * @property ObjectId $entityType
+ * @property string $actionId
+ * @property string $action
  */
 class AuditLog extends BaseModel
 {

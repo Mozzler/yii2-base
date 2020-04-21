@@ -13,6 +13,10 @@ use yii\helpers\ArrayHelper;
  * But most importantly to use the modelIndex creation.
  *
  * @see \mozzler\base\components\MozzlerCache
+ *
+ * @property string $id
+ * @property string $data
+ * @property integer $expire
  */
 class Cache extends BaseModel
 {

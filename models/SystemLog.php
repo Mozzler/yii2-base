@@ -12,7 +12,11 @@ use yii\helpers\ArrayHelper;
  *
  * @property string $type
  * @property string $message
- * @property array $request
+ * @property string $endpoint
+ * @property array $messageData
+ * @property array $trace
+ * @property array $requestData
+ * @property array $systemData
  * @property array $data
  * @property string $namespace
  *
@@ -112,7 +116,7 @@ class SystemLog extends BaseModel
                 ]
             ],
             'messageData' => [
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'Message Data',
                 'widgets' => [
                     'view' => [
@@ -121,7 +125,7 @@ class SystemLog extends BaseModel
                 ]
             ],
             'trace' => [
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'Trace',
                 'widgets' => [
                     'view' => [
@@ -130,7 +134,7 @@ class SystemLog extends BaseModel
                 ]
             ],
             'requestData' => [
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'Request Data',
                 'widgets' => [
                     'view' => [
@@ -139,7 +143,7 @@ class SystemLog extends BaseModel
                 ]
             ],
             'systemData' => [
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'System Data',
                 'hint' => 'The log vars data',
                 'widgets' => [
@@ -178,7 +182,7 @@ class SystemLog extends BaseModel
     {
         return ArrayHelper::merge(parent::behaviors(), [
             'garbage' => [
-                'class' => GarbageCollectionBehaviour::className(),
+                'class' => GarbageCollectionBehaviour::class,
                 'gcAgeDays' => 7
             ],
         ]);

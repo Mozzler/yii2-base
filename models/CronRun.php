@@ -13,7 +13,10 @@ use yii\helpers\ArrayHelper;
  * Class CronRun
  * @package mozzler\base\models
  *
- *
+ * @property integer $timestamp
+ * @property array $stats
+ * @property array $log
+ * @property string $status
  */
 class CronRun extends BaseModel
 {
@@ -54,11 +57,11 @@ class CronRun extends BaseModel
                 'required' => true,
             ],
             'stats' => [
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'Stats'
             ],
             'log' => [
-                'type' => 'Json', // Use addLog(),
+                'type' => 'JsonArray', // Use addLog(),
                 'rules' => [
                     'default' => ['value' => []]
                 ]

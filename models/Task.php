@@ -3,12 +3,22 @@
 namespace mozzler\base\models;
 
 use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
-use mozzler\base\models\behaviors\SetLogSizeBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
 /**
- * Model that stores information about a background task to run
+ * Class Task
+ * @package mozzler\base\models
+ *
+ * The model that stores information about a background task to run.
+ * @see CronRun
+ *
+ * @property string $scriptClass
+ * @property string $status
+ * @property string $triggerType
+ * @property array $config
+ * @property array $log
+ * @property integer $timeoutSeconds
  */
 class Task extends BaseModel
 {

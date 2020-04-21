@@ -6,6 +6,13 @@ use mozzler\base\models\behaviors\AuditLogBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Class Config
+ * @package mozzler\base\models
+ *
+ * @property string $key_
+ * @property string $value_
+ */
 class Config extends BaseModel
 {
 
