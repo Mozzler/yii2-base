@@ -5,11 +5,17 @@ namespace mozzler\base\models\traits;
 trait LoggableModelTrait
 {
 
+    // -- Traits can't have const so using vars and adding the _ for reduced namespace collision chance
+    public $_LOG_TYPE_WARNING = 'warning';
+    public $_LOG_TYPE_INFO = 'info';
+    public $_LOG_TYPE_ERROR = 'error';
+
+
     /**
      * @param $message
      * @param $type
      *
-     * Expected types: 'warning', 'info', 'error'
+     * Expected types: 'warning', 'info', 'error' e.g $this->_LOG_TYPE_ERROR
      */
     public function addLog($message, $type = 'info')
     {
@@ -40,7 +46,7 @@ trait LoggableModelTrait
                 $message = json_encode($logEntry['message']); // Sometimes a boolean or something else
             }
 
-            if ($logEntry['type'] === "error") {
+            if ($logEntry['type'] === $this->_LOG_TYPE_ERROR) {
                 $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n";
             } else {
 
