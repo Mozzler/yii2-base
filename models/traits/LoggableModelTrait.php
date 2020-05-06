@@ -29,6 +29,14 @@ trait LoggableModelTrait
             'type' => $type
         ];
         $this->log = $log;
+
+        if ($type === $this->_LOG_TYPE_ERROR) {
+            \Yii::error($message);
+        } elseif ($type === $this->_LOG_TYPE_WARNING) {
+            \Yii::warning($message);
+        } else {
+            \Yii::info($message);
+        }
     }
 
     public function returnLogLines()

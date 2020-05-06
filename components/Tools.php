@@ -304,6 +304,24 @@ class Tools extends Component
         return "\n#### EXCEPTION ####\nType: " . get_class($exception) . "\nCode: {$exception->getCode()}\nMessage: {$exception->getMessage()}\nLine: {$exception->getLine()}\nFile: {$exception->getFile()}\nTrace\n--------\n{$exception->getTraceAsString()}";
     }
 
+
+    /**
+     * Array Keys Exist
+     *
+     * Check if the Keys are in the array.
+     * Especially useful for checking 3rd party API responses.
+     * @param string[] $keys
+     * @param array $array
+     * @return bool
+     *
+     * Based off https://stackoverflow.com/questions/13169588/how-to-check-if-multiple-array-keys-exists
+     */
+    public function arrayKeysExist(array $keys, array $array)
+    {
+        return !array_diff_key(array_flip($keys), $array);
+        // Alternatively could use the ArrayHelper::keyExists and loop through the keys to check.
+    }
+
     /**
      * Ensure an ID is a proper MongoDB ID object.
      *
