@@ -316,7 +316,7 @@ class Tools extends Component
      *
      * Based off https://stackoverflow.com/questions/13169588/how-to-check-if-multiple-array-keys-exists
      */
-    public function arrayKeysExist(array $keys, array $array)
+    public static function arrayKeysExist(array $keys, array $array)
     {
         return !array_diff_key(array_flip($keys), $array);
         // Alternatively could use the ArrayHelper::keyExists and loop through the keys to check.
