@@ -19,7 +19,8 @@
     "openbuildings/swiftmailer-css-inliner": "^0.5.2",
     "ext-json": "*",
     "creocoder/yii2-flysystem": "^0.9.3",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-mongodb": "*"
   },
   "autoload": {
     "psr-4": {

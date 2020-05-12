@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models;
 
+use MongoDB\BSON\ObjectId;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use mozzler\base\models\behaviors\AutoIncrementBehavior;
@@ -19,12 +20,12 @@ use yii\helpers\UnsetArrayValue;
  * Class Model
  * @package mozzler\base\models
  *
- * @property string $_id
+ * @property ObjectId $_id
  * @property string $name
  * @property integer $createdAt
  * @property integer $updatedAt
- * @property \app\models\User $createdUserId
- * @property \app\models\User $updatedUserId
+ * @property ObjectId $createdUserId
+ * @property ObjectId $updatedUserId
  */
 class Model extends ActiveRecord
 {
