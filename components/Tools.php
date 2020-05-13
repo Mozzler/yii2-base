@@ -87,10 +87,30 @@ class Tools extends Component
     }
 
     /**
+     * Get Model Class Name
+     *
+     * Get's just the final class name, useful for getting the name of a model without the full namespace
+     * Example usage:
+     * $modelName = \Yii::$app->t::getModelClassName($user);
+     * would return 'User' as the model name instead of \app\models\User or \mozzler\auth\models\User
+     *
+     * Can obviously be used for other object types as well
+     *
+     * @param $model \mozzler\base\models\Model|object|mixed
+     * @return false|string
+     */
+    public static function getModelClassName($model)
+    {
+        $classname = get_class($model);
+        if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
+        return $pos;
+    }
+
+    /**
      * Create an empty model.
      *
-     * @param string $className             Class name of the model to create (eg: `mozzler\auth\user`).
-     * @param array $data                   Default data to populate the model
+     * @param string $className Class name of the model to create (eg: `mozzler\auth\user`).
+     * @param array $data Default data to populate the model
      * @return \mozzler\base\models\Model   Returns a new model
      * @throws \yii\base\InvalidConfigException
      */
@@ -273,10 +293,10 @@ class Tools extends Component
     public static function sendEmail($to, $subject, $template, $data = [], $config = [])
     {
         Yii::$app->mailer->view->params = \Yii::$app->params;
-        
+
         $mailer = \Yii::$app->mailer;
         // Adding in the params to the data. mainly for access to something like {{ _params.emailAssetsUrl }} for a Url to where you might store files on a CDN
-        $message = $mailer->compose($template,  ArrayHelper::merge(['_params' => \Yii::$app->params], $data))
+        $message = $mailer->compose($template, ArrayHelper::merge(['_params' => \Yii::$app->params], $data))
             ->setTo($to)
             ->setSubject($subject);
 
