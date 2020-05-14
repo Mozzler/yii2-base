@@ -1,3 +1,8 @@
 .mozzler-json-array-field-input {
     font-family: monospace;
 }
+
+input[type="number"] {
+    /* The default 6rem width just feels too short */
+    width: 9rem;
+}
