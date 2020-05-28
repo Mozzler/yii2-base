@@ -1,4 +1,4 @@
-var mozzlerFormVisbility = (function () {
+var mozzlerFormVisibility = (function () {
     var $mozzlerMainFormInput = $(`#form-${mozzlerMainWidgetId} input, #form-${mozzlerMainWidgetId} textarea, #form-${mozzlerMainWidgetId} select`); //  The main form inputs (ignore anything in the nav header/footer
     var $mozzlerMainForm = $(`#form-${mozzlerMainWidgetId}`); //  The main form itself
     function processVisibility() {
@@ -74,12 +74,12 @@ var mozzlerFormVisbility = (function () {
 if (mozzlerFieldsVisibleWhen) {
 
     // Process visibility when a field has been changed
-    mozzlerFormVisbility.$mozzlerMainFormInput.on('change selected', function (event) {
+    mozzlerFormVisibility.$mozzlerMainFormInput.on('change selected', function (event) {
         console.log("You changed", $(this));
-        mozzlerFormVisbility.processVisibility();
+        mozzlerFormVisibility.processVisibility();
 
     });
 
     console.debug("Processing the visibility of the fields: ", mozzlerFieldsVisibleWhen);
-    mozzlerFormVisbility.processVisibility(); // Process on page load
+    mozzlerFormVisibility.processVisibility(); // Process on page load
 }
