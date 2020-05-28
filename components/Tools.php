@@ -373,6 +373,24 @@ class Tools extends Component
         \Yii::error($dump ? print_r($message, true) : $message, $location);
     }
 
+    /**
+     * @param $microtimeStart float microtime(true)
+     * @return string e.g 3.546s
+     *
+     * Takes the microtime the event started and returns how many seconds ago that was, to 3 decimal places
+     * Example usage:
+     *
+     * $microtimeStart = microtime(true);
+     * // Do a bunch of processing things
+     * echo("It took " . \Yii::$app->t::processingTimeResponse($microtimeStart) . " to process this");
+     *
+     *
+     */
+    public static function processingTimeResponse($microtimeStart)
+    {
+        return number_format(microtime(true) - $microtimeStart, 3) . 's';
+    }
+
     public static function isApi()
     {
         if (isset(\Yii::$app) && isset(\Yii::$app->controller) && isset(\Yii::$app->controller->module)) { // Ensure the controller and module exist otherwise the codeception tests barf
