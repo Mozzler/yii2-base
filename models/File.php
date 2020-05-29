@@ -152,6 +152,7 @@ class File extends BaseModel
 
 
     // -- Example convert method, used by the FileUploadBehaviour
+    // -- You'll want to extend or override this file model and add your own convert to use this
     //    public function convert($fileInfo) {
     //        if ($this->getExtension() === 'png') {
     //            // -- Here you would convert the file to JPG
