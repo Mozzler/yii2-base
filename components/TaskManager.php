@@ -180,4 +180,43 @@ class TaskManager extends \yii\base\Component
 
         return $runCommand;
     }
+
+
+    /**
+     * Process Task
+     *
+     * For running a task directly.
+     * This is only expected to be used for unit tests which can't trigger background tasks properly.
+     *
+     * For app code you should instead use \Yii::$app->taskManager->schedule();
+     *
+     * @param $sciptClass string
+     * @param $config array any task specific configuration settings, e.g customerId
+     * @param $timeoutSeconds int maximum running time
+     * @return Task
+     * @throws \yii\base\InvalidConfigException
+     * @see schedule
+     */
+    public function processTask($sciptClass, $config = [], $timeoutSeconds = 60)
+    {
+        $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
+
+        // Unfortunately we can't use the $taskManager->schedule as it doesn't support background tasks and we don't want this to run in an async thread outside of the test environment
+        // $taskManager->schedule($this->queuePushNotificationsScriptClass, [], 60, false);
+        $taskConfig =
+            [
+                'config' => $config,
+                'scriptClass' => $sciptClass,
+                'timeoutSeconds' => $timeoutSeconds,
+                'status' => Task::STATUS_PENDING,
+                'name' => "{$unixTimestampMinuteStarted}-" . Task::TRIGGER_TYPE_BACKGROUND . "-{$sciptClass}",
+                'triggerType' => Task::TRIGGER_TYPE_BACKGROUND
+            ];
+        /** @var Task $task */
+        $task = \Yii::createObject(Task::class);
+        $task->setAttributes($taskConfig);
+
+        // Run the task
+        return \Yii::$app->taskManager->runTask($task);
+    }
 }
