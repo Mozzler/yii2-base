@@ -1,0 +1,9 @@
+<div class="page-model-view">
+    {{ t.renderWidget("mozzler.base.widgets.model.ViewHeader", arrayhelper.merge(config.headerConfig, {"model": model})) }}
+
+    {# Adding a file download link #}
+    <a href="{{ model.getUrl('download') }}" target="_blank">Download File <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></a>
+    
+    {{ t.renderWidget("mozzler.base.widgets.model.ViewModel", arrayhelper.merge(config.viewConfig, {"model": model})) }}
+    {{ t.renderWidget("mozzler.base.widgets.model.subpanel.SubPanels", arrayhelper.merge(config.relatePanelsConfig, {"model": model})) }}
+</div>
