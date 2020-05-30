@@ -9,6 +9,7 @@ use yii\base\Behavior;
 use yii\base\Event;
 use yii\db\BaseActiveRecord;
 use League\Flysystem\AdapterInterface;
+use yii\helpers\VarDumper;
 
 /**
  * AuditLog Behaviour for logging all changes to an entity
@@ -36,7 +37,6 @@ class FileUploadBehaviour extends Behavior
      *
      * You can replace this with a different behaviour to do more fancy file saving if you want.
      * @param $event
-     * @return bool
      * @throws BaseException
      */
     public function uploadFile($event)
@@ -47,15 +47,15 @@ class FileUploadBehaviour extends Behavior
         $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename
         // -- Basic file validation checks
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
-        $file = self::getFileInfo();
-        if (!empty($file)) {
-            \Yii::debug("The file information is: " . json_encode($file));
+        $fileInfo = self::getFileInfo();
+        if (!empty($fileInfo)) {
+            \Yii::debug("The file information is: " . json_encode($fileInfo));
         } else {
-            \Yii::error("No file uploaded" . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $file]));
+            \Yii::error("No file uploaded" . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $fileInfo]));
             return false;
         }
-        if (!is_file($file['tmp_name'])) {
-            throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$file['tmp_name']} could not be found", 'file' => $file]);
+        if (!is_file($fileInfo['tmp_name'])) {
+            throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$fileInfo['tmp_name']} could not be found", 'file' => $fileInfo]);
         }
 
         // -- Check the FileSystem has been defined
@@ -70,13 +70,14 @@ class FileUploadBehaviour extends Behavior
 
         // -- Convert the file, if needed
         if (method_exists($fileModel, 'convert')) {
-            $fileModel = $fileModel->convert($file); // If you need to do some conversion, e.g converting .png images to .jpg
+            // We later save the $file['tmp_name'] entry to the file system (e.g S3 or Google Cloud)
+            $fileInfo = $fileModel->convert($fileInfo); // If you need to do some conversion, e.g converting .png images to .jpg
         }
 
         // ----------------------------------
         //   Prepare the file
         // ----------------------------------
-        $extension = $fileModel->getExtension($file['name']);
+        $extension = $fileModel->getExtension($fileInfo['name']);
         $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fsName];
 
         $filename = \Yii::$app->t::renderTwig($fileModel::$filenameTwigTemplate, $twigData);
@@ -92,7 +93,7 @@ class FileUploadBehaviour extends Behavior
             // ----------------------------------
             //   Save the file
             // ----------------------------------
-            $stream = fopen($file['tmp_name'], 'r+');
+            $stream = fopen($fileInfo['tmp_name'], 'r+');
             $fs->writeStream($filepath, $stream, ['visibility' => $visibilty]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
         } else {
             // This is a duplicate file
@@ -105,7 +106,10 @@ class FileUploadBehaviour extends Behavior
         $fileModel->filename = $filename;
         $fileModel->filepath = $filepath; // The filepath is the full location
 
-        return true;
+        \Yii::debug("Final File Model - " . VarDumper::export($fileModel->toArray()));
+        \Yii::debug("Final \$fileInfo - " . VarDumper::export($fileInfo));
+        @unlink($fileInfo['tmp_name']); // PHP will automatically remove temporary files, but if the convert() method is pointing to a new file then we need to directly remove that
+        return $fileModel;
     }
 
     public function deleteFile($event)

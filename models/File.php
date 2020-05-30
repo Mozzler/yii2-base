@@ -157,7 +157,8 @@ class File extends BaseModel
     //        if ($this->getExtension() === 'png') {
     //            // -- Here you would convert the file to JPG
     //        }
-    //        return $this;
+    //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
+    //        return $fileInfo;
     //    }
 
 
@@ -169,13 +170,18 @@ class File extends BaseModel
      */
     public function getExtension($originalFilename = null)
     {
+        $mimeExtension = $this->mimeTypeToExtension($this->mimeType);
+        if (!empty($mimeExtension)) {
+            return $mimeExtension;
+        }
+
         if (empty($originalFilename)) {
             $originalFilename = $this->originalFilename;
         }
-        $extension = strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
-        // If we can't determine the extension based on the filename itself, we try to use the mimeType
-        return empty($extension) ? $this->mimeTypeToExtension($this->mimeType) : $extension;
+        // If we can't determine the extension based on the mimeType we try to use the filename itself
+        return strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
     }
+
 
     /**
      * @param $mime
@@ -258,8 +264,8 @@ class File extends BaseModel
             'video/mj2' => 'jp2',
             'image/jpx' => 'jp2',
             'image/jpm' => 'jp2',
-            'image/jpeg' => 'jpeg',
-            'image/pjpeg' => 'jpeg',
+            'image/jpeg' => 'jpg',
+            'image/pjpeg' => 'jpg',
             'application/x-javascript' => 'js',
             'application/json' => 'json',
             'text/json' => 'json',
