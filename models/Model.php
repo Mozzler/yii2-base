@@ -15,6 +15,7 @@ use mozzler\base\helpers\ModelHelper;
 use yii\data\ActiveDataProvider;
 use mozzler\base\yii\data\ActiveDataFilter;
 use yii\helpers\UnsetArrayValue;
+use yii\helpers\VarDumper;
 
 /**
  * Class Model
@@ -870,5 +871,40 @@ class Model extends ActiveRecord
 
         return $autoIncrementAttributes;
     }
+
+
+    /**
+     * @return string
+     *
+     * Returns a basic identity string useful for debugging output
+     *
+     * Examples:
+     *  Customer 5eaa5a45af2f5c356d52c59c "Michael Kubler"
+     *  Faq 5eb94118af2f5c07445b81e4 "How does the Mozzler Base Ident work?"
+     */
+    public function ident()
+    {
+        return \Yii::$app->t::getModelClassName($this) . " {$this->getId()} \"{$this->name}\"";
+    }
+
+    /**
+     * Save And Yii::error any save Errors
+     *
+     * @param bool $checkPermissions
+     * @return bool
+     *
+     * Outputs a Yii::error if the save failed.
+     * NOTE: This is expected to be used in background processing scripts and the like as the checkPermissions defaults to false
+     * You'll need to set it to true if using it in a client context and not an admin or task one
+     */
+    public function saveAndLogErrors($checkPermissions = false)
+    {
+        $save = $this->save(true, null, $checkPermissions);
+        if (!$save) {
+            \Yii::error("Error saving {$this->ident()}. Validation Error(s): " . VarDumper::export($this->getErrors()));
+        }
+        return $save;
+    }
+
 
 }

@@ -114,7 +114,7 @@ class File extends BaseModel
             ],
             'other' => [
                 // In case you want to save anything else
-                'type' => 'Json',
+                'type' => 'JsonArray',
                 'label' => 'Other Information'
             ],
         ]);
