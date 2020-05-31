@@ -44,7 +44,9 @@ class FileUploadBehaviour extends Behavior
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
-        $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename
+        if (empty($fileModel->_id)) {
+            $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename
+        }
         // -- Basic file validation checks
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
         $fileInfo = self::getFileInfo();
