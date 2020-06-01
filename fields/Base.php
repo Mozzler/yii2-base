@@ -33,6 +33,8 @@ class Base extends Component
     /** @var bool */
     public $hidden = false;
 
+    /** @var array */
+    public $options = [];
     /** @var null|string $visibleWhen */
 
     //  Set to a JS function to show/hide the input field based on the form data
