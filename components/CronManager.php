@@ -7,6 +7,7 @@ use mozzler\base\models\CronRun;
 use mozzler\base\models\Task;
 use \yii\helpers\ArrayHelper;
 use \yii\base\Component;
+use yii\helpers\VarDumper;
 
 /**
  * To use the cron manager, add it to the `web.php` components:
@@ -66,7 +67,7 @@ class CronManager extends Component
 
         // Cron has already been run for this interval, so do nothing
         if (!$cronRun) {
-            return "Cron has already been run this minute, wait ". ( 60 - date('s') ) . "s to run it again";
+            return "Cron has already been run this minute, wait " . (60 - date('s')) . "s to run it again\n";
         }
 
         $stats = [
@@ -74,7 +75,8 @@ class CronManager extends Component
             'Entries Run' => 0,
             'Entries Skipped' => 0,
             'Tasks Run' => [],
-            'Errors' => 0
+            'Errors' => 0,
+            'Error Messages' => [],
         ];
 
         $this->entries = ArrayHelper::merge($this->defaultEntries, $this->entries);
@@ -111,18 +113,21 @@ class CronManager extends Component
             if ($cronObject->shouldRunCronAtTime()) {
                 try {
                     $task = $taskManager->schedule($cronObject->scriptClass, $cronObject->config, $cronObject->timeoutSeconds, true, $cronObject->threadName);
+                    $stats['Entries Run']++;
+                    $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
+                    $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->getId()}";
                 } catch (\Throwable $exception) {
-                    $stats['Error'] = Tools::returnExceptionAsString($exception);
+                    $errorMessage = "Crun/run Exception whilst scheduling a Task: " . \Yii::$app->t::returnExceptionAsString($exception) . "\n----\n" . VarDumper::export(['cronEntry' => ArrayHelper::toArray($cronEntry)]);
+                    \Yii::error($errorMessage);
+                    $stats['Error Messages'][] = $errorMessage;
                     $stats['Errors']++;
                 }
 
-                $stats['Entries Run']++;
-                $cronRun->addLog("Script scheduled ({$cronObject->scriptClass}) with taskId: {$task->id}", 'info');
-                $stats['Tasks Run'][] = "{$task->name} - TaskId: {$task->getId()}";
+
             } else {
                 $stats['Entries Skipped']++;
             }
-            $cronRun->save();
+            $cronRun->saveAndLogErrors();
         }
 
         $cronRun->stats = $stats;

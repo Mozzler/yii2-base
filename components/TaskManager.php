@@ -5,6 +5,7 @@ namespace mozzler\base\components;
 use mozzler\base\models\Task;
 use mozzler\base\scripts\ScriptBase;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * To use the task manager, add it to the `web.php` components:
@@ -87,7 +88,7 @@ class TaskManager extends \yii\base\Component
             $scriptReturn = $script->run($task); // !! Actually run the script (task)
         } catch (\Throwable $exception) {
             $task->status = Task::STATUS_ERROR;
-            $task->addLog(Tools::returnExceptionAsString($exception), 'error');
+            $task->addLog(\Yii::$app->t::returnExceptionAsString($exception), 'error');
             $task->save(true, null, false);
             return $task;
         }
@@ -118,69 +119,168 @@ class TaskManager extends \yii\base\Component
         $taskId = $taskObject->getId();
 
         // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
-        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'; // Or could use > $isWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
+        $filePath = self::yiiCommandLocation();
 
-        $filePath = \Yii::getAlias('@app') . DIRECTORY_SEPARATOR . "yii" . (true === $isWindows ? '.bat' : ''); // e.g D:\www\bapp.viterra.com.au\commands
+        $arguments = ["task/run", $taskId];
+        $isBackground = true;
+
+        $taskObject->addLog("About to run the {$taskObject->ident()} with: " . VarDumper::export(['filePath' => $filePath, 'arguments' => $arguments, 'isBackground' => $isBackground]));
+        $taskObject->saveAndLogErrors();
+        try {
+
+            $runCommand = self::runCommand($filePath, $arguments, $isBackground);
+            $taskObject->addLog("Ran the {$taskObject->ident()} with the command {$runCommand}");
+            $taskObject->saveAndLogErrors();
+        } catch (\Throwable $exception) {
+            // Save the error to the task for visibility
+            $taskObject->addLog("Exception whilst running the {$taskObject->ident()} " . \Yii::$app->t::returnExceptionAsString($exception));
+            $taskObject->saveAndLogErrors();
+            throw $exception;
+        }
+//
+//
+//        // -------------------
+//        //  Run Async
+//        // -------------------
+//        if (self::isWindows()) {
+//            // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
+//            // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
+//
+//            // First, try and see if the COM extension can be used for triggering tasks async
+//            // Note: In the php.ini file (or extensions directory) you'll likely need to add the following to enable COM:
+//            // extension=com_dotnet
+//            if (extension_loaded('com_dotnet')) {
+//                $WshShell = new \COM("WScript.Shell");
+//                $runCommand = "\"$filePath\" task/run {$taskId}";
+//
+//                \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell:  {$runCommand}");
+//                $taskObject->addLog("Running the Windows command via WScript.Shell: $runCommand");
+//                $taskObject->save(true, null, false);
+//                $oExec = $WshShell->Run($runCommand, 0, false);
+//
+//                return $runCommand;
+//                /*
+//                 * https://ss64.com/vb/run.html
+//                 *
+//                 * $WshShell->Run(strCommand, intWindowStyle, bWaitOnReturn)
+//                 * Settings for intWindowStyle:
+//                 *
+//                 * 0 Hide the window (and activate another window.)
+//                 * 1 Activate and display the window. (restore size and position) Specify this flag when displaying a window for the first time.
+//                 * 2 Activate & minimize.
+//                 * 3 Activate & maximize.
+//                 * 4 Restore. The active window remains active.
+//                 * 5 Activate & Restore.
+//                 * 6 Minimize & activate the next top-level window in the Z order.
+//                 * 7 Minimize. The active window remains active.
+//                 * 8 Display the window in its current state. The active window remains active.
+//                 * 9 Restore & Activate. Specify this flag when restoring a minimized window.
+//                 * 10 Sets the show-state based on the state of the program that started the application.
+//                 */
+//            } else {
+//                // -- The following will wait for the command to complete, so tasks are run serially
+//                $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
+//            }
+//
+//            \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell: {$runCommand}");
+//            $taskObject->addLog("Running the Windows command: $runCommand");
+//            $taskObject->save(true, null, false);
+//            pclose(popen($runCommand, "r"));
+//        } else {
+//            $runCommand = "'{$filePath}' task/run " . escapeshellarg($taskId) . ' > /dev/null &';
+//            \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
+//            $taskObject->addLog("Running the Linux command: $runCommand");
+//            $taskObject->save(true, null, false);
+//            exec($runCommand);
+//        }
+
+        return $runCommand;
+    }
+
+    public static function isWindows()
+    {
+        // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
+        return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'; // Or could use > $isWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
+    }
 
 
+    public static function yiiCommandLocation()
+    {
+        return \Yii::getAlias('@app') . DIRECTORY_SEPARATOR . "yii" . (true === self::isWindows() ? '.bat' : ''); // e.g \app\yii or C:\www\yii.bat
+    }
+
+
+    /**
+     * @param $filePath string The command to run
+     * @param array $arguments An array of arguments for the command, please note: YOU WILL NEED TO escapeshellarg them as needed!
+     * @param bool $runAsync if on Linux you want the command to run in the background or not (In Windows this is predicated on the \COM module being installed
+     * @param string $currentDirectory
+     * @return string the command that was run
+     */
+    public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null)
+    {
+
+        if (!empty($currentDirectory)) {
+            chdir($currentDirectory);
+        }
+        $argumentsEscaped = array_map('escapeshellarg', $arguments); // Escape each set of arguments
+        $runCommand = "\"$filePath\" " . implode(' ', $argumentsEscaped);
         // -------------------
         //  Run Async
         // -------------------
-        if ($isWindows) {
+        if (self::isWindows()) {
             // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
             // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
 
             // First, try and see if the COM extension can be used for triggering tasks async
             // Note: In the php.ini file (or extensions directory) you'll likely need to add the following to enable COM:
             // extension=com_dotnet
-            if (extension_loaded('com_dotnet')) {
-                $WshShell = new \COM("WScript.Shell");
-                $runCommand = "\"$filePath\" task/run {$taskId}";
+            try {
 
-                \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell:  {$runCommand}");
-                $taskObject->addLog("Running the Windows command via WScript.Shell: $runCommand");
-                $taskObject->save(true, null, false);
-                $oExec = $WshShell->Run($runCommand, 0, false);
 
-                return $runCommand;
-                /*
-                 * https://ss64.com/vb/run.html
-                 *
-                 * $WshShell->Run(strCommand, intWindowStyle, bWaitOnReturn)
-                 * Settings for intWindowStyle:
-                 *
-                 * 0 Hide the window (and activate another window.)
-                 * 1 Activate and display the window. (restore size and position) Specify this flag when displaying a window for the first time.
-                 * 2 Activate & minimize.
-                 * 3 Activate & maximize.
-                 * 4 Restore. The active window remains active.
-                 * 5 Activate & Restore.
-                 * 6 Minimize & activate the next top-level window in the Z order.
-                 * 7 Minimize. The active window remains active.
-                 * 8 Display the window in its current state. The active window remains active.
-                 * 9 Restore & Activate. Specify this flag when restoring a minimized window.
-                 * 10 Sets the show-state based on the state of the program that started the application.
-                 */
-            } else {
-                // -- The following will wait for the command to complete, so tasks are run serially
-                $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
+                if (extension_loaded('com_dotnet') && $runAsync) {
+                    $WshShell = new \COM("WScript.Shell");
+                    \Yii::info("Running Windows command via WScript.Shell:  {$runCommand}");
+                    $oExec = $WshShell->Run($runCommand, 0, false);
+                    return $runCommand;
+                    /*
+                     * https://ss64.com/vb/run.html
+                     *
+                     * $WshShell->Run(strCommand, intWindowStyle, bWaitOnReturn)
+                     * Settings for intWindowStyle:
+                     *
+                     * 0 Hide the window (and activate another window.)
+                     * 1 Activate and display the window. (restore size and position) Specify this flag when displaying a window for the first time.
+                     * 2 Activate & minimize.
+                     * 3 Activate & maximize.
+                     * 4 Restore. The active window remains active.
+                     * 5 Activate & Restore.
+                     * 6 Minimize & activate the next top-level window in the Z order.
+                     * 7 Minimize. The active window remains active.
+                     * 8 Display the window in its current state. The active window remains active.
+                     * 9 Restore & Activate. Specify this flag when restoring a minimized window.
+                     * 10 Sets the show-state based on the state of the program that started the application.
+                     */
+                }
+            } catch (\Throwable $exception) {
+                \Yii::error("Error whilst trying to run the Windows command async using com_dotnet and WScript.Shell: " . \Yii::$app->t::returnExceptionAsString($exception));
             }
-
-            \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell: {$runCommand}");
-            $taskObject->addLog("Running the Windows command: $runCommand");
-            $taskObject->save(true, null, false);
+            \Yii::info("Running Windows command using popen/pclose: {$runCommand}");
             pclose(popen($runCommand, "r"));
         } else {
-            $runCommand = "'{$filePath}' task/run " . escapeshellarg($taskId) . ' > /dev/null &';
-            \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
-            $taskObject->addLog("Running the Linux command: $runCommand");
-            $taskObject->save(true, null, false);
-            exec($runCommand);
+
+            if ($runAsync) {
+                $runCommand .= " > /dev/null &";
+            }
+            \Yii::info("Running Linux command: {$runCommand}");
+            $output = [];
+            $exitCode = null;
+            exec($runCommand, $output, $exitCode);
+            \Yii::info("Ran the command {$runCommand}" . VarDumper::export(['exitCode' => $exitCode, 'output' => $output]));
         }
 
         return $runCommand;
     }
-
 
     /**
      * Process Task
@@ -190,14 +290,14 @@ class TaskManager extends \yii\base\Component
      *
      * For app code you should instead use \Yii::$app->taskManager->schedule();
      *
-     * @param $sciptClass string
+     * @param $scriptClass string
      * @param $config array any task specific configuration settings, e.g customerId
      * @param $timeoutSeconds int maximum running time
      * @return Task
      * @throws \yii\base\InvalidConfigException
      * @see schedule
      */
-    public function processTask($sciptClass, $config = [], $timeoutSeconds = 60)
+    public function processTask($scriptClass, $config = [], $timeoutSeconds = 60)
     {
         $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
 
@@ -206,10 +306,10 @@ class TaskManager extends \yii\base\Component
         $taskConfig =
             [
                 'config' => $config,
-                'scriptClass' => $sciptClass,
+                'scriptClass' => $scriptClass,
                 'timeoutSeconds' => $timeoutSeconds,
                 'status' => Task::STATUS_PENDING,
-                'name' => "{$unixTimestampMinuteStarted}-" . Task::TRIGGER_TYPE_BACKGROUND . "-{$sciptClass}",
+                'name' => "{$unixTimestampMinuteStarted}-" . Task::TRIGGER_TYPE_BACKGROUND . "-{$scriptClass}",
                 'triggerType' => Task::TRIGGER_TYPE_BACKGROUND
             ];
         /** @var Task $task */
