@@ -49,7 +49,7 @@ class AuditLogBehaviour extends AttributesBehavior
                 \Yii::warning("The AuditLogBehaviour can't find the \$this->auditLogAttributes to be applied to. Ensure you've assigned some attributes to be applied");
             }
         } catch (\Throwable $exception) {
-            \Yii::error("The AuditLogBehaviour Init errored with: " . Tools::returnExceptionAsString($exception));
+            \Yii::error("The AuditLogBehaviour Init errored with: " . \Yii::$app->t::returnExceptionAsString($exception));
         }
     }
 
@@ -107,7 +107,7 @@ class AuditLogBehaviour extends AttributesBehavior
             }
 
         } catch (\Throwable $exception) {
-            \Yii::error("The AuditLogBehaviour saveAuditLog() threw an exception with: " . Tools::returnExceptionAsString($exception));
+            \Yii::error("The AuditLogBehaviour saveAuditLog() threw an exception with: " . \Yii::$app->t::returnExceptionAsString($exception));
         }
         return $this->owner->$attribute; // Return the original attribute
     }

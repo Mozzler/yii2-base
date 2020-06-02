@@ -80,7 +80,7 @@ class ViewAuditLog extends BaseWidget
                         }
                     }
                 } catch (\Throwable $exception) {
-                    \Yii::warning("Unable to process the auditLog #{$auditLogActionId} " . Tools::returnExceptionAsString($exception));
+                    \Yii::warning("Unable to process the auditLog #{$auditLogActionId} " . \Yii::$app->t::returnExceptionAsString($exception));
                 }
             }
 

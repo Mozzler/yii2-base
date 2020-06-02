@@ -102,7 +102,7 @@ EOC;
 
             }
         } catch (\Throwable $exception) {
-            $this->stderr("There was an exception with sending the test email: " . Tools::returnExceptionAsString($exception));
+            $this->stderr("There was an exception with sending the test email: " . \Yii::$app->t::returnExceptionAsString($exception));
             return ExitCode::UNSPECIFIED_ERROR;
         }
 

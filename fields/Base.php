@@ -32,7 +32,6 @@ class Base extends Component
     public $widgets = [];
     /** @var bool */
     public $hidden = false;
-
     /** @var array */
     public $options = [];
     /** @var null|string $visibleWhen */

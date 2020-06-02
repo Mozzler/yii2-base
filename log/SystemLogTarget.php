@@ -262,7 +262,7 @@ class SystemLogTarget extends Target
             return \Yii::$app->t->returnExceptionAsString($exception);
         } catch (\Throwable $exception) {
             // If the Mozzler tools aren't defined as 't' as expected we invoke them directly
-            return Tools::returnExceptionAsString($exception);
+            return \Yii::$app->t::returnExceptionAsString($exception);
         }
     }
 

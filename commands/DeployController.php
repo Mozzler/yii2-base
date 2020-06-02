@@ -110,7 +110,7 @@ class DeployController extends BaseController
                     $this->stdout("- {$collectionName} : {$documentsCount} documents\n");
                 }
             } catch (\Throwable $exception) {
-                $this->stderr("Error: Issue getting collection count for {$collectionName}\n" . Tools::returnExceptionAsString($exception));
+                $this->stderr("Error: Issue getting collection count for {$collectionName}\n" . \Yii::$app->t::returnExceptionAsString($exception));
                 unset($collections[$collectionIndex]); // Assume there's an issue with this collection, most likely it's already been dropped
             }
         }
@@ -142,7 +142,7 @@ class DeployController extends BaseController
                 $drop = $collection->drop();
                 $this->stdout((true === $drop ? "✓ Dropped" : "✗ Failed to drop") . " collection {$collectionName}\n");
             } catch (\Throwable $exception) {
-                $this->stderr("✗ Error: Unable to drop collection {$collectionName}\n" . Tools::returnExceptionAsString($exception));
+                $this->stderr("✗ Error: Unable to drop collection {$collectionName}\n" . \Yii::$app->t::returnExceptionAsString($exception));
             }
         }
         return ExitCode::OK;
