@@ -137,62 +137,6 @@ class TaskManager extends \yii\base\Component
             $taskObject->saveAndLogErrors();
             throw $exception;
         }
-//
-//
-//        // -------------------
-//        //  Run Async
-//        // -------------------
-//        if (self::isWindows()) {
-//            // If running in Windows use https://www.somacon.com/p395.php as per http://de2.php.net/manual/en/function.exec.php#35731
-//            // Note: On Windows exec() will first start cmd.exe to launch the command. If you want to start an external program without starting cmd.exe use proc_open() with the bypass_shell option set.
-//
-//            // First, try and see if the COM extension can be used for triggering tasks async
-//            // Note: In the php.ini file (or extensions directory) you'll likely need to add the following to enable COM:
-//            // extension=com_dotnet
-//            if (extension_loaded('com_dotnet')) {
-//                $WshShell = new \COM("WScript.Shell");
-//                $runCommand = "\"$filePath\" task/run {$taskId}";
-//
-//                \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell:  {$runCommand}");
-//                $taskObject->addLog("Running the Windows command via WScript.Shell: $runCommand");
-//                $taskObject->save(true, null, false);
-//                $oExec = $WshShell->Run($runCommand, 0, false);
-//
-//                return $runCommand;
-//                /*
-//                 * https://ss64.com/vb/run.html
-//                 *
-//                 * $WshShell->Run(strCommand, intWindowStyle, bWaitOnReturn)
-//                 * Settings for intWindowStyle:
-//                 *
-//                 * 0 Hide the window (and activate another window.)
-//                 * 1 Activate and display the window. (restore size and position) Specify this flag when displaying a window for the first time.
-//                 * 2 Activate & minimize.
-//                 * 3 Activate & maximize.
-//                 * 4 Restore. The active window remains active.
-//                 * 5 Activate & Restore.
-//                 * 6 Minimize & activate the next top-level window in the Z order.
-//                 * 7 Minimize. The active window remains active.
-//                 * 8 Display the window in its current state. The active window remains active.
-//                 * 9 Restore & Activate. Specify this flag when restoring a minimized window.
-//                 * 10 Sets the show-state based on the state of the program that started the application.
-//                 */
-//            } else {
-//                // -- The following will wait for the command to complete, so tasks are run serially
-//                $runCommand = "\"$filePath\" task/run {$taskId}"; // A serial version
-//            }
-//
-//            \Yii::info("Task {$taskObject->name}\nRunning Windows command via WScript.Shell: {$runCommand}");
-//            $taskObject->addLog("Running the Windows command: $runCommand");
-//            $taskObject->save(true, null, false);
-//            pclose(popen($runCommand, "r"));
-//        } else {
-//            $runCommand = "'{$filePath}' task/run " . escapeshellarg($taskId) . ' > /dev/null &';
-//            \Yii::info("Task {$taskObject->name}\nRunning Linux command: {$runCommand}");
-//            $taskObject->addLog("Running the Linux command: $runCommand");
-//            $taskObject->save(true, null, false);
-//            exec($runCommand);
-//        }
 
         return $runCommand;
     }
@@ -274,14 +218,16 @@ class TaskManager extends \yii\base\Component
             pclose(popen($runCommand, "r"));
         } else {
 
+            $runCommand .= ' 2>&1'; // Redirect stderr to stdout for capturing in the $ouput
             if ($runAsync) {
-                $runCommand .= " > /dev/null &";
+                // Run as a background task
+                $runCommand .= ' &';
             }
             \Yii::info("Running Linux command: {$runCommand}");
             $output = [];
             $exitCode = null;
             exec($runCommand, $output, $exitCode);
-            \Yii::info("Ran the command {$runCommand}" . VarDumper::export(['exitCode' => $exitCode, 'output' => $output]));
+            \Yii::info("Ran the command {$runCommand}\n" . VarDumper::export(['exitCode' => $exitCode, 'output' => $output]));
         }
 
         return $runCommand;
