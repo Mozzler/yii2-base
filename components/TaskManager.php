@@ -215,15 +215,20 @@ class TaskManager extends \yii\base\Component
      * @param array $arguments An array of arguments for the command, please note: YOU WILL NEED TO escapeshellarg them as needed!
      * @param bool $runAsync if on Linux you want the command to run in the background or not (In Windows this is predicated on the \COM module being installed
      * @param string $currentDirectory
+     * @param bool $escapeArgs If the arguments should be automatically escaped (wrapped in 'single quotes')
      * @return string the command that was run
      */
-    public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null)
+    public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null, $escapeArgs = true)
     {
 
         if (!empty($currentDirectory)) {
             chdir($currentDirectory);
         }
-        $argumentsEscaped = array_map('escapeshellarg', $arguments); // Escape each set of arguments
+
+        // Allow for people to have escaped arguments already (possibly needed if wrapping every arg in 'single quotes' causes issues, but use with extreme caution)
+        $argumentsEscaped = array_map($escapeArgs ? 'escapeshellarg' : null, $arguments); // Escape each set of arguments
+
+        // The run command
         $runCommand = "\"$filePath\" " . implode(' ', $argumentsEscaped);
         // -------------------
         //  Run Async
