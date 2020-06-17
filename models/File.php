@@ -162,13 +162,7 @@ class File extends BaseModel
 
     public function getFilesystem()
     {
-//        \Yii::debug("getFilesystem() The file info is: " . VarDumper::export($this->toArray()));
         $fsName = $this->workoutFilesystemName();
-        if (empty($this->_id)) {
-            \Yii::warning("A new File");
-            // -- If the file hasn't been saved yet, work out the filesystem based on the field information
-//            $this->filesystemName = 'fs';
-        }
         // -- Check the FileSystem has been defined
         if (!\Yii::$app->has($fsName)) {
             throw new BaseException("Unable to find the {$fsName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$fsName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
@@ -189,11 +183,14 @@ class File extends BaseModel
      * ],
      * @throws \yii\base\InvalidConfigException
      */
-    private function workoutFilesystemName($fullLookup = false)
+    private function workoutFilesystemName()
     {
         $fsName = $this->filesystemName; // The default
+        // ----------------------------------------------------------------
+        //  Load the model field and check for a custom filesystemName
+        // ----------------------------------------------------------------
+        // If possible load up the field attributes and see if there's a custom filesystemName
         if (!empty($this->other) && \Yii::$app->t::arrayKeysExist(['fieldName', 'modelType'], $this->other)) {
-            // -- Load up the field attributes and see if there's a custom filesystemName
             $modelClass = $this->defaultModelNamespace . $this->other['modelType'];
             $model = Tools::createModel($modelClass);
             if (empty($model)) {
@@ -201,9 +198,7 @@ class File extends BaseModel
                 return $fsName;
             }
             $modelFields = $model->modelFields();
-//                \Yii::debug(VarDumper::export($modelFields));
             $filesystemName = ArrayHelper::getValue($modelFields, $this->other['fieldName'] . '.filesystemName');
-            \Yii::debug("The filesystemName is $filesystemName");
             if (!empty($filesystemName)) {
                 $this->filesystemName = $filesystemName;
                 return $filesystemName;
