@@ -44,9 +44,7 @@ class FileUploadBehaviour extends Behavior
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
-        if (empty($fileModel->_id)) {
-            $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename
-        }
+
         // -- Basic file validation checks
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
         $fileInfo = self::getFileInfo();
@@ -59,17 +57,12 @@ class FileUploadBehaviour extends Behavior
         if (!is_file($fileInfo['tmp_name'])) {
             throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$fileInfo['tmp_name']} could not be found", 'file' => $fileInfo]);
         }
+        $fs = $fileModel->getFilesystem();
 
-        // -- Check the FileSystem has been defined
-        if (!\Yii::$app->has($this->filesystemComponentName)) {
-            throw new BaseException("Unable to find the {$this->filesystemComponentName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$this->filesystemComponentName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
+
+        if (empty($fileModel->_id)) {
+            $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename, but do it after getting the Filesystem
         }
-        // Use the FlySystem that's been defined
-        $fsName = $this->filesystemComponentName;
-        $fs = \Yii::$app->$fsName;
-        // If you have defined a filesystem component using https://github.com/creocoder/yii2-flysystem
-        \Yii::info("Using the $fsName Flysystem Filesystem you've defined");
-
         // -- Convert the file, if needed
         if (method_exists($fileModel, 'convert')) {
             // We later save the $file['tmp_name'] entry to the file system (e.g S3 or Google Cloud)
@@ -79,8 +72,9 @@ class FileUploadBehaviour extends Behavior
         // ----------------------------------
         //   Prepare the file
         // ----------------------------------
+
         $extension = $fileModel->getExtension($fileInfo['name']);
-        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fsName];
+        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName];
 
         $filename = \Yii::$app->t::renderTwig($fileModel::$filenameTwigTemplate, $twigData);
         $twigData['filename'] = $filename;
@@ -125,9 +119,7 @@ class FileUploadBehaviour extends Behavior
         }
 
         // Use the FlySystem that's been defined
-        $fsName = $this->filesystemComponentName;
-        $fs = \Yii::$app->$fsName;
-
+        $fs = $fileModel->getFilesystem();
 
         $exists = $fs->has($fileModel->filepath);
         if ($exists) {

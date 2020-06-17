@@ -2,11 +2,14 @@
 
 namespace mozzler\base\models;
 
+use mozzler\base\components\Tools;
+use mozzler\base\exceptions\BaseException;
 use mozzler\base\models\behaviors\AuditLogBehaviour;
 use mozzler\base\models\behaviors\FileUploadBehaviour;
 use mozzler\base\models\behaviors\GarbageCollectionBehaviour;
 use mozzler\base\models\Model as BaseModel;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class File
@@ -17,6 +20,7 @@ use yii\helpers\ArrayHelper;
  * @property string $filename required
  * @property string $filepath required
  * @property string $mimeType
+ * @property string $filesystemName
  * @property string $version
  * @property integer $size
  * @property array $other
@@ -33,6 +37,7 @@ class File extends BaseModel
     //     ]]],
     public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), fsName (name of the filesystem)
     public static $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
+    public $defaultModelNamespace = 'app\models\\'; // Used by the $this->>workoutFilesystemName as we don't get this information
 
     protected function modelConfig()
     {
@@ -117,6 +122,11 @@ class File extends BaseModel
                 'type' => 'JsonArray',
                 'label' => 'Other Information'
             ],
+            'filesystemName' => [
+                'type' => 'Text',
+                'label' => 'Filesystem Name',
+                'default' => 'fs' // What the \Yii::$app->fs default is
+            ]
         ]);
     }
 
@@ -124,11 +134,11 @@ class File extends BaseModel
     {
 
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'version'];
+        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName'];
         $scenarios[self::SCENARIO_UPDATE] = ['originalFilename']; // The original filename is used as what's sent to the browser on download
         $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'mimeType', 'size'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'filesystemName', 'mimeType', 'size'];
 
         return $scenarios;
     }
@@ -149,6 +159,58 @@ class File extends BaseModel
         ]);
     }
 
+
+    public function getFilesystem()
+    {
+//        \Yii::debug("getFilesystem() The file info is: " . VarDumper::export($this->toArray()));
+        $fsName = $this->workoutFilesystemName();
+        if (empty($this->_id)) {
+            \Yii::warning("A new File");
+            // -- If the file hasn't been saved yet, work out the filesystem based on the field information
+//            $this->filesystemName = 'fs';
+        }
+        // -- Check the FileSystem has been defined
+        if (!\Yii::$app->has($fsName)) {
+            throw new BaseException("Unable to find the {$fsName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$fsName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
+        }
+        // Use the FlySystem that's been defined on the model
+        // If you have defined a filesystem component using https://github.com/creocoder/yii2-flysystem
+        \Yii::info("Using the $fsName Flysystem Filesystem defined");
+        $this->filesystemName = $fsName;
+        return \Yii::$app->$fsName;
+    }
+
+
+    /**
+     * Example:   'other' => [
+     * 'fieldName' => 'secondaryDocumentFile',
+     * 'modelType' => 'Client',
+     * 'md5' => 'c89d22cc8d1a150aa1cdd42a1d9bb237',
+     * ],
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function workoutFilesystemName($fullLookup = false)
+    {
+        $fsName = $this->filesystemName; // The default
+        if (!empty($this->other) && \Yii::$app->t::arrayKeysExist(['fieldName', 'modelType'], $this->other)) {
+            // -- Load up the field attributes and see if there's a custom filesystemName
+            $modelClass = $this->defaultModelNamespace . $this->other['modelType'];
+            $model = Tools::createModel($modelClass);
+            if (empty($model)) {
+                \Yii::warning("Invalid model class $modelClass, not sure how to create it, using $fsName but you might want to edit the defaultModelNamespace $this->defaultModelNamespace");
+                return $fsName;
+            }
+            $modelFields = $model->modelFields();
+//                \Yii::debug(VarDumper::export($modelFields));
+            $filesystemName = ArrayHelper::getValue($modelFields, $this->other['fieldName'] . '.filesystemName');
+            \Yii::debug("The filesystemName is $filesystemName");
+            if (!empty($filesystemName)) {
+                $this->filesystemName = $filesystemName;
+                return $filesystemName;
+            }
+        }
+        return $fsName;
+    }
 
 
     // -- Example convert method, used by the FileUploadBehaviour

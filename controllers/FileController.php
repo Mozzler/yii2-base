@@ -157,20 +157,7 @@ class FileController extends BaseController
         if (empty($fileModel)) {
             throw new \yii\web\NotFoundHttpException("File with ID {$fileId} not found");
         }
-        /** @var FileUploadBehaviour $FileUploadBehaviour */
-        $FileUploadBehaviour = \Yii::createObject(FileUploadBehaviour::class);
-
-        $filesystemComponentName = $FileUploadBehaviour->filesystemComponentName; // 'fs' by default
-        // -- Check the FileSystem has been defined
-        if (!\Yii::$app->has($filesystemComponentName)) {
-            throw new BaseException("Unable to find the {$filesystemComponentName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$filesystemComponentName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
-        }
-
-        // Use the FlySystem that's been defined
-        $fsName = $filesystemComponentName;
-        /** @var \creocoder\flysystem\LocalFilesystem $fs */
-        $fs = \Yii::$app->$fsName;
-
+        $fs = $fileModel->getFilesystem();
         $exists = $fs->has($fileModel->filepath);
         if (!$exists) {
             throw new \yii\web\NotFoundHttpException("File with Id {$fileId} not found");

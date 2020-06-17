@@ -10,7 +10,7 @@ class File extends Base
      * What model is this relationship linked to?
      */
     public $relatedModel = \mozzler\base\models\File::class; // The Mozzler base File model
-
+    public $filesystemName = 'fs'; // Default to using \Yii::$app->fs but allow this to be something which can be modified
     /**
      * What is the foreign key field for this relationship?
      */
