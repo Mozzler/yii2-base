@@ -1,7 +1,7 @@
 <?php
 namespace mozzler\base\fields;
 
-class Date extends Base {
+class Date extends DateTime {
 	
 	public $type = 'Date';
 	

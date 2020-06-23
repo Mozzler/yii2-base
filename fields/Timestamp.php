@@ -1,7 +1,7 @@
 <?php
 namespace mozzler\base\fields;
 
-class Timestamp extends Integer {
+class Timestamp extends DateTime {
 	
 	public $type = 'Timestamp';
 

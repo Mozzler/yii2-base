@@ -92,7 +92,7 @@ class DateTime extends Base
                 $timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
                 $startTime = (new \DateTime($matches[0][1] . " 00:00", $timezone))->format("U"); // Start of the day
                 $endTime = (new \DateTime($matches[0][2] . " 23:59", $timezone))->format("U"); // End of the day
-                return [$attribute => ['gte' => $startTime, 'lte' => $endTime]];
+                return [$attribute => ['gte' => (int)$startTime, 'lte' => (int)$endTime]];
             }
         }
 
