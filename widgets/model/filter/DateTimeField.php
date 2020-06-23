@@ -19,16 +19,13 @@ class DateTimeField extends BaseField
             'widgetConfig' => [
                 'pluginOptions' => [
 //                    'locale' => ['format' => 'Y-m-d']
-//                    'value' => '2015-10-19 - 2015-11-03',
+                    'ranges' => [
+                        "Today" => ["moment().startOf('day')", "moment()"],
+                        "Yesterday" => ["moment().startOf('day').subtract(1,'days')", "moment().endOf('day').subtract(1,'days')"],
+                        "This Month" => ["moment().startOf('month')", "moment().endOf('month')"],
+                        "Last Month" => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
+                    ]
                 ],
-                'convertFormat' => true,
-                'options' => [
-                    'prepend' => ['content' => '<i class="fas fa-calendar-alt"></i>'],
-//                    'class' => 'drp-container form-group'
-                ]
-//                'class' => DateRangePicker::class,
-//                'type' => DateControl::FORMAT_DATETIME,
-//                'displayFormat' => 'php:' . \Yii::$app->formatter->datetimeFormat,
             ]
         ], $this->widgetConfig);
     }
@@ -42,7 +39,6 @@ class DateTimeField extends BaseField
 
         $field = $form->field($model, $attribute);
         return $field->widget(DateRangePicker::class, $config['widgetConfig']);
-//        return $field->widget(DateControl::className(), $config['widgetConfig']);
     }
 
 }

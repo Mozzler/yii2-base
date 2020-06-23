@@ -107,7 +107,7 @@ class SystemLog extends BaseModel
                 'required' => true,
             ],
             'endpoint' => [
-                'type' => 'Text',
+                'type' => 'TextLarge',
                 'label' => 'Endpoint',
                 'widgets' => [
                     'view' => [

@@ -35,7 +35,8 @@ class DateTime extends Base
             // -- If it's a date range then it'll be something like '2020-06-16 - 2020-07-07'
             $dateRangePoint = strpos($value, ' - ');
             if ($dateRangePoint !== false) {
-                $value = substr($value, 0, $dateRangePoint); // Taking just the first entry
+                // Using just the first entry (from)
+                $value = substr($value, 0, $dateRangePoint);
             }
 
             $timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
@@ -55,72 +56,44 @@ class DateTime extends Base
      * Example:
      *
      * [
-     * 'attribute' => 'testDriveStarted',
+     * 'attribute' => 'started',
      *
      * 'params' => [
-     *  'TestDrive' => [
-     *  'carType' => '',
-     *  'carId' => '',
-     *  'clientId' => '',
-     *  'loanType' => '',
-     *  'carRego' => '',
-     *  'testDriveStarted' => '2020-06-23 - 2020-07-08',
-     *  'testDriveEnded' => '',
-     *  'testDriveElapsedTime' => '',
-     *  'viewedTermsAndConditions' => '0',
-     *  'createdAt' => '',
-     *  'updatedAt' => '',
-     *  'createdUserId' => '',
-     *  'updatedUserId' => '',
+     *  'ExampleModel' => [
+     *  'started' => '2020-06-23 - 2020-07-08',
      * ],
      * ],
      * 'model' => [
      *  'id' => '',
      *  '_id' => null,
      *  'name' => null,
-     *  'createdAt' => '',
-     *  'createdUserId' => '',
-     *  'updatedAt' => '',
-     *  'updatedUserId' => '',
-     *  'carType' => '',
-     *  'carId' => '',
-     *  'clientId' => '',
-     *  'loanType' => '',
-     *  'carRego' => '',
-     *  'testDriveStarted' => '2020-06-23 - 2020-07-08',
-     *  'testDriveEnded' => '',
-     *  'testDriveElapsedTime' => '',
-     *  'viewedTermsAndConditions' => '0',
+     *  'started' => '2020-06-23 - 2020-07-08',
      * ],
      *
      * ]
      */
     public function generateFilter($model, $attribute, $params)
     {
-        \Yii::debug("The generateFilter is: " . VarDumper::export(['model' => $model->toArray(), 'attribute' => $attribute, 'params' => $params]));
-
-        //  If it's a Date Range we want to search between the two ranges
+        // -- If it's a Date Range we want to search between the two ranges
         if (strpos($model->$attribute, ' - ') !== false) {
-            $dateRangeRegex = '/([\d\-]+) \- ([\d\-]+)/';
+            $dateRangeRegex = '/([\d\-\/]+) - ([\d\-\/]+)/';
             preg_match_all($dateRangeRegex, $model->$attribute, $matches, PREG_SET_ORDER, 0);
-            \Yii::debug("matches - " . VarDumper::export($matches));
             /* E.g $matches = [
                 [
                     '2020-06-16 - 2020-07-07',
                     '2020-06-16',
                     '2020-07-07',
                 ],
-            ] */
-            if (!empty($matches) && count($matches[0]) === 3) {
+            ]
+            or matches 06/16/2020 - 06/25/2020
+             */
+            if (!empty($matches) && !empty($matches[0]) && count($matches[0]) === 3) {
                 // -- Parsed the Date Range
                 $timezone = new \DateTimeZone(\Yii::$app->formatter->timeZone);
-
-                $startTime = (new \DateTime($matches[0][1], $timezone))->format("U");
-                $endTime = (new \DateTime($matches[0][2], $timezone))->format("U");
+                $startTime = (new \DateTime($matches[0][1] . " 00:00", $timezone))->format("U"); // Start of the day
+                $endTime = (new \DateTime($matches[0][2] . " 23:59", $timezone))->format("U"); // End of the day
                 return [$attribute => ['gte' => $startTime, 'lte' => $endTime]];
             }
-
-//            $value = substr($model->$attribute, 0, $dateRangePoint); // Taking just the first entry
         }
 
         switch ($this->filterType) {
