@@ -123,7 +123,7 @@ class Base extends Component
     /**
      * Helper method that generates a query filter based
      */
-    public function generateFilter($model, $attribute)
+    public function generateFilter($model, $attribute, $params)
     {
         switch ($this->filterType) {
             case '=':

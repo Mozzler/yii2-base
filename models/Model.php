@@ -745,7 +745,7 @@ class Model extends ActiveRecord
         foreach ($searchAttributes as $attribute) {
             $modelField = $this->getModelField($attribute);
             if ($model->$attribute) {
-                $attributeFilters[] = $modelField->generateFilter($model, $attribute);
+                $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
             }
         }
 

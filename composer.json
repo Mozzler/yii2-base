@@ -20,7 +20,8 @@
     "ext-json": "*",
     "creocoder/yii2-flysystem": "^0.9.3",
     "ext-mbstring": "*",
-    "ext-mongodb": "*"
+    "ext-mongodb": "*",
+    "kartik-v/yii2-date-range": "dev-master"
   },
   "autoload": {
     "psr-4": {
