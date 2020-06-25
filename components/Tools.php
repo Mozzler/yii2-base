@@ -2,6 +2,7 @@
 
 namespace mozzler\base\components;
 
+use MongoDB\BSON\ObjectId;
 use Yii;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
@@ -9,6 +10,7 @@ use yii\helpers\ArrayHelper;
 class Tools extends Component
 {
 
+    public $cachedGetModelResults = [];
     public static $isApiRegex = '/api|OauthModule/';
 
     public static function app()
@@ -140,6 +142,25 @@ class Tools extends Component
             $filter = ['_id' => self::ensureId($filter)];
         }
         return $model->findOne($filter, $checkPermissions);
+    }
+
+    /**
+     * @param $className string
+     * @param $filter array|ObjectId|string
+     * @return mixed
+     * This will always work without a permissions check so shouldn't be used for basics
+     * It's mainly for use when exporting or when you are likely to lookup the same information multiple times in a request.
+     */
+    public function cachedGetModel($className, $filter)
+    {
+        $nameSpace = $className . '-' . json_encode($filter);
+        if (isset($this->cachedGetModelResults[$nameSpace])) {
+            \Yii::debug("Returning the cached get model: " . $nameSpace);
+            return $this->cachedGetModelResults[$nameSpace];
+        }
+        $model = self::getModel($className, $filter, false);
+        $this->cachedGetModelResults[$nameSpace] = $model;
+        return $model;
     }
 
     /**
