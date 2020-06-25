@@ -155,7 +155,6 @@ class Tools extends Component
     {
         $nameSpace = $className . '-' . json_encode($filter);
         if (isset($this->cachedGetModelResults[$nameSpace])) {
-            \Yii::debug("Returning the cached get model: " . $nameSpace);
             return $this->cachedGetModelResults[$nameSpace];
         }
         $model = self::getModel($className, $filter, false);
