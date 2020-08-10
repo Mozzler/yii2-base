@@ -10,3 +10,7 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+.widget-model-filter .select2-container--krajee .select2-selection--multiple .select2-selection__choice__remove {
+    margin-top: 0px;
+}
