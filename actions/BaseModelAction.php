@@ -88,7 +88,6 @@ class BaseModelAction extends BaseAction
      */
     public function loadModel($model = null)
     {
-
         if (is_null($model)) {
             // If it's a create action
             /* @var $model \yii\db\ActiveRecord */

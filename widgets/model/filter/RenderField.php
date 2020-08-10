@@ -28,7 +28,6 @@ class RenderField extends BaseWidget
         unset($modelConfig['class']);
         $config = ArrayHelper::merge($config, is_array($modelConfig) ? $modelConfig : []);
 
-
         // Load the field object, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'filter.class');
         if (!empty($className) && class_exists($className)) {
