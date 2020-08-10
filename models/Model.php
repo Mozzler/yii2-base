@@ -400,6 +400,16 @@ class Model extends ActiveRecord
         ];
     }
 
+    public function __get($key) {
+        $modelField = $this->getModelField($key);
+        if ($modelField && $modelField->formula) {
+            $formula = $modelField->formula;
+            return $formula($this);
+        }
+
+        return parent::__get($key);
+    }
+
     /**
      * Add support for internals
      *

@@ -34,6 +34,8 @@ class Base extends Component
     public $hidden = false;
     /** @var array */
     public $options = [];
+
+    public $formula = null;
     /** @var null|string $visibleWhen */
 
     //  Set to a JS function to show/hide the input field based on the form data
@@ -57,7 +59,6 @@ class Base extends Component
     public function init()
     {
         parent::init();
-
 
         // set default input / view widgets based on this field type
         $this->widgets['input'] = ArrayHelper::merge([
