@@ -74,7 +74,7 @@ class FileUploadBehaviour extends Behavior
         // ----------------------------------
 
         $extension = $fileModel->getExtension($fileInfo['name']);
-        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName];
+        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName,'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
 
         $filename = \Yii::$app->t::renderTwig($fileModel::$filenameTwigTemplate, $twigData);
         $twigData['filename'] = $filename;
