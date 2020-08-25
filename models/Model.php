@@ -14,7 +14,6 @@ use mozzler\base\helpers\ModelHelper;
 
 use yii\data\ActiveDataProvider;
 use mozzler\base\yii\data\ActiveDataFilter;
-use yii\helpers\UnsetArrayValue;
 use yii\helpers\VarDumper;
 
 /**
@@ -162,10 +161,25 @@ class Model extends ActiveRecord
         ];
     }
 
+    protected function getCachedModelFields()
+    {
+        $sessionCache = \Yii::$app->t->getSessionCache();
+        $sessionKey = $this::$collectionName . '-modelField';
+        if ($sessionCache->exists($sessionKey)) {
+            \Yii::debug("Returning cached modelFields");
+            return $sessionCache->get($sessionKey);
+        }
+        $modelFields = FieldHelper::createFields($this, $this->modelFields());
+        \Yii::debug("The modelFields: " . VarDumper::export($modelFields));
+        $sessionCache->set($sessionKey, $modelFields);
+        return $modelFields;
+    }
+
     protected function initModelFields()
     {
-        $this->modelFields = FieldHelper::createFields($this, $this->modelFields());
+        $this->modelFields = $this->getCachedModelFields();
     }
+
 
     /**
      * Define the available fields for this model, along with their configuration
@@ -400,7 +414,8 @@ class Model extends ActiveRecord
         ];
     }
 
-    public function __get($key) {
+    public function __get($key)
+    {
         $modelField = $this->getModelField($key);
         if ($modelField && $modelField->formula) {
             $formula = $modelField->formula;

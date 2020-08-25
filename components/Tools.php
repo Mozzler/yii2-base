@@ -5,6 +5,7 @@ namespace mozzler\base\components;
 use MongoDB\BSON\ObjectId;
 use Yii;
 use yii\base\Component;
+use yii\caching\ArrayCache;
 use yii\helpers\ArrayHelper;
 
 class Tools extends Component
@@ -12,6 +13,7 @@ class Tools extends Component
 
     public $cachedGetModelResults = [];
     public static $isApiRegex = '/api|OauthModule/';
+    public $sessionCacheName = 'sessionCache';
 
     public static function app()
     {
@@ -421,5 +423,25 @@ class Tools extends Component
             Yii::warning("Can't find the \Yii::\$app->controller->module so can't check if the request is API or not");
             return false; // NB: It's likely being run as a test or via CLI
         }
+    }
+
+
+    /**
+     *
+     * @return object|ArrayCache
+     */
+    public function getSessionCache()
+    {
+        // -- Use a session cache if defined otherwise create one
+        if (\Yii::$app->has($this->sessionCacheName)) {
+            \Yii::debug("Session Cache using the configured " . $this->sessionCacheName);
+            $sessionCacheName = $this->sessionCacheName;
+            $sessionCache = \Yii::$app->get($sessionCacheName);
+        } else {
+            /** @var ArrayCache $sessionCache */
+            \Yii::debug("Session Cache creating  " . $this->sessionCacheName);
+            $sessionCache = \Yii::createObject(\yii\caching\ArrayCache::class);
+        }
+        return $sessionCache;
     }
 }
