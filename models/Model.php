@@ -163,6 +163,7 @@ class Model extends ActiveRecord
 
     protected function getCachedModelFields()
     {
+
         $sessionCache = \Yii::$app->t->getSessionCache();
         $sessionKey = $this::$collectionName . '-modelField';
         if ($sessionCache->exists($sessionKey)) {
@@ -177,7 +178,8 @@ class Model extends ActiveRecord
 
     protected function initModelFields()
     {
-        $this->modelFields = $this->getCachedModelFields();
+        $this->modelFields = $this->getCachedModelFields(); // Causes Serialization of 'Closure' is not allowed
+//        $this->modelFields = FieldHelper::createFields($this, $this->modelFields());
     }
 
 
