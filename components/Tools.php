@@ -5,6 +5,7 @@ namespace mozzler\base\components;
 use MongoDB\BSON\ObjectId;
 use Yii;
 use yii\base\Component;
+use yii\caching\ArrayCache;
 use yii\helpers\ArrayHelper;
 
 class Tools extends Component
@@ -12,6 +13,7 @@ class Tools extends Component
 
     public $cachedGetModelResults = [];
     public static $isApiRegex = '/api|OauthModule/';
+    public $requestCacheName = 'requestCache';
 
     public static function app()
     {
@@ -422,4 +424,59 @@ class Tools extends Component
             return false; // NB: It's likely being run as a test or via CLI
         }
     }
+
+
+    /**
+     * @return object|ArrayCache
+     * @throws \yii\base\InvalidConfigException
+     *
+     * Note: This isn't a static function you need to use \Yii::$app->t->getRequestCache();
+     *
+     * Example config/common.php if you want to specify one (ensure serializer is false)
+     *
+     * ['components' => [
+     *  'requestCache' => [
+     *   'class' => 'yii\caching\ArrayCache',
+     *   'serializer' => false,
+     *  ],
+     * ]
+     *
+     * @see \mozzler\base\models\Model::getCachedModelFields()
+     *
+     * Example usage:
+     * function cachedStuff() {
+     *  $sessionCache = \Yii::$app->t->getRequestCache();
+     *  $key = 'cacheKey'; // Fill in this
+     *  if ($requestCache->exists($key)) {
+     *      return $requestCache->get($key);
+     *  }
+     *  $value = someExpensiveToComputerFunction();
+     *  $requestCache->set($key, $value);
+     *  return $value
+     * }
+     */
+    public function getRequestCache()
+    {
+        // -- Use a session cache if defined otherwise create one
+        if (\Yii::$app->has($this->requestCacheName)) {
+            $requestCacheName = $this->requestCacheName;
+            $requestCache = \Yii::$app->get($requestCacheName);
+        } else {
+
+            if (empty($this->requestCache)) {
+                \Yii::debug("Tools Request Cache ArrayCache is being created");
+                /** @var ArrayCache $requestCache */
+                $requestCache = \Yii::createObject(\yii\caching\ArrayCache::class, ['serializer' => false]);
+                $requestCache->serializer = false;
+                $this->requestCache = $requestCache;
+            } else {
+
+                $requestCache = $this->requestCache;
+            }
+
+        }
+        return $requestCache;
+    }
+
+    public $requestCache = null;
 }
