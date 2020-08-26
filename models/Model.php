@@ -163,8 +163,7 @@ class Model extends ActiveRecord
 
     protected function getCachedModelFields()
     {
-
-        $sessionCache = \Yii::$app->t->getSessionCache();
+        $sessionCache = \Yii::$app->t->getRequestCache();
         $sessionKey = $this::$collectionName . '-modelField';
         if ($sessionCache->exists($sessionKey)) {
             \Yii::debug("Returning cached modelFields");

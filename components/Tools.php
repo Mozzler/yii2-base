@@ -13,7 +13,7 @@ class Tools extends Component
 
     public $cachedGetModelResults = [];
     public static $isApiRegex = '/api|OauthModule/';
-    public $sessionCacheName = 'sessionCache';
+    public $requestCacheName = 'requestCache';
 
     public static function app()
     {
@@ -430,18 +430,30 @@ class Tools extends Component
      *
      * @return object|ArrayCache
      */
-    public function getSessionCache()
+    public function getRequestCache()
     {
         // -- Use a session cache if defined otherwise create one
-        if (\Yii::$app->has($this->sessionCacheName)) {
-            \Yii::debug("Session Cache using the configured " . $this->sessionCacheName);
-            $sessionCacheName = $this->sessionCacheName;
-            $sessionCache = \Yii::$app->get($sessionCacheName);
+        if (\Yii::$app->has($this->requestCacheName)) {
+            \Yii::debug("Request Cache using the configured one: " . $this->requestCacheName);
+            $requestCacheName = $this->requestCacheName;
+            $requestCache = \Yii::$app->get($requestCacheName);
         } else {
-            /** @var ArrayCache $sessionCache */
-            \Yii::debug("Session Cache creating  " . $this->sessionCacheName);
-            $sessionCache = \Yii::createObject(\yii\caching\ArrayCache::class);
+
+            if (empty($this->requestCache)) {
+                \Yii::debug("Tools Request Cache being created");
+                /** @var ArrayCache $requestCache */
+                $requestCache = \Yii::createObject(\yii\caching\ArrayCache::class, ['serializer' => false]);
+                $requestCache->serializer = false;
+                $this->requestCache = $requestCache;
+            } else {
+
+                \Yii::debug("Using the Tools local requestCache");
+                $requestCache = $this->requestCache;
+            }
+
         }
-        return $sessionCache;
+        return $requestCache;
     }
+
+    public $requestCache = null;
 }
