@@ -427,8 +427,33 @@ class Tools extends Component
 
 
     /**
-     *
      * @return object|ArrayCache
+     * @throws \yii\base\InvalidConfigException
+     *
+     * Note: This isn't a static function you need to use \Yii::$app->t->getRequestCache();
+     *
+     * Example config/common.php if you want to specify one (ensure serializer is false)
+     *
+     * ['components' => [
+     *  'requestCache' => [
+     *   'class' => 'yii\caching\ArrayCache',
+     *   'serializer' => false,
+     *  ],
+     * ]
+     *
+     * @see \mozzler\base\models\Model::getCachedModelFields()
+     *
+     * Example usage:
+     * function cachedStuff() {
+     *  $sessionCache = \Yii::$app->t->getRequestCache();
+     *  $key = 'cacheKey'; // Fill in this
+     *  if ($requestCache->exists($key)) {
+     *      return $requestCache->get($key);
+     *  }
+     *  $value = someExpensiveToComputerFunction();
+     *  $requestCache->set($key, $value);
+     *  return $value
+     * }
      */
     public function getRequestCache()
     {
