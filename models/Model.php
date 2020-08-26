@@ -147,38 +147,40 @@ class Model extends ActiveRecord
             self::SCENARIO_LIST => ['name', 'createdUserId', 'createdAt'],
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
-            self::SCENARIO_EXPORT => array_keys(array_filter($this->modelFields(), function ($modelField, $modelKey) {
+            self::SCENARIO_EXPORT => array_keys(array_filter($this->getCachedModelFields(), function ($modelField, $modelKey) {
+                \Yii::debug("Export ModelFields: " . VarDumper::export(['$modelField' => $modelField, '$modelKey' => $modelKey]));
                 if ($modelKey === 'id') {
                     return false; // Only want '_id' not 'id' otherwise it's doubling up
                 }
                 // This is used by the CSV export e.g model/export so you don't want to output fields that are relateMany
-                return $modelField['type'] === 'RelateMany' ? false : true;
+                return !empty($modelField['type']) && $modelField['type'] === 'RelateMany' ? false : true;
             }, ARRAY_FILTER_USE_BOTH)),
             self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
 
-            self::SCENARIO_DEFAULT => array_keys($this->modelFields()),
-            self::SCENARIO_AUDITABLE => array_values(array_diff(array_keys($this->modelFields()), ['updatedAt', 'createdAt', 'createdUserId', 'updatedUserId'])), // Default to all fields except the updated and created auto-generated fields. Note the use of array_values to repack the array after array_diff removes the entries
+            self::SCENARIO_DEFAULT => array_keys($this->getCachedModelFields()),
+            self::SCENARIO_AUDITABLE => array_values(array_diff(array_keys($this->getCachedModelFields()), ['updatedAt', 'createdAt', 'createdUserId', 'updatedUserId'])), // Default to all fields except the updated and created auto-generated fields. Note the use of array_values to repack the array after array_diff removes the entries
         ];
     }
 
+    /**
+     * @return array
+     * We cache the model field results within the request
+     */
     protected function getCachedModelFields()
     {
         $sessionCache = \Yii::$app->t->getRequestCache();
         $sessionKey = $this::$collectionName . '-modelField';
         if ($sessionCache->exists($sessionKey)) {
-            \Yii::debug("Returning cached modelFields");
             return $sessionCache->get($sessionKey);
         }
-        $modelFields = FieldHelper::createFields($this, $this->modelFields());
-        \Yii::debug("The modelFields: " . VarDumper::export($modelFields));
+        $modelFields = $this->modelFields();
         $sessionCache->set($sessionKey, $modelFields);
         return $modelFields;
     }
 
     protected function initModelFields()
     {
-        $this->modelFields = $this->getCachedModelFields(); // Causes Serialization of 'Closure' is not allowed
-//        $this->modelFields = FieldHelper::createFields($this, $this->modelFields());
+        $this->modelFields = FieldHelper::createFields($this, $this->getCachedModelFields());
     }
 
 
@@ -889,7 +891,7 @@ class Model extends ActiveRecord
     {
         $autoIncrementAttributes = [];
 
-        foreach ($this->modelFields() as $attribute => $fieldConfig) {
+        foreach ($this->getCachedModelFields() as $attribute => $fieldConfig) {
             if ($fieldConfig['type'] == 'AutoIncrement') {
                 $autoIncrementAttributes[] = $attribute;
             }

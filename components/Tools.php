@@ -434,20 +434,18 @@ class Tools extends Component
     {
         // -- Use a session cache if defined otherwise create one
         if (\Yii::$app->has($this->requestCacheName)) {
-            \Yii::debug("Request Cache using the configured one: " . $this->requestCacheName);
             $requestCacheName = $this->requestCacheName;
             $requestCache = \Yii::$app->get($requestCacheName);
         } else {
 
             if (empty($this->requestCache)) {
-                \Yii::debug("Tools Request Cache being created");
+                \Yii::debug("Tools Request Cache ArrayCache is being created");
                 /** @var ArrayCache $requestCache */
                 $requestCache = \Yii::createObject(\yii\caching\ArrayCache::class, ['serializer' => false]);
                 $requestCache->serializer = false;
                 $this->requestCache = $requestCache;
             } else {
 
-                \Yii::debug("Using the Tools local requestCache");
                 $requestCache = $this->requestCache;
             }
 
