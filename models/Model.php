@@ -148,12 +148,11 @@ class Model extends ActiveRecord
             self::SCENARIO_VIEW => ['name', 'createdUserId', 'createdAt', 'updatedUserId', 'updatedAt'],
             self::SCENARIO_SEARCH => ['id', 'name', 'createdUserId', 'updatedUserId'],
             self::SCENARIO_EXPORT => array_keys(array_filter($this->getCachedModelFields(), function ($modelField, $modelKey) {
-                \Yii::debug("Export ModelFields: " . VarDumper::export(['$modelField' => $modelField, '$modelKey' => $modelKey]));
                 if ($modelKey === 'id') {
                     return false; // Only want '_id' not 'id' otherwise it's doubling up
                 }
                 // This is used by the CSV export e.g model/export so you don't want to output fields that are relateMany
-                return !empty($modelField['type']) && $modelField['type'] === 'RelateMany' ? false : true;
+                return $modelField['type'] === 'RelateMany' ? false : true;
             }, ARRAY_FILTER_USE_BOTH)),
             self::SCENARIO_DELETE => ['id', 'name', 'createdAt', 'updatedAt'],
 
