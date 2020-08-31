@@ -713,7 +713,6 @@ class Model extends ActiveRecord
      */
     public static function findOne($condition, $checkPermissions = true, $applyDefaultFilter = true)
     {
-        \Yii::trace("model.findOne()" . print_r($condition, true), __METHOD__);
         return static::findByCondition($condition, $checkPermissions, $applyDefaultFilter)->one();
     }
 
@@ -727,7 +726,6 @@ class Model extends ActiveRecord
     protected static function findByCondition($condition, $checkPermissions = true, $applyDefaultFilter = true)
     {
         $query = static::find($checkPermissions, $applyDefaultFilter);
-        \Yii::trace(print_r($query, true), __METHOD__);
 
         if (!ArrayHelper::isAssociative($condition)) {
             // query by primary key
