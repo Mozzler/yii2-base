@@ -127,11 +127,16 @@ class TaskManager extends \yii\base\Component
         $taskObject->addLog("About to run the {$taskObject->ident()} with: " . VarDumper::export(['filePath' => $filePath, 'arguments' => $arguments, 'isBackground' => $isBackground]));
         $taskObject->saveAndLogErrors();
         try {
-
             $runCommand = self::runCommand($filePath, $arguments, $isBackground);
+            // Re-fetch the task object as it may have been updated when the command was run
+            // which means the current $taskObject is stale
+            $taskObject = Tools::getModel(Task::class, $taskId, false);
             $taskObject->addLog("Ran the {$taskObject->ident()} with the command {$runCommand}");
             $taskObject->saveAndLogErrors();
         } catch (\Throwable $exception) {
+            // Re-fetch the task object as it may have been updated when the command was run
+            // which means the current $taskObject is stale
+            $taskObject = Tools::getModel(Task::class, $taskId, false);
             // Save the error to the task for visibility
             $taskObject->addLog("Exception whilst running the {$taskObject->ident()} " . \Yii::$app->t::returnExceptionAsString($exception));
             $taskObject->saveAndLogErrors();
