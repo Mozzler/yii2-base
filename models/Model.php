@@ -928,7 +928,8 @@ class Model extends ActiveRecord
     {
         $save = $this->save(true, null, $checkPermissions);
         if (!$save) {
-            \Yii::error("Error saving {$this->ident()}. Validation Error(s): " . VarDumper::export($this->getErrors()));
+            $className = \Yii::$app->t::getModelClassName($this);
+            \Yii::error("Error saving {$this->ident()}. Validation Error(s): " . VarDumper::export(['Errors' => $this->getErrors(), $className => $this->toArray()]));
         }
         return $save;
     }
