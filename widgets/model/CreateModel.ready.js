@@ -1,6 +1,16 @@
 var mozzlerFormVisibility = (function () {
-    var $mozzlerMainFormInput = $(`#form-${mozzlerMainWidgetId} input, #form-${mozzlerMainWidgetId} textarea, #form-${mozzlerMainWidgetId} select`); //  The main form inputs (ignore anything in the nav header/footer
     var $mozzlerMainForm = $(`#form-${mozzlerMainWidgetId}`); //  The main form itself
+    if ($mozzlerMainForm.length === 0) {
+        console.warn(`Can't find the form at #form-${mozzlerMainWidgetId}`);
+        $mozzlerMainForm = $('.widget-model-create form, .widget-model-update form');
+        if ($mozzlerMainForm.length === 0) {
+            console.warn(`Also can't find a form with '.widget-model-create form, .widget-model-update form' maybe you aren't on a form page? Not processing the visibility`);
+        } else {
+            console.debug("The form map is ", getFormMap());
+        }
+    }
+    var $mozzlerMainFormInput = $mozzlerMainForm.find('input, textarea, select'); //  The main form inputs (ignore anything in the nav header/footer
+
     function processVisibility() {
         // console.debug("Processing the visibility");
         let serialisedMap = getFormMap();
@@ -24,7 +34,7 @@ var mozzlerFormVisibility = (function () {
             }
 
             // -- Now to translate back to the DOM entries
-            let $class = $(`#form-${mozzlerMainWidgetId} .form-group.field-${mozzlerMainModelClassName.toLowerCase()}-${fieldName.toLowerCase()}`);
+            let $class = $mozzlerMainForm.find(`.form-group.field-${mozzlerMainModelClassName.toLowerCase()}-${fieldName.toLowerCase()}`);
             if (isVisible) {
                 $class.removeClass('hidden');
             } else {
