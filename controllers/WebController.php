@@ -23,17 +23,18 @@ class WebController extends Controller {
 	 * Data for the HTML template (merged with `$data`)
 	 */
 	public $templateData = [];
-	
+
 	/**
 	 * Has the client requested a Json response?
 	 */
 	public $jsonRequested = false;
-	
+
 	/**
 	 * Before running any action, check if we need to be returning Json
 	 */
 	public function init()
 	{
+	    parent::init(); // Required to be called as of Yii2 v2.0.36 https://github.com/yiisoft/yii2/pull/18083#issuecomment-646020002
 		$this->on(self::EVENT_BEFORE_ACTION, [$this, 'checkJsonRequested']);
 	}
 
@@ -57,7 +58,7 @@ class WebController extends Controller {
 		$data = ArrayHelper::merge($this->data, $this->templateData);
 		return parent::render($template, $data);
 	}
-	
+
 	/**
 	 * Search all the parents controllers to try and find a view template file that follows
 	 * the controller inheritance structure.
@@ -69,15 +70,15 @@ class WebController extends Controller {
 	    foreach ($viewPaths as $path) {
 		    $path = \Yii::getAlias($path);
 		    $viewPath = $path . DIRECTORY_SEPARATOR . $view . '.' . $this->view->defaultExtension;
-		    
+
 		    if (file_exists($viewPath)) {
 	            return $viewPath;
 	        }
 	    }
-	    
+
 	    return false;
     }
-    
+
     /**
      * @inheritdoc
      */
