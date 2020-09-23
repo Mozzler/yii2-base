@@ -12,3 +12,13 @@ Add the following to you `config/params.php`:
 ```
 
 Copy the `views/layouts/emails` directory across to `views/layouts` in your application.
+
+
+
+Script / Cron Principles
+------------------------
+
+- Always write a script
+- Link a cron job to run a script
+- If we need the ability run via command, create a command that runs the script
+
