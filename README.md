@@ -1,6 +1,6 @@
 ## Installation
 
-Add the following to you `config/params.php`:
+Add the following to your `config/params.php`:
 
 ```
     'mozzler.base' => [
