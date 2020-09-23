@@ -105,7 +105,7 @@ class CronManager extends Component
             }
 
             if (empty($cronObject)) {
-                $cronRun->addLog("The cronObject is empty, there was an issue instanciating the object using the cronEntry: " . var_export($cronEntry, true), 'error');
+                $cronRun->addLog("The cronObject is empty, there was an issue instantiating the object using the cronEntry: " . var_export($cronEntry, true), 'error');
                 $stats['Errors']++;
                 continue;
             }
@@ -158,7 +158,7 @@ class CronManager extends Component
         ], "");
 
         // @todo: try/catch this and gracefully deal with the Exception 'yii\mongodb\Exception' example message: 'E11000 duplicate key error collection: viterra.app.cronRun index: timestampUniqueId dup key: { : 1550638500 }'
-        if (!$cronRun->save()) {
+        if (!$cronRun->saveAndLogErrors()) {
             // Unable to save cron due to an entry already existing for this
             // timestamp minute interval
             return false;

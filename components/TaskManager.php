@@ -50,14 +50,14 @@ class TaskManager extends \yii\base\Component
             ];
 
         if (Task::TRIGGER_TYPE_BACKGROUND === $taskConfig['triggerType']) {
-            throw new \yii\base\NotSupportedException("Background task scheduling is not yet supported, sorry :(");
+            throw new \yii\base\NotSupportedException("Background task scheduling is not yet supported, trying instantly triggering it instead or running via Cron");
         }
 
         /** @var Task $task */
         $task = Tools::createModel(Task::class, $taskConfig);
 
-        if (!$task->save(true, null, false)) {
-            throw new \Exception("Unable to save a task for execution: " . json_encode($task->getErrors()));
+        if (!$task->saveAndLogErrors()) {
+            throw new \Exception("Unable to save a task for execution: " . VarDumper::export(['Save Error(s)' => $task->getErrors(), 'Task' => $task->toScenarioArray()]));
         }
 
         if (Task::TRIGGER_TYPE_INSTANT === $task->triggerType) {
