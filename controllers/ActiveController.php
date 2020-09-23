@@ -14,7 +14,7 @@ use mozzler\rbac\filters\RbacFilter;
 
 class ActiveController extends BaseActiveController
 {
-	
+
 	// custom serializer to support scenario based responses
 	public $serializer = [
         'class' => 'mozzler\base\yii\rest\Serializer',
@@ -26,13 +26,14 @@ class ActiveController extends BaseActiveController
 	 * Model class associated with this controller
 	 */
     public $modelClass = null;
-    
+
     public function init()
     {
+        parent::init();
         if ($this->modelClass === null) {
             throw new InvalidConfigException(get_class($this) . '::$modelClass must be set.');
         }
-        
+
         // Instantiate an instance of the model class to ensure the database collectoin
         // is configured for RBAC
         \Yii::createObject($this->modelClass);
@@ -70,7 +71,7 @@ class ActiveController extends BaseActiveController
             ]
         ]);
     }
-    
+
     public static function rbac() {
 		return [
 			'public' => [
@@ -135,7 +136,7 @@ class ActiveController extends BaseActiveController
 	        ]
 	    ];
 	}
-    
+
     /**
      * @inheritdoc
      */
