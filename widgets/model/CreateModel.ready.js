@@ -6,7 +6,7 @@ var mozzlerFormVisibility = (function () {
         if ($mozzlerMainForm.length === 0) {
             console.warn(`Also can't find a form with '.widget-model-create form, .widget-model-update form' maybe you aren't on a form page? Not processing the visibility`);
         } else {
-            console.debug("The form map is ", getFormMap());
+            // console.debug("The form map is ", getFormMap());
         }
     }
     var $mozzlerMainFormInput = $mozzlerMainForm.find('input, textarea, select'); //  The main form inputs (ignore anything in the nav header/footer
@@ -19,7 +19,7 @@ var mozzlerFormVisibility = (function () {
 
             // -- Ignore null entries
             if (!mozzlerFieldsVisibleWhen[fieldName]) {
-                console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
+                // console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
                 continue;
             }
             let isVisible = true; // Assume it is in the case of an error
@@ -39,7 +39,7 @@ var mozzlerFormVisibility = (function () {
                 $class.removeClass('hidden');
             } else {
                 $class.addClass('hidden');
-                console.debug(`Setting to hidden: ${fieldName}`, $class);
+                // console.debug(`Setting to hidden: ${fieldName}`, $class);
             }
         }
     }
@@ -85,11 +85,11 @@ if (mozzlerFieldsVisibleWhen) {
 
     // Process visibility when a field has been changed
     mozzlerFormVisibility.$mozzlerMainFormInput.on('change selected', function (event) {
-        console.log("You changed", $(this));
+        // console.log("You changed", $(this));
         mozzlerFormVisibility.processVisibility();
 
     });
 
-    console.debug("Processing the visibility of the fields: ", mozzlerFieldsVisibleWhen);
+    // console.debug("Processing the visibility of the fields: ", mozzlerFieldsVisibleWhen);
     mozzlerFormVisibility.processVisibility(); // Process on page load
 }
