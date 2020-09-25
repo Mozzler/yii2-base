@@ -113,11 +113,6 @@ class FileUploadBehaviour extends Behavior
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
-        // -- Check the FileSystem has been defined
-        if (!\Yii::$app->has($this->filesystemComponentName)) {
-            throw new BaseException("Unable to find the {$this->filesystemComponentName} filesystem", 500, null, ['Developer note' => "In order to upload a file you need to define an {$this->filesystemComponentName} filesystem in the config/common.php component see https://github.com/creocoder/yii2-flysystem for more information"]);
-        }
-
         // Use the FlySystem that's been defined
         $fs = $fileModel->getFilesystem();
 
