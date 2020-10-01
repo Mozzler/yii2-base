@@ -63,10 +63,65 @@ class FileUploadBehaviour extends Behavior
         if (empty($fileModel->_id)) {
             $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename, but do it after getting the Filesystem
         }
+
+        // ----------------------------------------
+        //   Check associated model fields
+        // ----------------------------------------
+        $convertFunctionReference = null;
+        if (!empty($fileModel->modelType) && !empty($fileModel->fieldName)) {
+            $associatedModelField = $fileModel->getAssociatedModelField();
+            if (empty($associatedModelField)) {
+                \Yii::warning("Invalid model field yet the modelType and fieldName are set");
+            } else {
+
+                if (!empty($associatedModelField['filenameTwigTemplate'])) {
+                    $fileModel->filenameTwigTemplate = $associatedModelField['filenameTwigTemplate'];
+                    \Yii::debug("Using the {$fileModel->modelType} specially associated filenameTwigTemplate");
+                }
+                if (isset($associatedModelField['folderpathTwigTemplate'])) {
+                    $fileModel->folderpathTwigTemplate = $associatedModelField['folderpathTwigTemplate'];
+                    \Yii::debug("Using the {$fileModel->modelType} specially associated folderpathTwigTemplate");
+                }
+
+                // We accept the model.modelField.convertFunction to be:
+                // A string with a name of the method on the object
+                // A function (closure) itself
+                // A callable style array e.g ['\component\avatarCreator', 'convertMethod']
+                if (isset($associatedModelField['convertFunction'])) {
+
+                    if (is_string($associatedModelField['convertFunction'])) {
+                        // Is it a  method name on the associated model?
+                        $associatedModel = $fileModel->createAssociatedModel();
+                        if (is_callable([$associatedModel, $associatedModelField['convertFunction']])) {
+                            $convertFunctionReference = [$associatedModel, $associatedModelField['convertFunction']];
+                            \Yii::debug("Using the {$fileModel->modelType} specially associated convertFunctionReference of the method name {$associatedModelField['convertFunction']} on the model");
+                        } else if (is_callable($associatedModelField['convertFunction'])) {
+                            // Likely a static function reference
+                            \Yii::debug("Using the {$fileModel->modelType} specially associated convertFunctionReference of the static string name {$associatedModelField['convertFunction']} on the model");
+                        }
+                    } else if (is_callable($associatedModelField['convertFunction'])) {
+                        // Is a function or an array entry pointing to a function which call_user_func will accept
+                        $convertFunctionReference = $associatedModelField['convertFunction'];
+                        \Yii::debug("Using the {$fileModel->modelType} specially associated convertFunctionReference of the possibly function or maybe array on the model");
+                    }
+                }
+            }
+        }
+
         // -- Convert the file, if needed
-        if (method_exists($fileModel, 'convert')) {
+        if (is_null($convertFunctionReference) && method_exists($fileModel, 'convert')) {
+            $convertFunctionReference = [$fileModel, 'convert'];
+            \Yii::debug("Using the {$fileModel->ident()} associated convert method");
+        }
+        if (!is_null($convertFunctionReference)) {
             // We later save the $file['tmp_name'] entry to the file system (e.g S3 or Google Cloud)
-            $fileInfo = $fileModel->convert($fileInfo); // If you need to do some conversion, e.g converting .png images to .jpg
+            \Yii::debug("Running the custom convert method on the {$fileModel->ident()}");
+            // $convertFunctionReference is a function which can convert the file to a new type (e.g PNG to resized JPG)
+            // The function will be given the $fileInfo and the $file object and expects the $fileInfo returned
+            // Accepts a closure e.g: function($fileInfo, $file) { /* Do stuff...*/ return $fileInfo;}
+            // Also accepts a string pointing to a method on the model e.g: 'avatarFileConvert'
+            // Or accepts the array style callable e.g: '/class/Name', 'methodName']
+            $fileInfo = call_user_func($convertFunctionReference, $fileInfo, $fileModel); // If you need to do some conversion, e.g converting .png images to .jpg
         }
 
         // ----------------------------------
@@ -74,11 +129,11 @@ class FileUploadBehaviour extends Behavior
         // ----------------------------------
 
         $extension = $fileModel->getExtension($fileInfo['name']);
-        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName,'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
+        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName, 'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
 
-        $filename = \Yii::$app->t::renderTwig($fileModel::$filenameTwigTemplate, $twigData);
+        $filename = \Yii::$app->t::renderTwig($fileModel->filenameTwigTemplate, $twigData);
         $twigData['filename'] = $filename;
-        $folderpath = \Yii::$app->t::renderTwig($fileModel::$folderpathTwigTemplate, $twigData);
+        $folderpath = \Yii::$app->t::renderTwig($fileModel->folderpathTwigTemplate, $twigData);
         \Yii::debug("Creating the directory: {$folderpath} (the directory could already exist) with the filename being {$filename}");
         $fs->createDir($folderpath); // Creating it
         $visibilty = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private

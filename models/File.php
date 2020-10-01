@@ -19,6 +19,8 @@ use yii\helpers\VarDumper;
  * @property string $originalFilename
  * @property string $filename required
  * @property string $filepath required
+ * @property string $fieldName
+ * @property string $modelType
  * @property string $mimeType
  * @property string $filesystemName
  * @property string $version
@@ -35,8 +37,8 @@ class File extends BaseModel
     //           '\mozzler\base\models\File' => [
     //             'class' => 'app\models\File',
     //     ]]],
-    public static $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), fsName (name of the filesystem)
-    public static $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
+    public $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), fsName (name of the filesystem)
+    public $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
     public $defaultModelNamespace = 'app\models\\'; // Used by the $this->>workoutFilesystemName as we don't get this information
 
     protected function modelConfig()
@@ -93,6 +95,17 @@ class File extends BaseModel
                     ]
                 ],
             ],
+            'modelType' => [
+                // The associated model (e.g user)
+                'type' => 'Text',
+                'label' => 'Model Type',
+            ],
+            'fieldName' => [
+                // The associated model's field (e.g user.avatar)
+                'type' => 'Text',
+                'label' => 'Field Name',
+            ],
+
             'originalFilename' => [
                 'type' => 'Text',
                 'label' => 'Original Filename',
@@ -134,15 +147,14 @@ class File extends BaseModel
     {
 
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName'];
+        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'modelType', 'fieldName', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName', 'other'];
         $scenarios[self::SCENARIO_UPDATE] = ['originalFilename']; // The original filename is used as what's sent to the browser on download
-        $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'filesystemName', 'mimeType', 'size'];
+        $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'modelType', 'fieldName', 'createdAt'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'modelType', 'fieldName', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'filesystemName', 'mimeType', 'size', 'modelType', 'fieldName'];
 
         return $scenarios;
     }
-
 
     public function behaviors()
     {
@@ -158,7 +170,6 @@ class File extends BaseModel
             ]
         ]);
     }
-
 
     public function getFilesystem()
     {
@@ -190,23 +201,55 @@ class File extends BaseModel
         //  Load the model field and check for a custom filesystemName
         // ----------------------------------------------------------------
         // If possible load up the field attributes and see if there's a custom filesystemName
-        if (!empty($this->other) && \Yii::$app->t::arrayKeysExist(['fieldName', 'modelType'], $this->other)) {
-            $modelClass = $this->defaultModelNamespace . $this->other['modelType'];
-            $model = Tools::createModel($modelClass);
-            if (empty($model)) {
-                \Yii::warning("Invalid model class $modelClass, not sure how to create it, using $fsName but you might want to edit the defaultModelNamespace $this->defaultModelNamespace");
-                return $fsName;
-            }
-            $modelFields = $model->modelFields();
-            $filesystemName = ArrayHelper::getValue($modelFields, $this->other['fieldName'] . '.filesystemName');
-            if (!empty($filesystemName)) {
-                $this->filesystemName = $filesystemName;
-                return $filesystemName;
-            }
+        $associatedModelField = $this->getAssociatedModelField();
+        if (empty($associatedModelField)) {
+            \Yii::warning("Invalid model class or field name so using $fsName for the filesystem");
+            return $fsName;
+        }
+        $filesystemName = ArrayHelper::getValue($associatedModelField, 'filesystemName');
+        if (!empty($filesystemName)) {
+            $this->filesystemName = $filesystemName;
+            return $filesystemName;
         }
         return $fsName;
     }
 
+
+    public function getAssociatedModelField()
+    {
+        $associatedModel = $this->createAssociatedModel();
+        if (empty($associatedModel)) {
+            return null;
+        }
+        $fieldName = empty($this->fieldName) ? ArrayHelper::getValue($this, 'other.fieldName') : $this->fieldName; // Allow the $this->other['fieldName'] backwards compatibility
+        if (empty($fieldName)) {
+            \Yii::warning("Unknown fieldName for {$this->ident()}");
+            return null;
+        }
+        $modelFields = $associatedModel->getCachedModelFields();
+        $modelField = ArrayHelper::getValue($modelFields, $fieldName);
+        if (empty($modelField)) {
+            \Yii::warning("Invalid fieldName {$fieldName} for {$this->ident()}");
+        }
+        return $modelField;
+    }
+
+    public function createAssociatedModel()
+    {
+        $modelType = empty($this->modelType) ? ArrayHelper::getValue($this, 'other.modelType') : $this->modelType; // Allow the $this->other['modelType'] backwards compatibility
+        if (empty($modelType)) {
+            \Yii::warning("No modelType set. So can't create an associate model for {$this->ident()}");
+            return null;
+        }
+
+        $modelClass = $this->defaultModelNamespace . $modelType;
+        $model = Tools::createModel($modelClass);
+        if (empty($model)) {
+            \Yii::warning("Invalid model class $modelClass, not sure how to create it. You might want to edit the defaultModelNamespace $this->defaultModelNamespace for {$this->ident()}");
+            return null;
+        }
+        return $model;
+    }
 
     // -- Example convert method, used by the FileUploadBehaviour
     // -- You'll want to extend or override this file model and add your own convert to use this
@@ -217,7 +260,6 @@ class File extends BaseModel
     //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
     //        return $fileInfo;
     //    }
-
 
     /**
      * @param $originalFilename string
@@ -238,7 +280,6 @@ class File extends BaseModel
         // If we can't determine the extension based on the mimeType we try to use the filename itself
         return strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
     }
-
 
     /**
      * @param $mime

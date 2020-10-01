@@ -16,6 +16,16 @@ class File extends Base
      */
     public $relatedField = '_id';
 
+    // -- Custom settings which allow you to override the ones used by models/behaviors/FileUploadBehaviour.php
+    public $filenameTwigTemplate;
+    public $folderpathTwigTemplate;
+    // convertFunction is a function which can convert the file to a new type (e.g PNG to resized JPG)
+    // The function will be given the $fileInfo and the $file object and expects the $fileInfo returned
+    // Accepts a closure e.g: function($fileInfo, $file) { /* Do stuff...*/ return $fileInfo;}
+    // Also accepts a string pointing to a method on the model e.g: 'avatarFileConvert'
+    // Or accepts the array style callable e.g: '/class/Name', 'methodName']
+    public $convertFunction;
+
     public function setValue($value)
     {
         // ensureId doesn't like working on an empty field

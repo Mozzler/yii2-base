@@ -107,6 +107,8 @@ class FileController extends BaseController
         $fileObject = \Yii::$app->t::createModel(File::class, [
             'filename' => $file['tmp_name'], // Need something for passing the validation, but this is to be re-written in the FileUploadBehaviour
             'filepath' => $file['tmp_name'], // Need something for passing the validation, but this is to be re-written in the FileUploadBehaviour
+            'fieldName' => isset($file['fieldName']) ? $file['fieldName'] : null,
+            'modelType' => isset($file['modelType']) ? $file['modelType'] : null,
             'originalFilename' => $file['name'],
             'size' => $file['size'],
             'mimeType' => $file['type'],  // Could also use: \yii\helpers\FileHelper::getMimeType($file['tmp_name']),
