@@ -131,7 +131,7 @@ class TaskManager extends \yii\base\Component
             // Re-fetch the task object as it may have been updated when the command was run
             // which means the current $taskObject is stale
             $taskObject = Tools::getModel(Task::class, $taskId, false);
-            $taskObject->addLog("Ran the {$taskObject->ident()} with the command {$runCommand}");
+            $taskObject->addLog("Ran the {$taskObject->ident()} with the command {$runCommand['runCommand']} which had the exitCode {$runCommand['exitCode']} and the output:\n" . VarDumper::export($runCommand['output']));
             $taskObject->saveAndLogErrors();
         } catch (\Throwable $exception) {
             // Re-fetch the task object as it may have been updated when the command was run
@@ -165,7 +165,7 @@ class TaskManager extends \yii\base\Component
      * @param bool $runAsync if on Linux you want the command to run in the background or not (In Windows this is predicated on the \COM module being installed
      * @param string $currentDirectory
      * @param bool $escapeArgs If the arguments should be automatically escaped (wrapped in 'single quotes')
-     * @return string the command that was run
+     * @return array ['runCommand', 'exitCode', 'output' ] the command that was run, the exitCode ( more than 0 is a failure on *nix ) and the output
      */
     public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null, $escapeArgs = true)
     {
@@ -235,7 +235,7 @@ class TaskManager extends \yii\base\Component
             \Yii::info("Ran the command {$runCommand}\n" . VarDumper::export(['exitCode' => $exitCode, 'output' => $output]));
         }
 
-        return $runCommand;
+        return ['runCommand' => $runCommand, 'exitCode' => $exitCode, 'output' => $output];
     }
 
     /**
