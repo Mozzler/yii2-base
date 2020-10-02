@@ -31,12 +31,12 @@ class TaskManager extends \yii\base\Component
      * @param string $threadName If you need to execute multiple tasks at the same time, then you need to give each a name or number
      * @param array $scriptConfig
      * @param int $scriptTimeout
-     * @param bool $runNow if true then trigger the CLI TaskController command straight away
+     * @param bool $runNow if true then trigger the CLI TaskController command straight away which is the default as background tasks aren't supported, create a Cron entry instead
      * @return Task
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
      */
-    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = false, $threadName = '')
+    public static function schedule($scriptClassName, $scriptConfig = [], $scriptTimeout = 60, $runNow = true, $threadName = '')
     {
         $unixTimestampMinuteStarted = round(floor(time() / 60) * 60); // When this minute started - Used for identifying specific tasks
         $taskConfig =
