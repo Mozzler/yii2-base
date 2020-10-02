@@ -9,6 +9,7 @@ use yii\base\Behavior;
 use yii\base\Event;
 use yii\db\BaseActiveRecord;
 use League\Flysystem\AdapterInterface;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -47,7 +48,7 @@ class FileUploadBehaviour extends Behavior
         // -- Allow manual creation of a file model which hasn't been uploaded using filePond via a browser (e.g via CLI)
         // If you set the $file->other['_FILE_ALREADY_PROCESSED'] entry to true then we don't process any further
         // But you'll need to deal with actually uploading to the filesystem, setting the filepath, deleting any temp files, etc..
-        if (true === $fileModel->other['_FILE_ALREADY_PROCESSED']) {
+        if (true === ArrayHelper::getValue($fileModel, 'other._FILE_ALREADY_PROCESSED')) {
             \Yii::debug("The file has already been processed, skipping the file upload behaviour");
             return $fileModel;
         }
@@ -143,7 +144,7 @@ class FileUploadBehaviour extends Behavior
         $folderpath = \Yii::$app->t::renderTwig($fileModel->folderpathTwigTemplate, $twigData);
         \Yii::debug("Creating the directory: {$folderpath} (the directory could already exist) with the filename being {$filename}");
         $fs->createDir($folderpath); // Creating it
-        $visibilty = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
+        $visibility = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
 
         $filepath = $folderpath . $filename;
         $exists = $fs->has($filepath);
@@ -152,7 +153,11 @@ class FileUploadBehaviour extends Behavior
             //   Save the file
             // ----------------------------------
             $stream = fopen($fileInfo['tmp_name'], 'r+');
-            $fs->writeStream($filepath, $stream, ['visibility' => $visibilty]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
+            // As per https://flysystem.thephpleague.com/v1/docs/usage/filesystem-api/
+            $writeSuccess = $fs->writeStream($filepath, $stream, ['visibility' => $visibility]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
+            if (!$writeSuccess) {
+                \Yii::error("Unable to write {$filepath} for {$fileModel->ident()} to stream");
+            }
         } else {
             // This is a duplicate file
             \Yii::warning("This is a duplicate file, you've already uploaded {$filepath}");
