@@ -44,6 +44,13 @@ class FileUploadBehaviour extends Behavior
         /** @var File $fileModel */
         $fileModel = $this->owner;
 
+        // -- Allow manual creation of a file model which hasn't been uploaded using filePond via a browser (e.g via CLI)
+        // If you set the $file->other['_FILE_ALREADY_PROCESSED'] entry to true then we don't process any further
+        // But you'll need to deal with actually uploading to the filesystem, setting the filepath, deleting any temp files, etc..
+        if (true === $fileModel->other['_FILE_ALREADY_PROCESSED']) {
+            \Yii::debug("The file has already been processed, skipping the file upload behaviour");
+            return $fileModel;
+        }
 
         // -- Basic file validation checks
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
