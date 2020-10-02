@@ -474,4 +474,37 @@ class File extends BaseModel
         return isset($mime_map[$mime]) ? $mime_map[$mime] : false;
     }
 
+
+    /**
+     * @param $fileInfo array
+     * @param $newTmpFileLocation string e.g '/tmp/5f773fa7c5ff1f1ac1155d94.pdf'
+     * @param null|string $newExtension e.g 'pdf'
+     * @param null|string $newMimeType e.g 'application/pdf'
+     * @return array
+     *
+     * @example $fileInfo = $this->convertSetNewFile($fileInfo, $this, $newFilename, $this->jpegExtension, $this->jpegMimeType); // Run inside a convert() method
+     * // ------------------------------------------------------------------
+     * //   Update the fileInfo with the new details
+     * // ------------------------------------------------------------------
+     */
+    public function convertSetNewFile($fileInfo, $newTmpFileLocation, $newExtension = null, $newMimeType = null)
+    {
+        $originalTempFileLocation = $fileInfo['tmp_name'];
+        $otherInfo = $this->other;
+        $otherInfo['originalFilename'] = $this->originalFilename;; // Save the actual original name before the converting
+        $this->other = $otherInfo;
+
+        $fileInfo['tmp_name'] = $newTmpFileLocation; // The new file
+        if (!empty($newMimeType)) {
+            $this->mimeType = $newMimeType;
+            $fileInfo['type'] = $newMimeType;
+        }
+
+        $this->originalFilename = $this->originalFilename . ($newExtension ? '.' . $newExtension : ''); // Simply append the new extension to the end, it'll be super obvious what the previous file was
+        $this->size = filesize($newTmpFileLocation);
+        @unlink($originalTempFileLocation); // Delete the original temporary file as cleanup
+        \Yii::info("Converted {$this->ident()} to point to $newTmpFileLocation");
+        return $fileInfo;
+    }
+
 }
