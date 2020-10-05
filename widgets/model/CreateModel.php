@@ -2,12 +2,9 @@
 
 namespace mozzler\base\widgets\model;
 
-use app\models\CustomerGroup;
 use mozzler\base\models\Model;
 use mozzler\base\widgets\BaseWidget;
-use yii\web\View;
 use yii\helpers\Json;
-use yii\web\View as WebView;
 
 class CreateModel extends BaseWidget
 {
@@ -73,14 +70,14 @@ class CreateModel extends BaseWidget
         // --------------------------------
         // Used for the showing/hiding of fields, see widgets/model/CreateModel.ready.js
 
-        $this->outputJsData([
-            'mozzlerMainModelClassName' => [
-                Json::encode($t::getModelClassName($model))
-            ],
-            'mozzlerMainWidgetId' => [
-                Json::encode($this->id)
-            ]
-        ]);
+//        $this->outputJsData([
+//            'mozzlerMainModelClassName' => [
+//                Json::encode($t::getModelClassName($model))
+//            ],
+//            'mozzlerMainWidgetId' => [
+//                Json::encode($this->id)
+//            ]
+//        ]);
 
 //        $view->registerJs(
 //            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
