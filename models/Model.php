@@ -165,7 +165,7 @@ class Model extends ActiveRecord
      * @return array
      * We cache the model field results within the request
      */
-    protected function getCachedModelFields()
+    public function getCachedModelFields()
     {
         $sessionCache = \Yii::$app->t->getRequestCache();
         $sessionKey = static::collectionName() . '-modelField';

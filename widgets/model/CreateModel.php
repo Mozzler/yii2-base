@@ -7,7 +7,7 @@ use mozzler\base\models\Model;
 use mozzler\base\widgets\BaseWidget;
 use yii\web\View;
 use yii\helpers\Json;
-use yii\web\JsExpression;
+use yii\web\View as WebView;
 
 class CreateModel extends BaseWidget
 {
@@ -45,7 +45,6 @@ class CreateModel extends BaseWidget
         $config['hiddenItems'] = [];
         $hasFileUpload = false;
 
-        $fieldsVisibleWhen = [];
         $view = \Yii::$app->controller->getView();
         foreach ($config['attributes'] as $attribute) {
             $modelField = $model->getModelField($attribute);
@@ -63,11 +62,6 @@ class CreateModel extends BaseWidget
             if ($modelField->type == 'FileUpload') {
                 $hasFileUpload = true;
             }
-
-            if (!empty($modelField->visibleWhen)) {
-                // We need to save the functions as a JsExpression so the Json encoding deals with them correctly
-                $fieldsVisibleWhen[$attribute] = new JsExpression($modelField->visibleWhen);
-            }
         }
 
         if ($hasFileUpload) {
@@ -78,21 +72,36 @@ class CreateModel extends BaseWidget
         //  Add the JS info to the page
         // --------------------------------
         // Used for the showing/hiding of fields, see widgets/model/CreateModel.ready.js
-        $view->registerJs(
-            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
-            View::POS_HEAD,
-            'mozzlerFieldsVisibleWhen'
-        );
-        $view->registerJs(
-            'var mozzlerMainWidgetId = ' . Json::encode($config['id']) . ';',
-            View::POS_HEAD,
-            'mozzlerMainWidgetId'
-        );
-        $view->registerJs(
-            'var mozzlerMainModelClassName = ' . Json::encode($t::getModelClassName($model)) . ';', //
-            View::POS_HEAD,
-            'mozzlerMainModelClassName'
-        );
+
+        $this->outputJsData([
+            'mozzlerMainModelClassName' => [
+                Json::encode($t::getModelClassName($model))
+            ],
+            'mozzlerMainWidgetId' => [
+                Json::encode($this->id)
+            ]
+        ]);
+
+//        $view->registerJs(
+//            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
+//            View::POS_HEAD,
+//            'mozzlerFieldsVisibleWhen'
+//        );
+//        $this->outputJsData([
+//            'mozzlerMainWidgetId' => [
+//                Json::encode($t::getModelClassName($model))
+//            ]
+//        ]);
+//        $view->registerJs(
+//            'var mozzlerMainWidgetId = ' . Json::encode($this->id) . ';',
+//            View::POS_HEAD,
+//            'mozzlerMainWidgetId'
+//        );
+//        $view->registerJs(
+//            'var mozzlerMainModelClassName = ' . Json::encode($t::getModelClassName($model)) . ';', //
+//            View::POS_HEAD,
+//            'mozzlerMainModelClassName'
+//        );
         return $config;
     }
 }
