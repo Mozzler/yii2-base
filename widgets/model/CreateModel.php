@@ -46,7 +46,7 @@ class CreateModel extends BaseWidget
         $config['hiddenItems'] = [];
         $hasFileUpload = false;
 
-        $view = \Yii::$app->controller->getView();
+//        $view = \Yii::$app->controller->getView();
         foreach ($config['attributes'] as $attribute) {
             $modelField = $model->getModelField($attribute);
             if (!$modelField) {
