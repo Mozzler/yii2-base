@@ -31,36 +31,37 @@ class ToggleFieldVisibility extends BaseWidget
         ];
     }
 
-    // Take $config and process it to generate final config
-    public function code($templatify = false)
-    {
-        $config = $this->config();
-        /** @var Model $model */
-        $model = $config['model'];
-
-        $fieldsVisibleWhen = [];
-//        $view = \Yii::$app->controller->getView();
-
-        $modelFields = $model->getCachedModelFields();
-        foreach ($modelFields as $modelFieldKey => $modelField) {
-            if (!empty($modelField) && !empty($modelField->visibleWhen)) {
-                // We need to save the functions as a JsExpression so the Json encoding deals with them correctly
-                $fieldsVisibleWhen[$modelFieldKey] = new JsExpression($modelField->visibleWhen);
-            }
-        }
-
-        // --------------------------------
-        //  Add the JS info to the page
-        // --------------------------------
-        // Used for the showing/hiding of fields, see widgets/model/CreateModel.ready.js
-//        $view->registerJs(
-//            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
-//            View::POS_HEAD,
-//            'mozzlerFieldsVisibleWhen'
-//        );
-
-//        $this->outputJsData(['mozzlerFieldsVisibleWhen' => Json::encode($fieldsVisibleWhen)]);
-        return $config;
-    }
+//
+//    // Take $config and process it to generate final config
+//    public function code($templatify = false)
+//    {
+//        $config = $this->config();
+//        /** @var Model $model */
+//        $model = $config['model'];
+//
+//        $fieldsVisibleWhen = [];
+////        $view = \Yii::$app->controller->getView();
+//
+//        $modelFields = $model->getCachedModelFields();
+//        foreach ($modelFields as $modelFieldKey => $modelField) {
+//            if (!empty($modelField) && !empty($modelField->visibleWhen)) {
+//                // We need to save the functions as a JsExpression so the Json encoding deals with them correctly
+//                $fieldsVisibleWhen[$modelFieldKey] = new JsExpression($modelField->visibleWhen);
+//            }
+//        }
+//
+//        // --------------------------------
+//        //  Add the JS info to the page
+//        // --------------------------------
+//        // Used for the showing/hiding of fields, see widgets/model/CreateModel.ready.js
+////        $view->registerJs(
+////            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
+////            View::POS_HEAD,
+////            'mozzlerFieldsVisibleWhen'
+////        );
+//
+////        $this->outputJsData(['mozzlerFieldsVisibleWhen' => Json::encode($fieldsVisibleWhen)]);
+//        return $config;
+//    }
 }
 

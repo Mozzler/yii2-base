@@ -2,12 +2,13 @@
 
 namespace mozzler\base\widgets\model;
 
-use app\models\CustomerGroup;
+//use app\models\CustomerGroup;
 use mozzler\base\models\Model;
 use mozzler\base\widgets\BaseWidget;
-use yii\web\View;
+//use yii\web\View;
 use yii\helpers\Json;
-use yii\web\View as WebView;
+//use yii\web\View as WebView;
+use mozzler\base\widgets\model\common\ToggleFieldVisibility;
 
 class CreateModel extends BaseWidget
 {
