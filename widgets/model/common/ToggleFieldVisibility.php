@@ -16,7 +16,7 @@ class ToggleFieldVisibility extends BaseWidget
         return [
             'tag' => 'div',
             'options' => [
-                'class' => 'widget-model-toggle-visibility'
+                'class' => 'widget-model-toggle-visibility hidden'
             ],
             'container' => [
                 'tag' => 'div',

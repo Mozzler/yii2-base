@@ -15,21 +15,21 @@ class MozzlerFormVisibility {
         this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
 
         this.$mozzlerMainFormInput.on('change selected', (event) => {
-            console.log("You changed", $(this));
+            // console.log("You changed", $(this));
             this.processVisibility();
         });
         this.processVisibility();
     }
 
     processVisibility() {
-        console.debug("Processing the visibility");
+        // console.debug("Processing the visibility");
         let serialisedMap = this.getFormMap();
         for (const fieldName in this.fieldsVisibleWhen) {
             console.log(`${fieldName}: ${this.fieldsVisibleWhen[fieldName]}`);
 
             // -- Ignore null entries
             if (!this.fieldsVisibleWhen[fieldName]) {
-                console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
+                // console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
                 continue;
             }
             let isVisible = true; // Assume it is in the case of an error
@@ -49,7 +49,7 @@ class MozzlerFormVisibility {
                 $class.removeClass('hidden');
             } else {
                 $class.addClass('hidden');
-                console.debug(`Setting to hidden: ${fieldName}`, $class);
+                // console.debug(`Setting to hidden: ${fieldName}`, $class);
             }
         }
     }
@@ -71,7 +71,6 @@ class MozzlerFormVisibility {
         //     "email": "example@mozzler.com.au"
         // };
         // NB: We can do this easily because we don't have any complex data structures like arrays
-
         //
         let formMap = {};
         serialisedArray.forEach(function (element, index) {
@@ -82,19 +81,10 @@ class MozzlerFormVisibility {
         return formMap;
     }
 
-    //
-    //     return {
-    //         processVisibility,
-    //         $mozzlerMainFormInput,
-    //         $mozzlerMainForm,
-    //         getFormMap
-    //     }
-    // })();
-
-
 }
 
 // Example showing how to use widgets in JS
+window.mozzlerFormVisibilities = [];
 $('.widget-model-toggle-visibility').each(function () {
     const id = $(this).attr('id');
     const widgetData = m.widgets[id];
@@ -102,6 +92,7 @@ $('.widget-model-toggle-visibility').each(function () {
 
     const $form = $("#" + widgetData.formId);
     let mozzlerFormVisibility = new MozzlerFormVisibility($form, widgetData.fieldsVisibleWhen, widgetData.modelClassName)
+    mozzlerFormVisibilities.push({mozzlerFormVisibility, id, formId: widgetData.formId}); // Make global in case you need access, most likely for the getFormMap method
 
 });
 
