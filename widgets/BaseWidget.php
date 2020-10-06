@@ -8,33 +8,33 @@ use yii\web\View as WebView;
 use mozzler\base\helpers\WidgetHelper;
 
 class BaseWidget extends Widget {
-	
+
 	public $viewName = null;
 	public $dirName = null;
 	public $config = [];
-	
+
 	public function defaultConfig()
 	{
 		return [
 			'widgetConfig' => []
 		];
 	}
-	
+
 	public function config($templatify=false) {
 		$config = ArrayHelper::merge($this->defaultConfig(), $this->config);
-		
+
 		if ($templatify) {
 			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
 		}
-		
+
 		$config['id'] = $this->id;
-		
+
 		return $config;
 	}
-	
+
 	public function init() {
 		parent::init();
-		
+
 		if (!$this->viewName) {
 			$class = new \ReflectionClass($this);
 			$pathInfo = pathinfo($class->getFileName());
@@ -42,17 +42,17 @@ class BaseWidget extends Widget {
 			$this->dirName = $pathInfo['dirname'];
 		}
 	}
-	
+
 	public function run() {
 		$config = $this->code();
 		return $this->html($config);
 	}
-	
+
 	// take $config and process it to generate final config
 	public function code($templatify=false) {
 		return $this->config($templatify);
 	}
-	
+
 	public function html($config=[]) {
 		$this->outputCss();
 		$this->outputJs();
@@ -60,13 +60,13 @@ class BaseWidget extends Widget {
 			'widget' => $config
 		]);
 	}
-	
+
 	public function getViewPath()
     {
         $class = new \ReflectionClass($this);
         return dirname($class->getFileName());
     }
-    
+
     // take an object and output it to Javascript for this widget
     public function outputJsData($jsData) {
         if (!isset(\Yii::$app->controller)) {
@@ -74,9 +74,9 @@ class BaseWidget extends Widget {
             return false;
         }
 	    $view = \Yii::$app->controller->getView();
-	    $view->registerJs(" m.widgets['".$this->id."'] = ".json_encode($jsData)."; ", WebView::POS_HEAD);
+        $view->registerJs(" m.widgets['" . $this->id . "'] = " . \yii\helpers\Json::encode($jsData) . "; ", WebView::POS_HEAD);
     }
-    
+
     /**
 	 * This is a quick and dirty way to dynamically include a CSS file linked to a widget.
 	 * If the same widget is included twice in a page this CSS will be included twice (not good).
@@ -90,13 +90,13 @@ class BaseWidget extends Widget {
         }
 	    $view = \Yii::$app->controller->getView();
 	    $cssFile = $this->dirName . DIRECTORY_SEPARATOR . $this->viewName.'.css';
-	    
+
 	    if (file_exists($cssFile))
 	    {
 		    $view->registerCss(file_get_contents($cssFile));
 	    }
     }
-    
+
     /**
      * Output any javascript files associated with this widget
      */
@@ -112,20 +112,20 @@ class BaseWidget extends Widget {
             'head' => WebView::POS_HEAD,
             'load' => WebView::POS_LOAD
         ];
-        
+
         $view = \Yii::$app->controller->getView();
 	    $viewPath = $this->dirName . DIRECTORY_SEPARATOR . $this->viewName;
-        
+
         foreach ($jsTypes as $name => $position) {
             $jsFile = "$viewPath.$name.js";
             if (file_exists($jsFile)) {
                 $jsContent = file_get_contents($jsFile);
                 $jsContent = "\n/* START: $jsFile*/\n$jsContent\n/* END: $jsFile */\n";
-                
+
                 $view->registerJs($jsContent, $position);
             }
         }
     }
-	
+
 }
 

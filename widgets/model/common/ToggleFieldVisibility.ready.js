@@ -1,35 +1,34 @@
-// Example showing how to use widgets in JS
-$('.widget-model-toggle-visibility').each(function() {
-    const id = $(this).attr('id');
-    const widgetData = m.widgets[id];
-    console.log(widgetData);
-    
-    const form = $("#" + widgetData.formId);
-    console.log(form);
-});
+class MozzlerFormVisibility {
 
+    $mozzlerMainForm;
+    fieldsVisibleWhen; // An array of the fields and visibility info
+    modelClassName;
 
-var mozzlerFormVisibility = (function () {
-    var $mozzlerMainForm = $(`#form-${mozzlerMainWidgetId}`); //  The main form itself
-    if ($mozzlerMainForm.length === 0) {
-        console.warn(`Can't find the form at #form-${mozzlerMainWidgetId}`);
-        $mozzlerMainForm = $('.widget-model-create form, .widget-model-update form');
-        if ($mozzlerMainForm.length === 0) {
-            console.warn(`Also can't find a form with '.widget-model-create form, .widget-model-update form' maybe you aren't on a form page? Not processing the visibility`);
-        } else {
-            console.debug("The form map is ", getFormMap());
+    constructor($mozzlerMainForm, fieldsVisibleWhen, modelClassName) {
+        this.$mozzlerMainForm = $mozzlerMainForm;
+        this.fieldsVisibleWhen = fieldsVisibleWhen;
+        this.modelClassName = modelClassName;
+        if (this.$mozzlerMainForm.length === 0) {
+            console.error("Empty form, can't process the form visibility of ", $mozzlerMainForm);
+            return false;
         }
-    }
-    var $mozzlerMainFormInput = $mozzlerMainForm.find('input, textarea, select'); //  The main form inputs (ignore anything in the nav header/footer
+        this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
 
-    function processVisibility() {
-        // console.debug("Processing the visibility");
-        let serialisedMap = getFormMap();
-        for (const fieldName in mozzlerFieldsVisibleWhen) {
-            console.log(`${fieldName}: ${mozzlerFieldsVisibleWhen[fieldName]}`);
+        this.$mozzlerMainFormInput.on('change selected', (event) => {
+            console.log("You changed", $(this));
+            this.processVisibility();
+        });
+        this.processVisibility();
+    }
+
+    processVisibility() {
+        console.debug("Processing the visibility");
+        let serialisedMap = this.getFormMap();
+        for (const fieldName in this.fieldsVisibleWhen) {
+            console.log(`${fieldName}: ${this.fieldsVisibleWhen[fieldName]}`);
 
             // -- Ignore null entries
-            if (!mozzlerFieldsVisibleWhen[fieldName]) {
+            if (!this.fieldsVisibleWhen[fieldName]) {
                 console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
                 continue;
             }
@@ -39,13 +38,13 @@ var mozzlerFormVisibility = (function () {
             try {
                 // Run the function defined in the model field's visibleWhen attribute
                 // The function should look something similar to 'function (attribute, value, attributesMap) { return "' . self::ANSWER_TYPE_SINGLE_SELECT . '" === attributesMap.answerType; }'
-                isVisible = mozzlerFieldsVisibleWhen[fieldName](fieldName, serialisedMap[fieldName], serialisedMap);
+                isVisible = this.fieldsVisibleWhen[fieldName](fieldName, serialisedMap[fieldName], serialisedMap);
             } catch (error) {
-                console.error(`processVisibility() Errored when trying to run the function for determining if ${fieldName} should be visible. `, error);
+                console.error(`processVisibility() Errored when trying to run the function for determining if ${fieldName} should be visible on ${this.modelClassName}. `, error);
             }
 
             // -- Now to translate back to the DOM entries
-            let $class = $mozzlerMainForm.find(`.form-group.field-${mozzlerMainModelClassName.toLowerCase()}-${fieldName.toLowerCase()}`);
+            let $class = this.$mozzlerMainForm.find(`.form-group.field-${this.modelClassName.toLowerCase()}-${fieldName.toLowerCase()}`);
             if (isVisible) {
                 $class.removeClass('hidden');
             } else {
@@ -55,8 +54,8 @@ var mozzlerFormVisibility = (function () {
         }
     }
 
-    function getFormMap() {
-        let serialisedArray = $mozzlerMainForm.serializeArray();
+    getFormMap() {
+        let serialisedArray = this.$mozzlerMainForm.serializeArray();
         if (!serialisedArray) {
             return [];
         }
@@ -83,24 +82,28 @@ var mozzlerFormVisibility = (function () {
         return formMap;
     }
 
-    return {
-        processVisibility,
-        $mozzlerMainFormInput,
-        $mozzlerMainForm,
-        getFormMap
-    }
-})();
+    //
+    //     return {
+    //         processVisibility,
+    //         $mozzlerMainFormInput,
+    //         $mozzlerMainForm,
+    //         getFormMap
+    //     }
+    // })();
 
-// -- Only process this when there's model fields which have a visibleWhen setting
-if (typeof mozzlerFieldsVisibleWhen != 'undefined' && mozzlerFieldsVisibleWhen) {
 
-    // Process visibility when a field has been changed
-    mozzlerFormVisibility.$mozzlerMainFormInput.on('change selected', function (event) {
-        // console.log("You changed", $(this));
-        mozzlerFormVisibility.processVisibility();
-
-    });
-
-    // console.debug("Processing the visibility of the fields: ", mozzlerFieldsVisibleWhen);
-    mozzlerFormVisibility.processVisibility(); // Process on page load
 }
+
+// Example showing how to use widgets in JS
+$('.widget-model-toggle-visibility').each(function () {
+    const id = $(this).attr('id');
+    const widgetData = m.widgets[id];
+    console.log('widget-model-toggle-visibility: ', widgetData);
+
+    const $form = $("#" + widgetData.formId);
+    let mozzlerFormVisibility = new MozzlerFormVisibility($form, widgetData.fieldsVisibleWhen, widgetData.modelClassName)
+
+});
+
+
+

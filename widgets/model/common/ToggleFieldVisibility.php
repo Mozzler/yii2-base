@@ -43,17 +43,18 @@ class ToggleFieldVisibility extends BaseWidget
         $fieldsVisibleWhen = [];
 
         $modelFields = $model->getCachedModelFields();
-        
+
         foreach ($modelFields as $modelFieldKey => $modelField) {
-            if (!empty($modelField) && !empty($modelField->visibleWhen)) {
+            if (!empty($modelField) && !empty($modelField['visibleWhen'])) {
                 // We need to save the functions as a JsExpression so the Json encoding deals with them correctly
-                $fieldsVisibleWhen[$modelFieldKey] = new JsExpression($modelField->visibleWhen);
+                $fieldsVisibleWhen[$modelFieldKey] = new JsExpression($modelField['visibleWhen']);
             }
         }
 
         $this->outputJsData([
             'formId' => $config['formId'],
-            'fieldsVisibleWhen' => $fieldsVisibleWhen
+            'fieldsVisibleWhen' => $fieldsVisibleWhen,
+            'modelClassName' => \Yii::$app->t::getModelClassName($model)
         ]);
         return $config;
     }

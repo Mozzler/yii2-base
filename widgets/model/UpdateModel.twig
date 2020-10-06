@@ -3,7 +3,7 @@
     {% set form = form.begin({
         "id": "form-" ~ widget.id
     }|merge(widget.formConfig)) %}
-    
+
     {% set bodyContent %}
 		{% for hiddenInput in widget.hiddenItems %}
         	{{ t.renderWidget('mozzler.base.widgets.model.input.HiddenField', {
@@ -37,4 +37,9 @@
 	    }) }}
     </{{ widget.container.tag }}>
     {% set form = form.end() %}
+
+{{ t.renderWidget('mozzler.base.widgets.model.common.ToggleFieldVisibility', {
+	'model': widget.model,
+	'formId': 'form-' ~ widget.id
+}) }}
 </{{ widget.tag }}>

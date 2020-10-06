@@ -69,7 +69,7 @@ Example showing how to use widgets in JS
         const widgetData = m.widgets[id];
         console.log(widgetData);
         
-        // Custom JS Widget logic here...
+        // Custom JS Widget logic here... Run for each instance of the widget on the page, but can have custom per widget data
     });
 
 
