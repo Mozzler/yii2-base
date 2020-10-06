@@ -1,3 +1,14 @@
+// Example showing how to use widgets in JS
+$('.widget-model-toggle-visibility').each(function() {
+    const id = $(this).attr('id');
+    const widgetData = m.widgets[id];
+    console.log(widgetData);
+    
+    const form = $("#" + widgetData.formId);
+    console.log(form);
+});
+
+
 var mozzlerFormVisibility = (function () {
     var $mozzlerMainForm = $(`#form-${mozzlerMainWidgetId}`); //  The main form itself
     if ($mozzlerMainForm.length === 0) {

@@ -27,7 +27,8 @@ class ToggleFieldVisibility extends BaseWidget
             'formConfig' => [
                 'options' => []
             ],
-            'model' => null
+            'model' => null,
+            'formId' => null
         ];
     }
 
@@ -40,9 +41,9 @@ class ToggleFieldVisibility extends BaseWidget
         $model = $config['model'];
 
         $fieldsVisibleWhen = [];
-//        $view = \Yii::$app->controller->getView();
 
         $modelFields = $model->getCachedModelFields();
+        
         foreach ($modelFields as $modelFieldKey => $modelField) {
             if (!empty($modelField) && !empty($modelField->visibleWhen)) {
                 // We need to save the functions as a JsExpression so the Json encoding deals with them correctly
@@ -50,17 +51,10 @@ class ToggleFieldVisibility extends BaseWidget
             }
         }
 
-        // --------------------------------
-        //  Add the JS info to the page
-        // --------------------------------
-        // Used for the showing/hiding of fields, see widgets/model/CreateModel.ready.js
-//        $view->registerJs(
-//            'var mozzlerFieldsVisibleWhen = ' . Json::encode($fieldsVisibleWhen) . ';',
-//            View::POS_HEAD,
-//            'mozzlerFieldsVisibleWhen'
-//        );
-
-//        $this->outputJsData(['mozzlerFieldsVisibleWhen' => Json::encode($fieldsVisibleWhen)]);
+        $this->outputJsData([
+            'formId' => $config['formId'],
+            'fieldsVisibleWhen' => $fieldsVisibleWhen
+        ]);
         return $config;
     }
 }
