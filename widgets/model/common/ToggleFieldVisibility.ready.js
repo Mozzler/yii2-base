@@ -15,21 +15,17 @@ class MozzlerFormVisibility {
         this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
 
         this.$mozzlerMainFormInput.on('change selected', (event) => {
-            // console.log("You changed", $(this));
             this.processVisibility();
         });
         this.processVisibility();
     }
 
     processVisibility() {
-        // console.debug("Processing the visibility");
         let serialisedMap = this.getFormMap();
         for (const fieldName in this.fieldsVisibleWhen) {
-            console.log(`${fieldName}: ${this.fieldsVisibleWhen[fieldName]}`);
 
             // -- Ignore null entries
             if (!this.fieldsVisibleWhen[fieldName]) {
-                // console.debug(`Ignoring the null entry for ${fieldName}`); // These aren't going to be output, but just in case
                 continue;
             }
             let isVisible = true; // Assume it is in the case of an error
@@ -49,7 +45,6 @@ class MozzlerFormVisibility {
                 $class.removeClass('hidden');
             } else {
                 $class.addClass('hidden');
-                // console.debug(`Setting to hidden: ${fieldName}`, $class);
             }
         }
     }
@@ -78,6 +73,7 @@ class MozzlerFormVisibility {
             let name = element.name.replace(/[^\[]+\[([\w]+)]/, '$1');
             formMap[name] = element.value;
         });
+        // console.debug("MozzlerFormVisibility() The form map is: ", formMap);
         return formMap;
     }
 
@@ -88,7 +84,7 @@ window.mozzlerFormVisibilities = [];
 $('.widget-model-toggle-visibility').each(function () {
     const id = $(this).attr('id');
     const widgetData = m.widgets[id];
-    console.log('widget-model-toggle-visibility: ', widgetData);
+    // console.log('widget-model-toggle-visibility: ', widgetData);
 
     const $form = $("#" + widgetData.formId);
     let mozzlerFormVisibility = new MozzlerFormVisibility($form, widgetData.fieldsVisibleWhen, widgetData.modelClassName)
