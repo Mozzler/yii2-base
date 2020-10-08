@@ -142,8 +142,8 @@ class FileUploadBehaviour extends Behavior
         $filename = \Yii::$app->t::renderTwig($fileModel->filenameTwigTemplate, $twigData);
         $twigData['filename'] = $filename;
         $folderpath = \Yii::$app->t::renderTwig($fileModel->folderpathTwigTemplate, $twigData);
-        \Yii::debug("Creating the directory: {$folderpath} (the directory could already exist) with the filename being {$filename}");
-        $fs->createDir($folderpath); // Creating it
+        // NB: No longer pre-creating the folder as it doesn't seem to be needed
+
         $visibility = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
 
         $filepath = $folderpath . $filename;
