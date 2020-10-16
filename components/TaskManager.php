@@ -179,6 +179,8 @@ class TaskManager extends \yii\base\Component
 
         // The run command
         $runCommand = "\"$filePath\" " . implode(' ', $argumentsEscaped);
+        $exitCode = null;
+        $output = [];
         // -------------------
         //  Run Async
         // -------------------
@@ -191,12 +193,11 @@ class TaskManager extends \yii\base\Component
             // extension=com_dotnet
             try {
 
-
                 if (extension_loaded('com_dotnet') && $runAsync) {
                     $WshShell = new \COM("WScript.Shell");
                     \Yii::info("Running Windows command via WScript.Shell:  {$runCommand}");
                     $oExec = $WshShell->Run($runCommand, 0, false);
-                    return $runCommand;
+                    return ['runCommand' => $runCommand, 'exitCode' => $exitCode, 'output' => $oExec];
                     /*
                      * https://ss64.com/vb/run.html
                      *
@@ -229,7 +230,7 @@ class TaskManager extends \yii\base\Component
                 $runCommand .= ' &';
             }
             \Yii::info("Running Linux command: {$runCommand}");
-            $output = [];
+
             $exitCode = null;
             exec($runCommand, $output, $exitCode);
             \Yii::info("Ran the command {$runCommand}\n" . VarDumper::export(['exitCode' => $exitCode, 'output' => $output]));
