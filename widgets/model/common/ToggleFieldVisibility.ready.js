@@ -1,26 +1,16 @@
-class MozzlerFormVisibility {
 
-    $mozzlerMainForm;
-    fieldsVisibleWhen; // An array of the fields and visibility info
-    modelClassName;
+const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, modelClassName) {
 
-    constructor($mozzlerMainForm, fieldsVisibleWhen, modelClassName) {
-        this.$mozzlerMainForm = $mozzlerMainForm;
-        this.fieldsVisibleWhen = fieldsVisibleWhen;
-        this.modelClassName = modelClassName;
-        if (this.$mozzlerMainForm.length === 0) {
-            console.error("Empty form, can't process the form visibility of ", $mozzlerMainForm);
-            return false;
-        }
-        this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
-
-        this.$mozzlerMainFormInput.on('change selected', (event) => {
-            this.processVisibility();
-        });
-        this.processVisibility();
+    this.$mozzlerMainForm = $mozzlerMainForm;
+    this.fieldsVisibleWhen = fieldsVisibleWhen;
+    this.modelClassName = modelClassName;
+    if (this.$mozzlerMainForm.length === 0) {
+        console.error("Empty form, can't process the form visibility of ", $mozzlerMainForm);
+        return false;
     }
+    this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
 
-    processVisibility() {
+    this.processVisibility = function() {
         let serialisedMap = this.getFormMap();
         for (const fieldName in this.fieldsVisibleWhen) {
 
@@ -49,7 +39,7 @@ class MozzlerFormVisibility {
         }
     }
 
-    getFormMap() {
+    this.getFormMap = function() {
         let serialisedArray = this.$mozzlerMainForm.serializeArray();
         if (!serialisedArray) {
             return [];
@@ -76,6 +66,11 @@ class MozzlerFormVisibility {
         // console.debug("MozzlerFormVisibility() The form map is: ", formMap);
         return formMap;
     }
+
+    this.$mozzlerMainFormInput.on('change selected', (event) => {
+        this.processVisibility();
+    });
+    this.processVisibility();
 
 }
 
