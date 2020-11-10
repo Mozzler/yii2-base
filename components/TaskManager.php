@@ -167,7 +167,7 @@ class TaskManager extends \yii\base\Component
      * @param bool $escapeArgs If the arguments should be automatically escaped (wrapped in 'single quotes')
      * @return array ['runCommand', 'exitCode', 'output' ] the command that was run, the exitCode ( more than 0 is a failure on *nix ) and the output
      */
-    public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null, $escapeArgs = true)
+    public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null, $escapeArgs = true, $redirectOutput = '2>&1')
     {
 
         if (!empty($currentDirectory)) {
@@ -224,7 +224,7 @@ class TaskManager extends \yii\base\Component
             pclose(popen($runCommand, "r"));
         } else {
 
-            $runCommand .= ' 2>&1'; // Redirect stderr to stdout for capturing in the $ouput
+            $runCommand .= ' ' . $redirectOutput; // Redirect stderr to stdout for capturing in the $output (or you might want to ignore stdError by changing it to 2>/dev/null or whatever else is needed )
             if ($runAsync) {
                 // Run as a background task
                 $runCommand .= ' &';
