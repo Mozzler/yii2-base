@@ -40,12 +40,11 @@ class JsonField extends BaseField
                         ]));
                 }
             }
-            // Create a nice JSON output with spacing and line breaks, but encode the HTML and don't show the JSON escape slashes which makes URLs hard to read
-            // NB: The newline replacement causes issues with parsing the JSON in something like the browser console for multi-line entries
-
-            if(!is_string($value)) {
 
 
+            if (!is_string($value)) {
+                // Create a nice JSON output with spacing and line breaks, but encode the HTML and don't show the JSON escape slashes which makes URLs hard to read
+                // NB: The newline replacement causes issues with parsing the JSON in something like the browser console for multi-line entries
                 $config['prettyJson'] = htmlentities(str_replace('\n', '
   ', json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
             }
