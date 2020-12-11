@@ -745,7 +745,7 @@ class Model extends ActiveRecord
      * data provided in $params (supplied by a form, so is keyed by
      * $form->formName)
      */
-    public function search($params = [], $scenario = null, $queryFilter = [], $dataProviderConfig = [])
+    public function search($params = [], $scenario = null, $queryFilter = [], $dataProviderConfig = [], $orderBy = ['createdAt' => SORT_DESC])
     {
         if (!$scenario) {
             $scenario = self::SCENARIO_DEFAULT;
@@ -755,6 +755,10 @@ class Model extends ActiveRecord
         $model = clone $this;
         $model->setScenario($scenario);
         $query = $model->find();
+
+        if (!empty($orderBy)) {
+            $query->orderBy($orderBy);
+        }
 
         if ($queryFilter && is_array($queryFilter)) {
             $query->andWhere($queryFilter);
