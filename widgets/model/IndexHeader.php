@@ -24,7 +24,10 @@ class IndexHeader extends BaseWidget {
 					'class' => 'col-md-12 buttons'
 				],
 				'filter' => [
-					'title' => 'Filter the results',
+					'options' => [
+						'class' => 'btn btn-default btn-sm btn-filter',
+						'title' => 'Filter the results'
+					],
 					'text' => '<span class="glyphicon glyphicon-filter"></span>'
 				]
 			],
