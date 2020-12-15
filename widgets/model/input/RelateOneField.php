@@ -16,12 +16,7 @@ class Select2 extends BaseSelect2
         parent::init();
 
         if (!isset($this->data)) {
-
-            $value = $this->value;
-            if (!is_string($this->value)) {
-                $value = json_encode($this->value);
-            }
-            $key = empty($this->value) ? '' :$value;
+            $key = empty($this->value) ? '' : (string)$this->value;
             $val = empty($this->initValueText) ? $key : $this->initValueText;
             $this->data = [$key => $val];
         }

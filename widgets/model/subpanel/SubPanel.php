@@ -97,7 +97,7 @@ class SubPanel extends BaseWidget
             if (!empty($model->__get($config['relationAttribute'])) && is_array($model->__get($config['relationAttribute']))) {
                 $modelField = $model->getCachedModelFields()[$config['relationAttribute']];
                 $class = $modelField['relatedModel'];
-                \Yii::debug("Looks to be a relateMany: " . VarDumper::export(['relationAttribute' => $config['relationAttribute'], 'value' => $model->__get($config['relationAttribute']), '$modelField' => $modelField, '$class' => $class]));
+//                \Yii::debug("Looks to be a relateMany: " . VarDumper::export(['relationAttribute' => $config['relationAttribute'], 'value' => $model->__get($config['relationAttribute']), '$modelField' => $modelField, '$class' => $class]));
                 $relatedModel = \Yii::$app->t::createModel($class);
                 $query = $relatedModel::find()->where(['_id' => ['$in' => $model->__get($config['relationAttribute'])]]); // Find where it's an array of ObjectId's
                 $config['dataProvider'] = new ActiveDataProvider([

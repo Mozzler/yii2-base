@@ -63,7 +63,6 @@ class RelateMany extends RelateOne
         if (is_string($value)) {
             return $value;
         }
-        return json_encode($value);
     }
 
 //    // set stored value -- convert application value to db value
