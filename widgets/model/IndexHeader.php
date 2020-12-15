@@ -28,6 +28,7 @@ class IndexHeader extends BaseWidget {
 						'class' => 'btn btn-default btn-sm btn-filter',
 						'title' => 'Filter the results'
 					],
+                    'tag' => 'a',
 					'text' => '<span class="glyphicon glyphicon-filter"></span>'
 				]
 			],
