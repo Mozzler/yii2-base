@@ -1,0 +1,7 @@
+{% if widget.userDefinedValue %}
+    {{ widget.userDefinedValue }}
+{% else %}
+    <{{ widget.tag }} {{ html.renderTagAttributes(widget.options) }}>
+    {{ widget.label }}
+    </{{ widget.tag }}>
+{% endif %}
