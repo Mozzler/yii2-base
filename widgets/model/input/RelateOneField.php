@@ -20,7 +20,7 @@ class Select2 extends BaseSelect2
             $value = $this->value;
             // @todo: Allow updating a RelateMany field containing an array of entries
             if (is_array($value)) {
-                $value = VarDumper::export($value);
+                $value = json_encode($value);
             }
             $key = empty($value) ? '' : $value;
             $val = empty($this->initValueText) ? $key : $this->initValueText;
