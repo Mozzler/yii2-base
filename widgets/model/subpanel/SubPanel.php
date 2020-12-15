@@ -99,7 +99,9 @@ class SubPanel extends BaseWidget
                 $class = $modelField['relatedModel'];
 //                \Yii::debug("Looks to be a relateMany: " . VarDumper::export(['relationAttribute' => $config['relationAttribute'], 'value' => $model->__get($config['relationAttribute']), '$modelField' => $modelField, '$class' => $class]));
                 $relatedModel = \Yii::$app->t::createModel($class);
-                $query = $relatedModel::find()->where(['_id' => ['$in' => $model->__get($config['relationAttribute'])]]); // Find where it's an array of ObjectId's
+                $ids = self::convertArrayToObjectIds($model->__get($config['relationAttribute']));
+
+                $query = $relatedModel::find()->where(['_id' => ['$in' =>$ids]]); // Find where it's an array of ObjectId's
                 $config['dataProvider'] = new ActiveDataProvider([
                     'query' => $query,
                     'pagination' => [
@@ -195,4 +197,32 @@ class SubPanel extends BaseWidget
         return $config;
     }
 
+    protected static function convertArrayToObjectIds($inputArray)
+    {
+        if (empty($inputArray)) {
+            return [];
+        }
+        if (is_string($inputArray)) {
+            return [self::convertStringToObjectId($inputArray)];
+        }
+
+        $outputArray = [];
+        foreach ($inputArray as $entry) {
+            $objectId = self::convertStringToObjectId($entry);
+            if (!empty($objectId)) {
+                $outputArray[] = $objectId;
+            }
+        }
+        return $outputArray;
+    }
+
+    protected static function convertStringToObjectId($inputString)
+    {
+        try {
+            return new \MongoDB\BSON\ObjectId($inputString);
+        } catch (\Throwable $e) {
+            // likely an Invalid string, not an ObjectId
+            return null;
+        }
+    }
 }
