@@ -4,6 +4,7 @@ namespace mozzler\base\widgets\model\input;
 
 use kartik\select2\Select2 as BaseSelect2;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\JsExpression;
 use yii\helpers\Html;
 use mozzler\base\components\Tools;
@@ -16,7 +17,12 @@ class Select2 extends BaseSelect2
         parent::init();
 
         if (!isset($this->data)) {
-            $key = empty($this->value) ? '' : (string)$this->value;
+            $value = $this->value;
+            // @todo: Allow updating a RelateMany field containing an array of entries
+            if (is_array($value)) {
+                $value = VarDumper::export($value);
+            }
+            $key = empty($value) ? '' : $value;
             $val = empty($this->initValueText) ? $key : $this->initValueText;
             $this->data = [$key => $val];
         }

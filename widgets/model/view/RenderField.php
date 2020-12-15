@@ -30,6 +30,7 @@ class RenderField extends BaseWidget
 
         // Load the field object, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'view.class');
+        \Yii::debug("The RenderField className is: $className");
         if (!empty($className) && class_exists($className)) {
             $fieldWidget = \Yii::createObject($className);
         } else {

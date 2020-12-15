@@ -2,8 +2,6 @@
 
 namespace mozzler\base\fields;
 
-use yii\helpers\VarDumper;
-
 class RelateMany extends RelateOne
 {
 
@@ -23,68 +21,34 @@ class RelateMany extends RelateOne
      * @return mixed
      *
      * Example input:
-     *  [
-     * '5fc8d8701358ad7f960875f4',
-     * '5fc8d8701358ad7f960875f6',
-     * '5fc89ba9a232c55c5e076204',
+     * [
+     *  '5fc8d8701358ad7f960875f4',
+     *  '5fc8d8701358ad7f960875f6',
+     *  '5fc89ba9a232c55c5e076204',
      * ]
      *
-     * We want to convert those strings to MongoDB ObjectIDs
+     * We DO NOT want to convert those strings to MongoDB ObjectIDs
+     * because otherwise the select2 widget complains.
+     * Weirdly the error you get is "Array to string conversion" in the /app/vendor/yiisoft/yii2/helpers/BaseHtml.php at line 1867
+     * But the issue only appears if the value is an array of ObjectIDs but is fine if it's an array of strings
      */
     public function setValue($value)
     {
-        \Yii::debug("Setting the relateMany field based on the input value: " . VarDumper::export($value));
         if (is_string($value)) {
             $value = json_decode($value, true);
             if ('' == $value) {
                 $value = []; // Empty string = empty array
             }
         }
-        $convertedValue = [];
-        foreach ($value as $inputString) {
-            $convertedValue[] = self::convertToObjectIdIfPossible($inputString);
-        }
-        return $convertedValue;
+        return $value;
     }
 
-    protected static function convertToObjectIdIfPossible($inputString)
-    {
-        try {
-            return new \MongoDB\BSON\ObjectId($inputString);
-        } catch (\Throwable $exception) {
-            \Yii::error("Error with the RelateMany input {$inputString} is can't be converted to a valid ObjectId: " . \Yii::$app->t::returnExceptionAsString($exception));
-            return $inputString;
-        }
-    }
 
     // get stored value -- convert db value to application value
     public function getValue($value)
     {
-        if (is_string($value)) {
-            return $value;
-        }
+        return $value;
     }
-
-//    // set stored value -- convert application value to db value
-//    public function setValue($value) {
-//        if (!$value)
-//            return null;
-//
-//        try {
-//            return new \MongoDB\BSON\ObjectId($value);
-//        } catch (\MongoDB\Driver\Exception\InvalidArgumentException $e) {
-//            if ($this->allowUserDefined) {
-//                return $value;
-//            }
-//
-//            throw $e;
-//        }
-//    }
-
-//    public function generateFilter($model, $attribute, $params)
-//    {
-//        return [$attribute => [new \MongoDB\BSON\ObjectId($model->$attribute)];
-//    }
 
 }
 
