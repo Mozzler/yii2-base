@@ -98,7 +98,7 @@ class ConfigManager
         foreach ($existingDbConfigs as $existingDbConfigIndex => $existingDbConfig) {
             $existingDbEntries[$existingDbConfig->key_] = $existingDbConfig->value_;
         }
-        return ArrayHelper::merge(\Yii::$app->params['config'], $existingDbEntries);
+        return ArrayHelper::merge(ArrayHelper::getValue(\Yii::$app->params, 'config', []), $existingDbEntries);
     }
 
     /**
