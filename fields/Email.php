@@ -8,7 +8,7 @@ class Email extends Base {
 	
 	public function defaultRules() {
 		return [
-			'string' => ['min' => 6, 'max' => 100],
+			'string' => ['min' => 6, 'max' => 200],
 			'filter' => ['filter' => 'trim'],
 			'email' => []
 		];
