@@ -104,20 +104,21 @@ class FieldGridConfig {
 	 */
 	public function getFieldConfig($field, $customConfig=[]) {
 		$config = $this->config();
-		
-		if (!isset($config[$field->type])) {
-			return $customConfig;
-		}
-		
+
+        if (!isset($config[$field->type])) {
+            // If we add new field types but don't define them as an empty array in the defaultConfig then their header doesn't appear in the Grid column
+            $config[$field->type] = []; // Default to empty
+        }
+
 		$config = ArrayHelper::merge($config[$field->type], $customConfig);
 		$config['attribute'] = $field->attribute;
-		
+
 		$fieldFunctions = $this->fieldFunctions();
 		if (isset($fieldFunctions[$field->type])) {
 			$config = ArrayHelper::merge($fieldFunctions[$field->type]($field), $config);
 		}
-		
+
 		return $config;
 	}
-	
+
 }
