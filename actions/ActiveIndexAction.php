@@ -5,6 +5,7 @@ namespace mozzler\base\actions;
 use mozzler\base\models\Model;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 
 class ActiveIndexAction extends \yii\rest\IndexAction
 {
@@ -19,11 +20,11 @@ class ActiveIndexAction extends \yii\rest\IndexAction
     * Prepares the data provider that should return the requested collection of the models.
     * @return ActiveDataProvider
     *
-    * Allows up to the 100 results per page not the default 50
+    * Allows up to the 500 results per page not the default 50
      *
      * Based off: vendor/yiisoft/yii2/rest/IndexAction.php:prepareDataProvider()
     */
-    protected function prepareDataProvider()
+    protected function prepareDataProvider($dataProviderConfigOverrides = [], $orderBy = null)
     {
         $requestParams = Yii::$app->getRequest()->getBodyParams();
         if (empty($requestParams)) {
@@ -60,7 +61,7 @@ class ActiveIndexAction extends \yii\rest\IndexAction
 
         // Specify default data provider config that adheres to max page
         // size limit and applies any sorting in requestParams
-        $dataProviderConfig = [
+        $dataProviderConfig = ArrayHelper::merge([
             'pagination' => [
                 'pageSizeLimit' => [1, $this->pageSizeMaxLimit],
                 'params' => $requestParams,
@@ -69,13 +70,13 @@ class ActiveIndexAction extends \yii\rest\IndexAction
                 'params' => $requestParams,
                 'attributes' => $model->activeAttributes()
             ],
-        ];
+        ], $dataProviderConfigOverrides);
 
         // Fetch an RBAC filter to apply based on this user's permissions
         $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
 
         // Return data provider built from model search function
-        return $model->search(null, $this->searchScenario, $rbacFilter ? $rbacFilter : null, $dataProviderConfig);
+        return $model->search(null, $this->searchScenario, $rbacFilter ? $rbacFilter : null, $dataProviderConfig, $orderBy);
     }
 
 }

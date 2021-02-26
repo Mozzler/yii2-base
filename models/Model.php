@@ -740,12 +740,13 @@ class Model extends ActiveRecord
         return $query->andWhere($condition);
     }
 
+    public $defaultOrderBy = ['createdAt' => SORT_DESC];
     /**
      * Build a DataProvider that has a query filtering by the
      * data provided in $params (supplied by a form, so is keyed by
      * $form->formName)
      */
-    public function search($params = [], $scenario = null, $queryFilter = [], $dataProviderConfig = [], $orderBy = ['createdAt' => SORT_DESC])
+    public function search($params = [], $scenario = null, $queryFilter = [], $dataProviderConfig = [], $orderBy = null)
     {
         if (!$scenario) {
             $scenario = self::SCENARIO_DEFAULT;
@@ -756,6 +757,10 @@ class Model extends ActiveRecord
         $model->setScenario($scenario);
         $query = $model->find();
 
+        // We want to allow a default orderby to be defined per model, but also can be overridden per search query
+        if (null === $orderBy) {
+            $orderBy = $this->defaultOrderBy;
+        }
         if (!empty($orderBy)) {
             $query->orderBy($orderBy);
         }
