@@ -1,4 +1,5 @@
 <?php
+
 namespace mozzler\base\actions;
 
 use yii\helpers\ArrayHelper;
@@ -14,10 +15,15 @@ class ModelIndexAction extends BaseModelAction
      */
 
     public $scenario = Model::SCENARIO_LIST;
-    public $dataProviderConfig = [];
+    public $dataProviderConfig = [
+        'pagination' => [
+            'pageSizeLimit' => 500, // Allow a lot higher maximum page size by default (which is only 50) use ?per-page=500 to actually see that
+        ]
+    ];
 
-    public function defaultConfig() {
-        return ArrayHelper::merge(parent::defaultConfig(),[
+    public function defaultConfig()
+    {
+        return ArrayHelper::merge(parent::defaultConfig(), [
             'widgetConfig' => []
         ]);
     }
