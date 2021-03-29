@@ -6,7 +6,7 @@
 				<a href="{{ widget.exportUrl }}" target="_blank" class="btn btn-default btn-sm" title="Download as .csv file">Export <span class="glyphicon glyphicon-download-alt"></span></a>
 			{% endif %}
 			{% if widget.model.reportItems %}
-				{{ t.renderWidget('mozzler.base.widgets.modelReport.ModelReportToggleButton', {'model': model}) }}
+				{{ t.renderWidget('mozzler.base.widgets.modelReport.ModelReportToggleButton', {'model': widget.model}) }}
 			{% endif %}
 			{% if widget.canCreateModel %}
     			<a href="{{ widget.model.getUrl("create") }}" class="btn btn-primary btn-sm">Create {{ widget.model.modelConfig('label') }}</a>

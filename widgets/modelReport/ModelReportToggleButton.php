@@ -12,7 +12,7 @@ class ModelReportToggleButton extends BaseWidget
         return [
             'tag' => 'a',
             'options' => [
-                'class' => 'btn btn-default btn-sm btn-filter model-report-toggle-button', // Hidden by default
+                'class' => 'btn btn-default btn-sm model-report-toggle-button', // Hidden by default
                 'id' => 'model-report-section',
                 'title' => 'Show the Reports Dashboard'
             ],
