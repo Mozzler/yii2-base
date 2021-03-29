@@ -1,0 +1,7 @@
+@media screen and (max-width: 481px) {
+    .model-report-item-chart {
+        min-height: 15rem;
+        min-width: 420px;
+    }
+
+}

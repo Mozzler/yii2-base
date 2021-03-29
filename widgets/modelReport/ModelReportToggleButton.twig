@@ -1,0 +1,6 @@
+{# Only show if the model has reportItems to show #}
+{% if widget.model.reportItems %}
+    <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+    <span class="{{ widget.glyphicon }}"></span>
+    </{{ widget.tag }}>
+{% endif %}

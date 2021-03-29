@@ -1,0 +1,26 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right">
+            <span class="glyphicon glyphicon-warning-sign hidden model-report-all-warning" aria-hidden="true"></span>
+            <span class="glyphicon glyphicon-refresh model-report-all-refresh" aria-hidden="true"></span>
+        </div>
+        <h3 class="panel-title">Reports</h3>
+        <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+
+        {% for rowIndex, row  in widget.reportItemsLayoutWidgetMode %}
+            <!-- Row Index: {{ rowIndex }} -->
+            <div class="row">
+                {% for reportItemWidget in row %}
+
+                    {{ t.renderWidget(reportItemWidget.widgetClassTwig, arrayhelper.merge(reportItemWidget, {"model": widget.model})) }}
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="model-report-warnings hidden"></div>
+    </div>
+</div>
+</{{ widget.tag }}>

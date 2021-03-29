@@ -1,0 +1,18 @@
+.model-report-item-panel .panel-body {
+    min-height: 6rem;
+    line-height: 6rem;
+}
+
+.model-report-item-panel {
+    min-width: 16rem;
+}
+
+.model-report-item-panel .panel-counter {
+    text-align: center;
+    font-size: larger;
+}
+
+.model-report-item-panel .report-item-footer-panel {
+    text-align: center;
+}
+
