@@ -17,11 +17,49 @@ use yii\base\BaseObject;
  * @package app\components
  *
  * Helps create the Chart.js, Panel and Table based reports
+ *
+ * You can also use your own report types.
+ * You'll want to setup a reportItems() method on the model for this to be useful.
+ *
+ * Example config/common.php
+ *
+ * 'reportsManager' => [
+ *   'class' => 'mozzler\base\components\ReportsManager',
+ *   'apiEndpoint' => '/report/reportItem', // If you've configured the config/web.php controllerMap for the report controller
+ *   'colours' => [
+ *     'orange' => 'rgb(247, 148, 24)',
+ *     'maximum-yellow-red' => 'rgb(245, 184, 46)',
+ *     'baby-blue-eyes' => 'rgb(171, 210, 250)',
+ *     'pink' => 'rgb(255, 193, 207)',
+ *     'tea-green' => 'rgb(213, 255, 217)',
+ *     'plum-web' => 'rgb(221, 166, 222)',
+ *     'vivid-tangerine' => 'rgb(238, 168, 149)',
+ *     'alice-blue' => 'rgb(214, 228, 235)',
+ *     'light-slate-gray' => 'rgb(123, 143, 163)',
+ *  ]
+ * ],
  */
 class ReportsManager extends BaseObject
 {
-    public $apiEndpoint = '/v1/reports/reportItem';
-
+    /**
+     * @var string
+     *
+     * You likely want to change this according to the config
+     * e.g in the config/common.php file this assumes
+     * 'modules' => [
+     * 'mozzlerBase' => [
+     * 'class' => '\mozzler\base\Module'
+     * ],
+     *
+     * However you can also set the controllerMap in the config/web.php:
+     *
+     * 'controllerMap' => [
+     *    'report' => [
+     *      'class' => 'mozzler\base\controllers\ReportsController'
+     *     ],
+     *  ],
+     */
+    public $apiEndpoint = '/mozzlerBase/reports/reportItem';
 
     public function init()
     {
@@ -56,7 +94,7 @@ class ReportsManager extends BaseObject
      * @var array
      * This will be prefilled with the 'colours' gradient if you use \Yii::$app->reportsManager->getColourGradients
      */
-    public $colourGradients = [ ];
+    public $colourGradients = [];
 
 
     /**
