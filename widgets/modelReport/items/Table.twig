@@ -1,0 +1,8 @@
+<{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
+<div class="panel panel-default report-item-table-wrapper">
+    {% if widget.reportItem.title %}
+        <div class="panel-footer report-item-title report-item-title-table text-center">{{ widget.reportItem.title }}</div>
+    {% endif %}
+    <div class="report-item-table-body panel-counter" id="{{ widget.tableId }}"></div>
+</div>
+</{{ widget.tag }}>

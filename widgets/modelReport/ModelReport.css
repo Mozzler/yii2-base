@@ -1,0 +1,70 @@
+/* Main report section */
+.model-report-section {
+    margin-top: 1rem;
+}
+
+
+
+/* Refresh All Icon */
+.model-report-all-refresh {
+    cursor: pointer;
+}
+
+/* Spinning */
+.model-report-all-refresh-active {
+    animation: spin 4s linear infinite;
+}
+
+
+/* Warning icon */
+.model-report-all-warning {
+    color: #A94442; /* Danger Red */
+    cursor: pointer;
+}
+
+.model-report-warnings {
+    padding-top: 2em;
+}
+
+@keyframes report-spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+
+@keyframes report-warning-flash {
+    from {
+        background: #f96;
+    }
+    to {
+        background: #fff;
+    }
+}
+
+.report-warning-flash {
+    animation: report-warning-flash 1s ease-in-out 0s;
+}
+
+@keyframes report-update-flash {
+    from {
+        background: #D6E4EB;
+    }
+    to {
+        background: #fff;
+    }
+}
+
+/* Mostly used for the Panel updates */
+.report-update-flash {
+    animation: report-update-flash 1s ease-in-out 0s;
+}
+
+.report-item-clickable {
+    cursor: pointer;
+}
+
+.report-item-title {
+    text-align: center;
+}
