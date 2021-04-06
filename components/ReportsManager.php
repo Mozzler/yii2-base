@@ -422,6 +422,7 @@ class ReportsManager extends BaseObject
             $rowEntries = [];
             $colTotal = 0; // Should be a max of 12
             $colSizeEntriesNotSet = 0;
+            $ignoreColCount = false;
             foreach ($rowItem as $entryIndex => $entryItem) {
 
                 // Sometimes the $reportItemsLayout is
@@ -453,6 +454,9 @@ class ReportsManager extends BaseObject
                 }
 
 
+                if (true === ArrayHelper::getValue($reportItem, 'ignoreColumnCount', false)) {
+                    $ignoreColCount = true;
+                }
                 $colSize = $this->getColSize(ArrayHelper::getValue($reportItemConfig, 'options.class', ''));
                 if ($colSize > 0) {
                     $colTotal += $colSize;
@@ -461,10 +465,10 @@ class ReportsManager extends BaseObject
                     //    1 => '5',
                     // ]
 
-                    if ($colTotal > 12) {
+                    if (false === $ignoreColCount && $colTotal > 12) {
                         throw new BaseException("The col-md-X classes for row $entryIndex should not total more than 12, check config for $reportItemName and others in the row. Model: " . get_class($model) . "::reportItemsLayout()");
                     }
-                } else {
+                } else if (false === $ignoreColCount) {
                     $colSizeEntriesNotSet++;
                 }
 
@@ -480,7 +484,7 @@ class ReportsManager extends BaseObject
 
 
             // -- Check if we need to set the size on some of these
-            if ($colSizeEntriesNotSet > 0) {
+            if (false === $ignoreColCount && $colSizeEntriesNotSet > 0) {
 
                 // -- Make sure there's space
                 if ($colTotal === 12 || $colTotal + $colSizeEntriesNotSet >= 12) {

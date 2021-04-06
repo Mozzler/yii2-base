@@ -23,7 +23,7 @@ class Table extends ModelReportItem
         $config['options']['class'] = $config['options']['class'] . ' model-report-item-table';
 
         // ----------------------------------------------------------------------
-        //   PANEL
+        //   Table
         // ----------------------------------------------------------------------
         $tableId = strtolower(htmlentities(\Yii::$app->t::getModelClassName($config['model']) . $config['reportItemName'] . '-' . $config['id']));
         $config['tableId'] = $tableId;
