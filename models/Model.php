@@ -33,7 +33,7 @@ class Model extends ActiveRecord
     public static $moduleClass = '\mozzler\base\Module';
     public $controllerRoute;
 
-    protected static $collectionName;
+    public static $collectionName;
     protected $modelFields;
     public $modelConfig;
 

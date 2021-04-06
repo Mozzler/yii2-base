@@ -32,7 +32,7 @@ class Task extends BaseModel
     const STATUS_COMPLETE = 'complete';
     const STATUS_ERROR = 'error';
 
-    protected static $collectionName = 'app.task';
+    public static $collectionName = 'app.task';
 
     protected function modelConfig()
     {

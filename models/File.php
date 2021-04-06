@@ -29,7 +29,7 @@ use yii\helpers\VarDumper;
  */
 class File extends BaseModel
 {
-    protected static $collectionName = 'app.file';
+    public static $collectionName = 'app.file';
 
     // If you want to override these twig templates it's expected you'll setup your own File model and in your config/common.php file setup something like
     //     'container' => [
