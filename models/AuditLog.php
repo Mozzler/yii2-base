@@ -31,7 +31,7 @@ class AuditLog extends BaseModel
     public $previousModel; // Used when rendering the previousValue
     public $newModel; // Used when rendering the newValue
 
-    public static $collectionName = 'app.auditLog'; // This should be the same as what's used in \mozzler\base\components\cache
+    protected static $collectionName = 'app.auditLog'; // This should be the same as what's used in \mozzler\base\components\cache
 
     protected function modelConfig()
     {

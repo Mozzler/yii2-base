@@ -24,7 +24,7 @@ use yii\helpers\ArrayHelper;
  */
 class SystemLog extends BaseModel
 {
-    public static $collectionName = 'app.systemLog';
+    protected static $collectionName = 'app.systemLog';
     public const TYPE_DEBUG = 'debug';
     public const TYPE_TRACE = 'trace';
     public const TYPE_PROFILE = 'profile';

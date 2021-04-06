@@ -33,7 +33,7 @@ class Model extends ActiveRecord
     public static $moduleClass = '\mozzler\base\Module';
     public $controllerRoute;
 
-    public static $collectionName;
+    protected static $collectionName;
     protected $modelFields;
     public $modelConfig;
 
@@ -741,6 +741,7 @@ class Model extends ActiveRecord
     }
 
     public $defaultOrderBy = ['createdAt' => SORT_DESC];
+
     /**
      * Build a DataProvider that has a query filtering by the
      * data provided in $params (supplied by a form, so is keyed by
@@ -941,6 +942,11 @@ class Model extends ActiveRecord
             \Yii::error("Error saving {$this->ident()}. Validation Error(s): " . VarDumper::export(['Errors' => $this->getErrors(), $className => $this->toArray()]));
         }
         return $save;
+    }
+
+    public static function getCollectionName()
+    {
+        return self::$collectionName;
     }
 
 

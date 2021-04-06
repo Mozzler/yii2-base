@@ -21,7 +21,7 @@ use yii\helpers\ArrayHelper;
 class Cache extends BaseModel
 {
 
-    public static $collectionName = 'app.cache'; // This should be the same as what's used in \mozzler\base\components\cache
+    protected static $collectionName = 'app.cache'; // This should be the same as what's used in \mozzler\base\components\cache
 
     protected function modelConfig()
     {

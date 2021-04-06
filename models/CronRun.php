@@ -22,7 +22,7 @@ class CronRun extends BaseModel
 {
     use traits\LoggableModelTrait;
 
-    public static $collectionName = 'app.cronRun';
+    protected static $collectionName = 'app.cronRun';
 
     protected function modelConfig()
     {

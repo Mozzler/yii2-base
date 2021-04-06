@@ -16,7 +16,7 @@ use yii\helpers\ArrayHelper;
 class Config extends BaseModel
 {
 
-    public static $collectionName = 'app.config';
+    protected static $collectionName = 'app.config';
 
     protected function modelConfig()
     {
