@@ -59,6 +59,7 @@
 /* Mostly used for the Panel updates */
 .report-update-flash {
     animation: report-update-flash 1s ease-in-out 0s;
+    background-color: transparent;
 }
 
 .report-item-clickable {

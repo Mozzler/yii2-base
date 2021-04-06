@@ -7,6 +7,7 @@ $('.model-report-item-table').each(function () {
 
         // -- The Table
         let $table = $('#' + widget.tableId);
+        let $widget = $('#' + widgetId);
 
         let searchParams = new URL(document.location).search;
         let endpoint = `${widget.apiEndpoint}${searchParams ? searchParams + '&' : '?'}reportItem=${widget.reportItemName}&model=${widget.modelName}`;
@@ -30,10 +31,14 @@ $('.model-report-item-table').each(function () {
                 console.log("AJAX request got the panel data: ", panelDataAndConfig);
                 if (panelDataAndConfig && panelDataAndConfig.data) {
                     $table.html(panelDataAndConfig.data).addClass('report-update-flash');
+                    $widget.addClass('report-update-flash');
+                    $widget.find('.report-item-title-table').addClass('report-update-flash');
                     _ModelReport.addMessage(widgetId, `Loaded up the Table <strong>${widget.title || widget.reportItemName}</strong> in ${_ModelReport.returnProcessedTimeDurationHumanReadable(startTime)}`, 'success');
                     lastLoadedTime = _ModelReport.getProcessedTime();
                     setTimeout(function () {
-                        $table.addClass('report-item-clickable');
+                        $table.addClass('report-item-clickable').removeClass('report-update-flash');
+                        $widget.removeClass('report-update-flash');
+                        $widget.find('.report-item-title-table').removeClass('report-update-flash');
                     }, debounceTime);
 
                 } else {
