@@ -182,6 +182,7 @@ class ReportsManager extends BaseObject
      * @param $config array
      * @return array|int|\MongoDB\Driver\Cursor|null
      * @throws \yii\mongodb\Exception
+     * @throws BaseException
      */
     public function generateData($reportItem, $model, $modelReport, $dataProvider, $config = ['data' => null])
     {
@@ -204,11 +205,13 @@ class ReportsManager extends BaseObject
             if (!empty($filter)) {
                 $dataProviderQuery->andFilterWhere($filter);
             }
+
+            $dataProviderQuery->checkPermissions = ArrayHelper::getValue($reportItem, 'data.applyRBAC', true); // Apply RBAC filtering? (defaults to true)
             return (int)$dataProviderQuery->count('*', $dataProvider->db);
         }
 
         if (!empty($aggregationPipeline)) {
-            $aggregationPipeline = $this->addAggregationMatchPipelineFromDataProvider($model, $aggregationPipeline, $dataProvider, $filter);
+            $aggregationPipeline = $this->addAggregationMatchPipelineFromDataProvider($model, $aggregationPipeline, $dataProvider, $filter, ['applyRBAC' => ArrayHelper::getValue($reportItem, 'data.applyRBAC', true)]);
             $collection = \Yii::$app->mongodb->getCollection($model::collectionName());
             return $collection->aggregate($aggregationPipeline);
         }
@@ -222,12 +225,13 @@ class ReportsManager extends BaseObject
      * @param $aggregationPipeline array
      * @param $dataProvider ActiveDataProvider
      * @param null|array $matchQuery
+     * @param $options array if we should be applying the RBAC filter
      * @return mixed
      * @throws BaseException
      */
-    public function addAggregationMatchPipelineFromDataProvider($model, $aggregationPipeline, $dataProvider, $matchQuery = null)
+    public function addAggregationMatchPipelineFromDataProvider($model, $aggregationPipeline, $dataProvider, $matchQuery = null, $options = ['applyRBAC' => true])
     {
-        $match = $this->getAggregationMatchPipelineFromDataProvider($model, $dataProvider, $matchQuery);
+        $match = $this->getAggregationMatchPipelineFromDataProvider($model, $dataProvider, $matchQuery, $options);
 
         if (empty($aggregationPipeline)) {
             // There's probably something wrong if this is the case
@@ -245,38 +249,48 @@ class ReportsManager extends BaseObject
      * @param $dataProvider ActiveDataProvider
      * @param $model Model
      * @param $matchQuery null|array An optional query that will be added into the $match, along with the Search and RBAC filters
+     * @param $options array if we should be applying the RBAC filter
      * @return array|null
      * @throws BaseException
      */
-    public function getAggregationMatchPipelineFromDataProvider($model, $dataProvider, $matchQuery = null)
+    public function getAggregationMatchPipelineFromDataProvider($model, $dataProvider, $matchQuery = null, $options = ['applyRBAC' => true])
     {
         if (empty($dataProvider) || !isset($dataProvider->query)) {
             throw new BaseException('Programming Error: Expected a Data Provider'); // Nope, you are using it wrong
         }
 
-
         $dataProviderQuery = clone $dataProvider->query;
 
+        // ---------------------------------------------
+        //   Apply RBAC filtering
+        // ---------------------------------------------
         // We need the model because we need to get the RBAC rules (if they apply)
-        // The $modelFilter returns true, false or an array with the RBAC policies
-        $modelFilter = \Yii::$app->rbac->can($model, 'find', []);
-        \Yii::debug("The modelFilter is " . VarDumper::export($modelFilter));
-        if (false === $modelFilter) {
-            throw new BaseException('You are unable to access this');
-        } else if (is_array($modelFilter)) {
-            // It's an array of filters to be applied to the query, e.g
-            // ['OR', ['$and' => [['dealType' => ['$in' => ['used', 'wholesale',],],], ['dealershipId' => unserialize('C:21:"MongoDB\\BSON\\ObjectId":48:{a:1:{s:3:"oid";s:24:"5f3aa890c5ff1f12435c6463";}}'),],],],];
-            $dataProviderQuery->andFilterWhere($modelFilter);
+
+        if (true === ArrayHelper::getValue($options, 'applyRBAC', true)) {
+
+
+            // The $modelFilter returns true, false or an array with the RBAC policies
+            $modelFilter = \Yii::$app->rbac->can($model, 'find', []);
+            \Yii::debug("The modelFilter is " . VarDumper::export($modelFilter));
+            if (false === $modelFilter) {
+                throw new BaseException('You are unable to access this');
+            } else if (is_array($modelFilter)) {
+                // It's an array of filters to be applied to the query, e.g
+                // ['OR', ['$and' => [['dealType' => ['$in' => ['online', 'silent',],],], ['dealId' => unserialize('C:21:"MongoDB\\BSON\\ObjectId":48:{a:1:{s:3:"oid";s:24:"5f3aa890c5ff1f12435c6463";}}'),],],],];
+                $dataProviderQuery->andFilterWhere($modelFilter);
+            }
         }
 
-
+        // -- Add the $matchQuery if provided
         if (!empty($matchQuery)) {
             $dataProviderQuery->andFilterWhere($matchQuery);
         }
+
+
         // The $dataProviderQuery->where would be: [ 'and', [ 'AND', [ 'clientId' => [ 'oid' => '5f356e4fc5ff1f292434652b', ], ], [ 'dealershipId' => [ 'oid' => '5f3aa813c5ff1f12435c6462', ], ], [ 'AND', [ '>=', 'testDriveStarted', 1612099800, ], [ '<=', 'testDriveStarted', 1614518940, ], ], ], [ 'timedOut' => true, ], ]
         // After buildCondition is it now something like // e.g [ '$and' => [ [ '$and' => [ [ 'clientId' => [ 'oid' => '5f356e4fc5ff1f292434652b', ], ], [ 'dealershipId' => [ 'oid' => '5f3aa813c5ff1f12435c6462', ], ], [ '$and' => [ [ 'testDriveStarted' => [ '$gte' => 1612099800, ], ], [ 'testDriveStarted' => [ '$lte' => 1614518940, ], ], ], ], ], ], [ 'timedOut' => true, ], ], ]
+//        \Yii::debug('$dataProviderQuery: ' . VarDumper::export(ArrayHelper::toArray($dataProviderQuery)));
 
-        \Yii::debug('$dataProviderQuery: ' . VarDumper::export(ArrayHelper::toArray($dataProviderQuery)));
         $whereQuery = ArrayHelper::getValue(ArrayHelper::toArray($dataProviderQuery), 'where', []);
         if (empty($whereQuery)) {
             // There's somehow no RBAC nor Search query to apply, so no $match
