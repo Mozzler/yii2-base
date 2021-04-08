@@ -23,7 +23,7 @@ $(".model-report-item-chart").each(function () {
 
     const loadData = function () {
         if (lastLoadedTime && _ModelReport.returnProcessedTimeDuration(lastLoadedTime) < debounceTime) {
-            console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);
+            // console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);
             return false;
         }
         let startTime = _ModelReport.getProcessedTime();
@@ -39,7 +39,7 @@ $(".model-report-item-chart").each(function () {
         $.getJSON(endpoint, function (chartDataAndConfig) {
 
             _ModelReport.deactivateRefresh(widgetId);
-            console.log("AJAX request got the chart and data: ", chartDataAndConfig);
+            // console.log("AJAX request got the chart and data: ", chartDataAndConfig);
             if (chartDataAndConfig) {
                 chart.data = chartDataAndConfig.data;
                 chart.update();

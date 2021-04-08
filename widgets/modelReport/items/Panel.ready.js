@@ -16,7 +16,7 @@ $('.model-report-item-panel').each(function () {
 
         const loadData = function () {
             if (lastLoadedTime && _ModelReport.returnProcessedTimeDuration(lastLoadedTime) < debounceTime) {
-                console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);
+                // console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);
                 return false;
             }
             lastLoadedTime = _ModelReport.getProcessedTime(); // Prevent any new loads whilst this one is processing
@@ -27,7 +27,7 @@ $('.model-report-item-panel').each(function () {
             $.getJSON(endpoint, function (panelDataAndConfig) {
 
                 _ModelReport.deactivateRefresh(widgetId);
-                console.log("AJAX request got the panel data: ", panelDataAndConfig);
+                // console.log("AJAX request got the panel data: ", panelDataAndConfig);
                 if (panelDataAndConfig && panelDataAndConfig.data || 0 === panelDataAndConfig.data) {
                     let html = `${widget.reportItem.pre || ''}${panelDataAndConfig.data}${widget.reportItem.post || ''}`;
                     $panel.html(html).addClass('report-update-flash');
