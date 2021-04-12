@@ -64,7 +64,8 @@ class IndexModel extends BaseWidget {
 		if ($config['applyRbacToActionColumn']) {
 			$config = $this->applyRbacToActionColumn($config);
 		}
-		
+
+        $config['canReportModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'report'); // Don't show the reports panel if you can't view it
 		$finalConfig = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
 
 		// exclude gridViewConfig['columns'] from the templatify as they should be 

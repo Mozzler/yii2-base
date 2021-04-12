@@ -1,6 +1,6 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
-    {{ t.renderWidget("mozzler.base.widgets.model.IndexHeader", arrayhelper.merge(widget.headerConfig, {"model": widget.model})) }}
-    {% if widget.model.reportItems %}
+{{ t.renderWidget("mozzler.base.widgets.model.IndexHeader", arrayhelper.merge(widget.headerConfig, {"model": widget.model})) }}
+    {% if widget.canReportModel and widget.model.reportItems %}
         {{ t.renderWidget('mozzler.base.widgets.modelReport.ModelReport', {'model': widget.model}) }}
     {% endif %}
     {{ t.renderWidget('kartik.grid.GridView', widget.gridViewConfig, false) }}

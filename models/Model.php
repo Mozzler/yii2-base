@@ -243,7 +243,10 @@ class Model extends ActiveRecord
                 ],
                 'delete' => [
                     'grant' => false
-                ]
+                ],
+                'report' => [
+                    'grant' => false
+                ],
             ],
             'registered' => [
                 'find' => [
@@ -257,7 +260,10 @@ class Model extends ActiveRecord
                 ],
                 'delete' => [
                     'grant' => true
-                ]
+                ],
+                'report' => [
+                    'grant' => true
+                ],
             ],
             'admin' => [
                 'find' => [
@@ -271,7 +277,10 @@ class Model extends ActiveRecord
                 ],
                 'delete' => [
                     'grant' => true
-                ]
+                ],
+                'report' => [
+                    'grant' => true
+                ],
             ]
         ];
     }

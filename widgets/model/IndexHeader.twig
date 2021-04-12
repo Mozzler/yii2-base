@@ -1,10 +1,10 @@
 <{{ widget.tag }} id="{{ widget.id }}" {{ html.renderTagAttributes(widget.options) }}>
 	<{{ widget.container.tag }} {{ html.renderTagAttributes(widget.container.options) }}>
 	    <{{ widget.buttonsContainer.tag }} {{ html.renderTagAttributes(widget.buttonsContainer.options) }}>
-			{% if widget.model.reportItems %}
+			{% if widget.canReportModel and widget.model.reportItems %}
 				{{ t.renderWidget('mozzler.base.widgets.modelReport.ModelReportToggleButton', {'model': widget.model}) }}
 			{% endif %}
-	        <{{ widget.buttonsContainer.filter.tag }} href="#" {{ html.renderTagAttributes(widget.buttonsContainer.filter.options) }}>{{ widget.buttonsContainer.filter.text }}</{{ widget.buttonsContainer.filter.tag }}>
+	            <{{ widget.buttonsContainer.filter.tag }} href="#" {{ html.renderTagAttributes(widget.buttonsContainer.filter.options) }}>{{ widget.buttonsContainer.filter.text }}</{{ widget.buttonsContainer.filter.tag }}>
 			{% if widget.canExportModel %}
 				<a href="{{ widget.exportUrl }}" target="_blank" class="btn btn-default btn-sm" title="Download as .csv file">Export <span class="glyphicon glyphicon-download-alt"></span></a>
 			{% endif %}
