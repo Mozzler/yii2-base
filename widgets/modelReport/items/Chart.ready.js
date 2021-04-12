@@ -6,12 +6,12 @@ $(".model-report-item-chart").each(function () {
     const widget = m.widgets[widgetId];
 
     // -- If you need more colours than are already defined
-    let getColour = function (colourIndex, numberOfColours) {
+    const getColour = function (colourIndex, numberOfColours) {
         // If you specify a custom getColour method then use that
         if (widget.getColour) {
-            widget.getColour(colourIndex, numberOfColours)
+            return widget.getColour(colourIndex, numberOfColours)
         } else {
-            _ModelReport.getColour(colourIndex, numberOfColours);
+            return _ModelReport.getColour(colourIndex, numberOfColours);
         }
     }
 
@@ -22,6 +22,20 @@ $(".model-report-item-chart").each(function () {
     let lastLoadedTime = null;
     let debounceTime = widget.debounceTimeMs || 6000; // By detault don't reload if you've already done so in the last 6s
 
+
+    const convertDataGetColour = function (chartDataAndConfig) {
+        for (let i in (chartDataAndConfig)) {
+            const typeofField = typeof chartDataAndConfig[i];
+            if ('string' === typeofField  && chartDataAndConfig[i].indexOf('getColour(') === 0) {
+                // Convert a getColour(colourIndex, numberOfColours) method into a local call
+                chartDataAndConfig[i] = eval(chartDataAndConfig[i]);
+            }
+            if ( 'object'  === typeofField) {
+                chartDataAndConfig[i] = convertDataGetColour(chartDataAndConfig[i]);
+            }
+        }
+        return chartDataAndConfig;
+    }
     const loadData = function () {
         if (lastLoadedTime && _ModelReport.returnProcessedTimeDuration(lastLoadedTime) < debounceTime) {
             // console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);
@@ -42,7 +56,7 @@ $(".model-report-item-chart").each(function () {
             _ModelReport.deactivateRefresh(widgetId);
             // console.log("AJAX request got the chart and data: ", chartDataAndConfig);
             if (chartDataAndConfig) {
-                chart.data = chartDataAndConfig.data;
+                chart.data = convertDataGetColour(chartDataAndConfig.data);
                 chart.update();
                 lastLoadedTime = _ModelReport.getProcessedTime();
                 _ModelReport.addMessage(widgetId, `Loaded up The Chart <strong>${widget.title || widget.reportItemName}</strong> in ${_ModelReport.returnProcessedTimeDurationHumanReadable(startTime)}`, 'success');

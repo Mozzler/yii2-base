@@ -19,10 +19,23 @@ $('.model-report-item-table').each(function () {
         let getColour = function (colourIndex, numberOfColours) {
             // If you specify a custom getColour method then use that
             if (widget.getColour) {
-                widget.getColour(colourIndex, numberOfColours)
+                return widget.getColour(colourIndex, numberOfColours)
             } else {
-                _ModelReport.getColour(colourIndex, numberOfColours);
+                return _ModelReport.getColour(colourIndex, numberOfColours);
             }
+        }
+        const convertDataGetColour = function (chartDataAndConfig) {
+            for (let i in (chartDataAndConfig)) {
+                const typeofField = typeof chartDataAndConfig[i];
+                if ('string' === typeofField && chartDataAndConfig[i].indexOf('getColour(') === 0) {
+                    // Convert a getColour(colourIndex, numberOfColours) method into a local call
+                    chartDataAndConfig[i] = eval(chartDataAndConfig[i]);
+                }
+                if ('object' === typeofField) {
+                    chartDataAndConfig[i] = convertDataGetColour(chartDataAndConfig[i]);
+                }
+            }
+            return chartDataAndConfig;
         }
 
         const loadData = function () {
@@ -40,7 +53,7 @@ $('.model-report-item-table').each(function () {
                 _ModelReport.deactivateRefresh(widgetId);
                 // console.log("AJAX request got the panel data: ", panelDataAndConfig);
                 if (panelDataAndConfig && panelDataAndConfig.data) {
-                    $table.html(panelDataAndConfig.data).addClass('report-update-flash');
+                    $table.html(convertDataGetColour(panelDataAndConfig.data)).addClass('report-update-flash');
                     $widget.addClass('report-update-flash');
                     $widget.find('.report-item-title-table').addClass('report-update-flash');
                     _ModelReport.addMessage(widgetId, `Loaded up the Table <strong>${widget.title || widget.reportItemName}</strong> in ${_ModelReport.returnProcessedTimeDurationHumanReadable(startTime)}`, 'success');

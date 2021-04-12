@@ -18,9 +18,9 @@ $('.model-report-item-panel').each(function () {
         let getColour = function (colourIndex, numberOfColours) {
             // If you specify a custom getColour method then use that
             if (widget.getColour) {
-                widget.getColour(colourIndex, numberOfColours)
+                return widget.getColour(colourIndex, numberOfColours)
             } else {
-                _ModelReport.getColour(colourIndex, numberOfColours);
+                return _ModelReport.getColour(colourIndex, numberOfColours);
             }
         }
 

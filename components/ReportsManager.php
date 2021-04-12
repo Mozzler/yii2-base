@@ -336,17 +336,13 @@ class ReportsManager extends BaseObject
      */
     public function getColourGradients($selector = null)
     {
-        if (null === $selector || 'colours' === $selector) {
-            // Add the 'colours' gradient which is all of the $this->colours
-            if (!isset($this->colourGradients['colours'])) {
-                $colours = array_values($this->colours);
-                if ('colours' === $selector) {
-                    return $colours;
-                }
-                return ArrayHelper::merge($this->colourGradients, $colours);
-            }
+        if (empty($selector)) {
+            $selector = 'colours';
         }
-        // It's not the default 'colours' gradient of all of them so return whatever has been selected
+        if ('colours' === $selector && !isset($this->colourGradients[$selector])) {
+            // Add the 'colours' gradient which is all of the $this->colours
+            $this->colourGradients[$selector] = array_values($this->colours);
+        }
         return $this->colourGradients[$selector];
     }
 
@@ -373,7 +369,7 @@ class ReportsManager extends BaseObject
             // Use an existing colour directly
             return array_values($this->colours)[$colourIndex]; // Return the colour at that index e.g rgb(238, 168, 149)
         } else {
-            return new JsExpression("getColour($colourIndex, $coloursTotal)"); // Use the JS getColour method which likely calls _reportManager.getColour which then calls the d3 interpolateRGB d3.piecewise(d3.interpolateRgb, on the colours gradient (or whichever gradient was supplied)
+            return (string)new JsExpression("getColour($colourIndex, $coloursTotal)"); // Use the JS getColour method which likely calls _reportManager.getColour which then calls the d3 interpolateRGB d3.piecewise(d3.interpolateRgb, on the colours gradient (or whichever gradient was supplied)
         }
     }
 
