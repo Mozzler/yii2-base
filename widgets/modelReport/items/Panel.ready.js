@@ -14,6 +14,16 @@ $('.model-report-item-panel').each(function () {
         let lastLoadedTime = null;
         let debounceTime = widget.debounceTimeMs || 6000; // By detault don't reload if you've already done so in the last 6s
 
+        // -- If you need more colours than are already defined
+        let getColour = function (colourIndex, numberOfColours) {
+            // If you specify a custom getColour method then use that
+            if (widget.getColour) {
+                widget.getColour(colourIndex, numberOfColours)
+            } else {
+                _ModelReport.getColour(colourIndex, numberOfColours);
+            }
+        }
+
         const loadData = function () {
             if (lastLoadedTime && _ModelReport.returnProcessedTimeDuration(lastLoadedTime) < debounceTime) {
                 // console.debug(`Debounced, you've already loaded ${widget.title || widget.reportItemName} within the last ${_ModelReport.returnProcessedTimeDurationHumanReadable(lastLoadedTime)} please wait until it's been ${debounceTime / 1000}s`);

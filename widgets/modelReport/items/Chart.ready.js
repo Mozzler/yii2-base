@@ -5,14 +5,15 @@ $(".model-report-item-chart").each(function () {
     // Get the data for this widget
     const widget = m.widgets[widgetId];
 
-    // Get the data
-    // const chartSettings = widget['chartSettings'];
-    // console.log("The Test chart settings are: ", chartSettings);
-
-    // let getColours = function (index, totalCount) {
-    //     // Pass onto the Report Manager getColours as we don't have a custom function for this defined.
-    //
-    // }
+    // -- If you need more colours than are already defined
+    let getColour = function (colourIndex, numberOfColours) {
+        // If you specify a custom getColour method then use that
+        if (widget.getColour) {
+            widget.getColour(colourIndex, numberOfColours)
+        } else {
+            _ModelReport.getColour(colourIndex, numberOfColours);
+        }
+    }
 
     // -- The Chart... Without data
     let ctx = document.getElementById(widget.canvasId).getContext('2d');

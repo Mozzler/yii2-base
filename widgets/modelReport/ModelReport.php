@@ -20,6 +20,7 @@ class ModelReport extends BaseWidget
             'model' => null,
             'configOptions' => [],
             'modelReports' => [],
+            'colourGradient' => null, // Will default to 'colours'
         ];
     }
 
@@ -45,7 +46,13 @@ class ModelReport extends BaseWidget
             $reportItemsLayout = $model->reportItemsLayout();
         }
 
+
         $config['reportItemsLayoutWidgetMode'] = \Yii::$app->reportsManager->convertReportItemsLayoutToWidgetMode($reportItemsLayout, $reportItems, $model);
+
+
+        $this->outputJsData([
+            'reportItemColours' => \Yii::$app->reportsManager->getColourGradients($config['colourGradient']),
+        ]);
         return $config;
     }
 

@@ -1,4 +1,6 @@
-_ModelReport = (function () {
+_ModelReport = (function (m) {
+
+        let modelReportWidgetData = m.widgets[$('.model-report-section').attr("id")];
 
         let refreshStateReportItems = {};
         let messages = [];
@@ -178,6 +180,26 @@ _ModelReport = (function () {
         }
 
 
+        let colourGradient = modelReportWidgetData.reportItemColours || [
+            "rgb(247, 148, 24)",
+            "rgb(245, 184, 46)",
+            "rgb(171, 210, 250)",
+            "rgb(255, 193, 207)",
+            "rgb(214, 228, 235)",
+            "rgb(213, 255, 217)",
+            "rgb(123, 143, 163)",
+            "rgb(221, 166, 222)",
+            "rgb(238, 168, 149)",
+        ];
+
+        // Requires the d3-color and d3-interpolate files to be included
+        let colourRange = d3.piecewise(d3.interpolateRgb, colourGradient);
+
+        let getColour = function (colourIndex, numberOfColours) {
+            return colourRange((1 / numberOfColours) * colourIndex);
+        }
+
+
         return {
             activateRefresh,
             deactivateRefresh,
@@ -187,9 +209,10 @@ _ModelReport = (function () {
             returnProcessedTimeDurationHumanReadable,
             getMessages,
             setReportMenuOpenStatus,
+            getColour,
         }
     }
-)();
+)(m);
 
 try {
     const urlParams = new URLSearchParams(window.location.search || '');

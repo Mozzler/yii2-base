@@ -336,7 +336,6 @@ class ReportsManager extends BaseObject
      */
     public function getColourGradients($selector = null)
     {
-
         if (null === $selector || 'colours' === $selector) {
             // Add the 'colours' gradient which is all of the $this->colours
             if (!isset($this->colourGradients['colours'])) {
