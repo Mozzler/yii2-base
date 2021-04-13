@@ -38,7 +38,7 @@ class ModelReportItem extends BaseWidget
 
         // For creating many colours in the getColour() as per https://github.com/d3/d3-interpolate
         $view = \Yii::$app->controller->getView();
-        $view->registerJsFile('https://d3js.org/d3-color.v2.min.js', ['position' => View::POS_END], 'd3-colour'); // Grabbed 9th March 2021 Original Url - https://d3js.org/d3-color.v2.min.js
+        $view->registerJsFile('https://d3js.org/d3-color.v2.min.js', ['position' => View::POS_END], 'd3-colour.v2'); // Grabbed 9th March 2021 Original Url - https://d3js.org/d3-color.v2.min.js
         $view->registerJsFile('https://d3js.org/d3-interpolate.v2.min.js', ['position' => View::POS_END], 'd3-interpolate.v2'); //Grabbed 9th March 2021 Original Url - https://d3js.org/d3-interpolate.v2.min.js
 
         $config['colours'] = \Yii::$app->reportsManager->colours;

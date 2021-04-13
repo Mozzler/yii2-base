@@ -25,8 +25,7 @@ class Chart extends ModelReportItem
 
         // -- Register the ChartJS files
         // NB: As of 24th Feb 2021 v2.9.4 is the latest. v3 is being developed but still in beta, so using the latest v2 https://cdnjs.com/libraries/Chart.js
-        $view->registerJsFile('https://cdn.jsdelivr.net/npm/chart.js@2.9.4', ['position' => View::POS_END], 'chartJs'); // https://cdn.jsdelivr.net/npm/chart.js@2.9.4 or Alternative URL https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js
-
+        $view->registerJsFile('https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js', ['position' => View::POS_END], 'chartjs.v2'); // The very last v2 version before v3 released. https://cdn.jsdelivr.net/npm/chart.js@2.9.4 or Alternative URL https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js
         $this->outputJsData([
             'canvasId' => $canvasId,
             'reportItem' => $config['reportItem']['widgetConfig'],
