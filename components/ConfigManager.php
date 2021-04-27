@@ -63,7 +63,7 @@ class ConfigManager
     {
         $config = \Yii::createObject($className);
 
-        $config->load($data, "");
+        $config->load($data, '');
         $config->save();
     }
 
@@ -72,9 +72,11 @@ class ConfigManager
      */
     protected function getExistingConfigs($className)
     {
+        $forceAdmin = \Yii::$app->rbac->forceAdmin;
+        \Yii::$app->rbac->forceAdmin = true;
         \Yii::createObject($className);
         $configs = $className::find()->all();
-
+        \Yii::$app->rbac->forceAdmin = $forceAdmin;
         return $configs;
     }
 
