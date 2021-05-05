@@ -3,6 +3,7 @@
 namespace mozzler\base\models;
 
 use MongoDB\BSON\ObjectId;
+use mozzler\base\components\Tools;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use mozzler\base\models\behaviors\AutoIncrementBehavior;
@@ -930,7 +931,18 @@ class Model extends ActiveRecord
      */
     public function ident()
     {
-        return \Yii::$app->t::getModelClassName($this) . " {$this->getId()} \"{$this->name}\"";
+        $ident = '';
+        try {
+            if (property_exists($this, 'name')) {
+                $ident = \Yii::$app->t::getModelClassName($this) . " {$this->getId()} \"{$this->name}\"";
+            } else {
+                $ident = \Yii::$app->t::getModelClassName($this) . ' ' . $this->getId();
+            }
+        } catch (\Throwable $err) {
+            // Likely the $name field doesn't exist, but the ->t mozzler tools might also not be configured, so calling that directly.
+            \Yii::error('Error trying to get an ident: ' . Tools::returnExceptionAsString($err));
+        }
+        return $ident;
     }
 
     /**
