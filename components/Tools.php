@@ -445,7 +445,7 @@ class Tools extends Component
      *
      * Example usage:
      * function cachedStuff() {
-     *  $sessionCache = \Yii::$app->t->getRequestCache();
+     *  $requestCache = \Yii::$app->t->getRequestCache();
      *  $key = 'cacheKey'; // Fill in this
      *  if ($requestCache->exists($key)) {
      *      return $requestCache->get($key);
@@ -454,6 +454,9 @@ class Tools extends Component
      *  $requestCache->set($key, $value);
      *  return $value
      * }
+     *
+     * NOTE: THIS IS NOT A STATIC FUNCTION!!
+     * Use -> not ::
      */
     public function getRequestCache()
     {
