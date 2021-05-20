@@ -933,7 +933,7 @@ class Model extends ActiveRecord
     {
         $ident = '';
         try {
-            if (property_exists($this, 'name')) {
+            if ($this->hasAttribute('name') && !empty($this->name)) {
                 $ident = \Yii::$app->t::getModelClassName($this) . " {$this->getId()} \"{$this->name}\"";
             } else {
                 $ident = \Yii::$app->t::getModelClassName($this) . ' ' . $this->getId();
