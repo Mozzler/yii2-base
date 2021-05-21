@@ -32,7 +32,12 @@ class File extends Base
         if (empty($value)) {
             return $value;
         }
-        return \Yii::$app->t::ensureId($value);
+        try {
+            return \Yii::$app->t::ensureId($value);
+        } catch (\Throwable $exception) {
+            \Yii::error(\Yii::$app->t::returnExceptionAsString($exception));
+            return $value;
+        }
     }
 
 

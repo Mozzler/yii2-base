@@ -33,10 +33,10 @@ class FileField extends BaseField
             if ($config['model']->$attribute) {
                 /** @var \mozzler\base\models\File $fileModel */
                 $fileModel = $this->lookupFile($config['model']->$attribute, $attribute);
-                $config['value'] = $this->getFileValue($fileModel, $attribute);
                 if ($fileModel) {
                     // Some nice to have info
 //                    \Yii::debug("The file model: " . json_encode($fileModel->toScenarioArray()));
+                    $config['value'] = $this->getFileValue($fileModel, $attribute);
                     $config['link'] = $this->getFileDownloadLinkValue($fileModel->getId());
                     $config['size'] = $this->getFileDownloadSizeReadable($fileModel->size);
 
@@ -74,8 +74,13 @@ class FileField extends BaseField
     {
         $fileField = \Yii::createObject(File::class);
         // Check if the File exists
-        /** @var \mozzler\base\models\File $fileModel */
-        $fileModel = \Yii::$app->t::getModel($fileField->relatedModel, $objectId);
+        try {
+            /** @var \mozzler\base\models\File $fileModel */
+            $fileModel = \Yii::$app->t::getModel($fileField->relatedModel, $objectId);
+        } catch (\Throwable $exception) {
+            \Yii::error("Error getting the file with objectId: $objectId\nError: " . \Yii::$app->t::returnExceptionAsString($exception));
+            $fileModel = null;
+        }
         return $fileModel;
     }
 
