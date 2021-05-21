@@ -6,6 +6,7 @@ use mozzler\base\fields\File;
 use mozzler\base\widgets\model\view;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 
 class FileField extends BaseField
 {
@@ -78,7 +79,7 @@ class FileField extends BaseField
             /** @var \mozzler\base\models\File $fileModel */
             $fileModel = \Yii::$app->t::getModel($fileField->relatedModel, $objectId);
         } catch (\Throwable $exception) {
-            \Yii::error("Error getting the file with objectId: $objectId\nError: " . \Yii::$app->t::returnExceptionAsString($exception));
+            \Yii::error("Error getting the file with objectId: " . VarDumper::export($objectId) . "\nError: " . \Yii::$app->t::returnExceptionAsString($exception));
             $fileModel = null;
         }
         return $fileModel;
