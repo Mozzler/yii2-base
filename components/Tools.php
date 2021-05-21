@@ -481,5 +481,51 @@ class Tools extends Component
         return $requestCache;
     }
 
+
+    /**
+     * @param $class
+     * @param array $filter
+     * @param int $limit
+     * @return \Generator|void
+     *
+     * Example usage:
+     * foreach ($this->yieldModels(User::class, ['email' => ['$exists' => true]]) as $user) {
+     *   $user->.... Do stuff on the users
+     * }
+     */
+    public static function yieldModels($class, $filter = [], $limit = 4)
+    {
+
+        $count = \Yii::$app->t::countModels($class, $filter, [
+            'checkPermissions' => false
+        ]);
+        if ($count === 0) {
+            return;
+        }
+        $rounds = ceil($count / $limit);
+        $modelsYielded = 0;
+        for ($round = 0; $round < $rounds; $round++) {
+
+            $offset = $round * $limit;
+            $models = \Yii::$app->t::getModels($class, $filter, ['checkPermissions' => false,
+                'limit' => $limit,
+                'offset' => $offset,
+            ]);
+
+            if (empty($models)) {
+                if ($round !== $rounds) {
+                    \Yii::warning("yieldModels() Unexpectedly no more entries. Yielded $modelsYielded of $count. In round $round of $rounds of $class\n", Console::FG_RED);
+                }
+                return;
+            }
+
+            foreach ($models as $model) {
+                $modelsYielded++;
+                yield $model;
+            }
+        }
+        return;
+    }
+
     public $requestCache = null;
 }
