@@ -117,6 +117,24 @@ class Tools extends Component
      * @param array $data Default data to populate the model
      * @return \mozzler\base\models\Model   Returns a new model
      * @throws \yii\base\InvalidConfigException
+     *
+     * !!!!!!!!!!!!!!
+     * !!!  NOTE  !!!
+     * !!!!!!!!!!!!!!
+     * !! Because there's a call to getClassName if you want to redefine the model (e.g the config/common.php's container.definitions) you'll need to update both versions
+     * e.g:
+     * config/common.php:
+     * return [...,
+     *    'container' => [
+     *      'definitions' => [
+     *          'mozzler\base\models\File' => [
+     *              'class' => 'app\models\File',
+     *          ],
+     *          '\\mozzler\\base\\models\\File' => [
+     *              'class' => 'app\models\File',
+     *          ],
+     * ]]];
+     *
      */
     public static function createModel($className, $data = [])
     {
