@@ -501,9 +501,37 @@ class Tools extends Component
 
 
     /**
+     * Get the currently logged in user
+     *
+     * This can be really useful in model scenarios, model fields and RBAC policies (well any that aren't the user, you'll want to disable model field caching for users if doing that),  etc..
+     * e.g \Yii::$app->t::getCurrentUser()
+     * @return User|null
+     * @throws \Throwable
+     */
+    public static function getCurrentUser()
+    {
+        if (!\Yii::$app->has('user')) {
+            // -- Likely a CLI request
+            return null;
+        }
+        /** @var User $user */
+        $user = \Yii::$app->user->getIdentity();
+        if (empty($user)) {
+            return null;
+        }
+        return $user;
+    }
+
+    /**
+     * Yield Models
+     *
+     * When you want to easily foreach over entries
+     *
+     * Note that the sort order is GOING to be out of order, mostly reversed but going forwards in batches
      * @param $class
      * @param array $filter
-     * @param int $limit
+     * @param array $options e.g ['checkPermissions' => true] or setting the sort, although you'll get it in the opposite order than what's requested as we start from the end and also work in batches
+     * @param int $limit this doesn't support 1 as a limit. It's how many records are grabbed per batch, change it depending on the size of the models, the amount of ram you want and the database load you are willing to accept
      * @return \Generator|void
      *
      * Example usage:
@@ -511,7 +539,7 @@ class Tools extends Component
      *   $user->.... Do stuff on the users
      * }
      */
-    public static function yieldModels($class, $filter = [], $limit = 4)
+    public static function yieldModels($class, $filter = [], $options = [], $limit = 10)
     {
 
         $count = \Yii::$app->t::countModels($class, $filter, [
@@ -520,15 +548,19 @@ class Tools extends Component
         if ($count === 0) {
             return;
         }
-        $rounds = ceil($count / $limit);
+        $rounds = floor($count / $limit);
         $modelsYielded = 0;
-        for ($round = 0; $round < $rounds; $round++) {
+
+        // Note: Because of the way you could be modifying entries based on a filter we start from the end and work backwards.
+        // e.g if you have a filter of ['accountId' => null] then because of the way the batch operations work you'd be skipping over entries if we started from the front (offset 0) instead we start with the highest offset and work backwards
+        // But it's not completely backwards, if 0->100 then with a limit of 3 you'd get something like: 98, 99, 100, 95, 96, 97, 94, 93, 92 ...
+        for ($round = $rounds; $round >= 0; $round--) {
 
             $offset = $round * $limit;
-            $models = \Yii::$app->t::getModels($class, $filter, ['checkPermissions' => false,
+            $models = \Yii::$app->t::getModels($class, $filter, ArrayHelper::merge(['checkPermissions' => false], $options, [
                 'limit' => $limit,
                 'offset' => $offset,
-            ]);
+            ]));
 
             if (empty($models)) {
                 if ($round !== $rounds) {
