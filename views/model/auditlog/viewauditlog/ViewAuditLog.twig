@@ -11,9 +11,12 @@
     {% endif %}
     {% for auditEntryAction in widget.auditLog %}
         <div class="panel panel-{% if auditEntryAction.0.action == "update" %}success{% elseif auditEntryAction.0.action ==  "insert" %}primary{% elseif auditEntryAction.0.action ==  "delete" %}warning{% endif %}">
-            <div class="panel-heading auditlog-action-{{ auditEntryAction.0.action }}"><strong class="auditlog-action">{% if auditEntryAction.0.action == "update" %}Updated{% elseif auditEntryAction.0.action ==  "insert" %}Inserted{% elseif auditEntryAction.0.action ==  "delete" %}Deleted{% endif %}</strong>{% if auditEntryAction.0.createdUserId %}
-                by <strong class="auditlog-name">{{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId", "wrapLayout": false})) | striptags }}{% endif %}</strong>
-                on <strong class="auditlog-date">{{ auditEntryAction.0.createdAt | date(widget.format, widget.timeZone) }}</strong>
+            <div class="panel-heading auditlog-action-{{ auditEntryAction.0.action }}"><strong
+                        class="auditlog-action">{% if auditEntryAction.0.action == "update" %}Updated{% elseif auditEntryAction.0.action ==  "insert" %}Inserted{% elseif auditEntryAction.0.action ==  "delete" %}Deleted{% endif %}</strong>{% if auditEntryAction.0.createdUserId %}
+                by <strong
+                        class="auditlog-name">{{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", arrayhelper.merge([], {"model": auditEntryAction.0, "attribute" : "createdUserId", "wrapLayout": false})) | striptags }}{% endif %}</strong>
+                on <strong
+                        class="auditlog-date">{{ auditEntryAction.0.createdAt | date(widget.format, widget.timeZone) }}</strong>
             </div>
             <div class="panel-body">
 
@@ -33,15 +36,28 @@
                                 {% endif %}
                             </td>
 
-                            <!-- Show the previous / new values -->
+                           {# Show the previous / new values #}
                             <td class="auditlog-{{ auditEntry.field }}-previousModel">
                                 {% if auditEntry.previousModel %}
-                                    {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry.previousModel, "attribute" : auditEntry.field }) }}
+                                    {% if auditEntry.previousModel[auditEntry.field] == '(empty)' %}
+                                        {{ auditEntry.previousModel[auditEntry.field] }}
+                                    {% else %}
+                                        {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry.previousModel, "attribute" : auditEntry.field }) }}
+                                    {% endif %}
                                 {% endif %}
                             </td>
                             <td class="auditlog-{{ auditEntry.field }}-newModel">
+                                {# e.g
+                                    auditEntry.field == '_id' - The modelField name
+                                    auditEntry.newModel[auditEntry.field] == ObjectId('6050387dcdb2c6386e02ea24') - The actual value. Or '(empty)' if it's not set
+                                #}
                                 {% if auditEntry.newModel %}
-                                    {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry.newModel, "attribute" : auditEntry.field }) }}
+                                    {#  Not all field rendering widgets can deal with '(empty)' e.g the dateTime parser or ObjectId / RelateOne fields can throw errors. So output just plain text #}
+                                    {% if auditEntry.newModel[auditEntry.field] == '(empty)' %}
+                                        {{ auditEntry.newModel[auditEntry.field] }}
+                                    {% else %}
+                                        {{ t.renderWidget("mozzler.base.widgets.model.view.RenderField", {"wrapLayout": false, "model": auditEntry.newModel, "attribute" : auditEntry.field }) }}
+                                    {% endif %}
                                 {% endif %}
                             </td>
                         </tr>
