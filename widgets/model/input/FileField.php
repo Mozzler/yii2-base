@@ -47,8 +47,8 @@ if (typeof FilePond === "undefined") {
 	    server: {
 	        process: \'/file/create\',
 	        revert: \'/file/delete\', // Allow deleting uploaded files
-	        load: \'/file/download?id=\', // Allow viewing previously uploaded files
-	        restore: \'/file/download?id=\',
+	        load: \'/file/download?filepond=load&id=\', // Allow viewing previously uploaded files
+	        restore: \'/file/download?filepond=restore&id=\',
 	        fetch: null,
 	    },
 	});
