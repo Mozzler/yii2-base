@@ -385,10 +385,10 @@ class Tools extends Component
     /**
      * Ensure an ID is a proper MongoDB ID object.
      *
-     * @pararm    string    $id        ID to convert to a MongoDB ID object
+     * @pararm    string|null    $id        ID to convert to a MongoDB ID object
      * @return    \MongoDB\BSON\ObjectId    Returns a MongoID object
      */
-    public static function ensureId($id)
+    public static function ensureId($id = null)
     {
         return new \MongoDB\BSON\ObjectId($id);
     }
