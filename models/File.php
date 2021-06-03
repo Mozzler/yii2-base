@@ -40,6 +40,7 @@ class File extends BaseModel
     public $filenameTwigTemplate = '{{ fileModel._id }}-{{ now | date("U") }}.{{ extension }}'; // Used by models/behaviors/FileUploadBehaviour.php and can use the fileModel (this file model, including _id), extension (worked out by original filename or mimetype), fsName (name of the filesystem)
     public $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
     public $defaultModelNamespace = 'app\models\\'; // Used by the $this->>workoutFilesystemName as we don't get this information
+    public $defaultFs = 'fs'; // If you've not defined a File system in the File document and we can't determine one from the related model's fields then we use \Yii::$app->fs
 
     protected function modelConfig()
     {
@@ -128,7 +129,7 @@ class File extends BaseModel
                 // Normal S3 versions are long strings, not numbers
                 'type' => 'Text',
                 'label' => 'Version Number',
-                'default' => "1" // NB: Has to be a string not integer otherwise this barfs
+                'default' => '1' // NB: Has to be a string not integer otherwise this barfs
             ],
             'other' => [
                 // In case you want to save anything else
@@ -197,14 +198,21 @@ class File extends BaseModel
     private function workoutFilesystemName()
     {
         $fsName = $this->filesystemName; // The default
+
+        if (!empty($fsName)) {
+            // Using what's been saved with the document
+            return $fsName;
+        }
         // ----------------------------------------------------------------
         //  Load the model field and check for a custom filesystemName
         // ----------------------------------------------------------------
         // If possible load up the field attributes and see if there's a custom filesystemName
+
+        $fsName = $this->defaultFs; // If you've not defined a File system in the File document and we can't determine one from the related model's fields in a moment then we use \Yii::$app->fs
         $associatedModelField = $this->getAssociatedModelField();
         if (empty($associatedModelField)) {
             \Yii::warning("Invalid model class or field name so using $fsName for the filesystem");
-            return $fsName;
+            return $fsName = 'fs'; // If you've not defined a File system in the File document and we can't determine one from the related model's fields then we use \Yii::$app->fs
         }
         $filesystemName = ArrayHelper::getValue($associatedModelField, 'filesystemName');
         if (!empty($filesystemName)) {
@@ -266,6 +274,10 @@ class File extends BaseModel
      * @return string file extension
      *
      * Based off vendor/yiisoft/yii2/web/UploadedFile.php
+     * NB: Doesn't include the dot.
+     *
+     * So $file->getExtension() === 'jpg' not '.jpg'
+     *
      */
     public function getExtension($originalFilename = null)
     {
