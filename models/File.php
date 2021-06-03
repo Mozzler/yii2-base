@@ -139,7 +139,6 @@ class File extends BaseModel
             'filesystemName' => [
                 'type' => 'Text',
                 'label' => 'Filesystem Name',
-                'default' => 'fs' // What the \Yii::$app->fs default is
             ]
         ]);
     }
@@ -197,11 +196,9 @@ class File extends BaseModel
      */
     private function workoutFilesystemName()
     {
-        $fsName = $this->filesystemName; // The default
-
-        if (!empty($fsName)) {
+        if (!empty($this->filesystemName)) {
             // Using what's been saved with the document
-            return $fsName;
+            return $this->filesystemName;
         }
         // ----------------------------------------------------------------
         //  Load the model field and check for a custom filesystemName
