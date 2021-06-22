@@ -282,6 +282,9 @@ class Model extends ActiveRecord
                 'report' => [
                     'grant' => true
                 ],
+                'export' => [
+                    'grant' => true
+                ],
             ]
         ];
     }
