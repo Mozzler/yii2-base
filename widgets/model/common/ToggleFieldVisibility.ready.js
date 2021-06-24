@@ -1,4 +1,3 @@
-
 const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, modelClassName) {
 
     this.$mozzlerMainForm = $mozzlerMainForm;
@@ -10,9 +9,10 @@ const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, mod
     }
     this.$mozzlerMainFormInput = this.$mozzlerMainForm.find('input, textarea, select'); //  The main form inputs to worry about
 
-    this.processVisibility = function() {
+    this.processVisibility = function () {
         let serialisedMap = this.getFormMap();
-        for (const fieldName in this.fieldsVisibleWhen) {
+
+        for (let fieldName in this.fieldsVisibleWhen) {
 
             // -- Ignore null entries
             if (!this.fieldsVisibleWhen[fieldName]) {
@@ -26,11 +26,11 @@ const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, mod
                 // The function should look something similar to 'function (attribute, value, attributesMap) { return "' . self::ANSWER_TYPE_SINGLE_SELECT . '" === attributesMap.answerType; }'
                 isVisible = this.fieldsVisibleWhen[fieldName](fieldName, serialisedMap[fieldName], serialisedMap);
             } catch (error) {
-                console.error(`processVisibility() Errored when trying to run the function for determining if ${fieldName} should be visible on ${this.modelClassName}. `, error);
+                console.error("processVisibility() Errored when trying to run the function for determining if " + fieldName + " should be visible on " + this.modelClassName + "\n", error);
             }
 
             // -- Now to translate back to the DOM entries
-            let $class = this.$mozzlerMainForm.find(`.form-group.field-${this.modelClassName.toLowerCase()}-${fieldName.toLowerCase()}`);
+            let $class = this.$mozzlerMainForm.find(".form-group.field-" + this.modelClassName.toLowerCase() + "-" + fieldName.toLowerCase());
             if (isVisible) {
                 $class.removeClass('hidden');
             } else {
@@ -39,7 +39,7 @@ const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, mod
         }
     }
 
-    this.getFormMap = function() {
+    this.getFormMap = function () {
         let serialisedArray = this.$mozzlerMainForm.serializeArray();
         if (!serialisedArray) {
             return [];
@@ -67,7 +67,7 @@ const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, mod
         return formMap;
     }
 
-    this.$mozzlerMainFormInput.on('change selected', (event) => {
+    this.$mozzlerMainFormInput.on('change selected', function (event) {
         this.processVisibility();
     });
     this.processVisibility();
@@ -83,9 +83,7 @@ $('.widget-model-toggle-visibility').each(function () {
 
     const $form = $("#" + widgetData.formId);
     let mozzlerFormVisibility = new MozzlerFormVisibility($form, widgetData.fieldsVisibleWhen, widgetData.modelClassName)
-    mozzlerFormVisibilities.push({mozzlerFormVisibility, id, formId: widgetData.formId}); // Make global in case you need access, most likely for the getFormMap method
+    mozzlerFormVisibilities.push({mozzlerFormVisibility: mozzlerFormVisibility, id: id, formId: widgetData.formId}); // Make global in case you need access, most likely for the getFormMap method
 
 });
-
-
 
