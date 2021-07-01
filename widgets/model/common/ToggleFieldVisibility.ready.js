@@ -67,8 +67,9 @@ const MozzlerFormVisibility = function ($mozzlerMainForm, fieldsVisibleWhen, mod
         return formMap;
     }
 
+    let that = this;
     this.$mozzlerMainFormInput.on('change selected', function (event) {
-        this.processVisibility();
+        that.processVisibility();
     });
     this.processVisibility();
 
