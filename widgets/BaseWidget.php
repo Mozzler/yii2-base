@@ -27,6 +27,15 @@ class BaseWidget extends Widget {
 			$config = WidgetHelper::templatifyConfig($config, ['widget' => $config]);
 		}
 
+        // Set to disabled if readOnly is set
+        if (!empty($config['model']) && !empty($config['attribute'])) {
+
+            $modelField = $config['model']->getModelField($config['attribute']);
+            if ($modelField->readOnly) {
+                $config['widgetConfig']['disabled'] = 'disabled';
+            }
+        }
+
 		$config['id'] = $this->id;
 
 		return $config;
