@@ -54,8 +54,7 @@ class WebController extends Controller {
 	 * Merge with $data sent as the second parameter
 	 */
 	public function render($template, $data=[]) {
-		$data = ArrayHelper::merge($this->data, $data);
-		$data = ArrayHelper::merge($this->data, $this->templateData);
+        $data = ArrayHelper::merge($this->templateData, $this->data,  $data);
 		return parent::render($template, $data);
 	}
 
