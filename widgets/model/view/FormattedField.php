@@ -90,7 +90,7 @@ class FormattedField extends BaseField
             $attributeValue = ArrayHelper::getValue($config, 'model.' . $config['attribute']);
             $attributeValue = $config['valueTransformFunction']($attributeValue, $config['attribute'], $config['model'], $config); // Allow for custom value transformations
             $config['formattedValue'] = $config['preContent'] . \Yii::$app->formatter->format($attributeValue, ArrayHelper::merge([$config['formatterMethod']], $config['formatterOptions'])) . $config['postContent'];
-            \Yii::debug("The FormattedField formatted Value is " . json_encode($config['formattedValue']));
+//            \Yii::debug("The FormattedField formatted Value is " . json_encode($config['formattedValue']));
         }
         return $config;
     }
