@@ -56,9 +56,10 @@ class CronManager extends Component
             'dayMonth' => '*',
             'dayWeek' => '*',
             'timezone' => 'Australia/Adelaide',
-            'active' => true,
+            'active' => false, // We aren't actually using this, it doesn't do anything it's just wasting DB space, so should have it disabled by default
             'threadName' => '',
-        ]];
+        ]
+    ];
 
     public function run()
     {
