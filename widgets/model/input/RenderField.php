@@ -17,7 +17,7 @@ class RenderField extends BaseWidget
         $fieldType = $modelField->type;
 
         // If the field is set to readOnly then set the input field attribute as disabled.
-        if ($modelField->readOnly) {
+        if (!empty($modelField) && $modelField->readOnly) {
             $modelField->widgets['input'] = ArrayHelper::merge($modelField->widgets['input'], ['fieldOptions' => ['inputOptions' => ['disabled' => 'disabled', 'class' => 'form-control']]]);
         }
 
