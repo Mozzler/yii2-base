@@ -113,9 +113,10 @@ class Tools extends Component
     /**
      * Create an empty model.
      *
-     * @param string $className Class name of the model to create (eg: `mozzler\auth\user`).
+     * @template T
+     * @param class-string<T> $className Class name of the model to create (eg: `mozzler\auth\user`).
      * @param array $data Default data to populate the model
-     * @return \mozzler\base\models\Model   Returns a new model
+     * @return T Returns a new model
      * @throws \yii\base\InvalidConfigException
      *
      * !!!!!!!!!!!!!!
@@ -138,7 +139,6 @@ class Tools extends Component
      */
     public static function createModel($className, $data = [])
     {
-        /** @var \mozzler\base\models\Model $model */
         $model = Yii::createObject(self::getClassName($className));
 
         if ($data) {
@@ -154,6 +154,13 @@ class Tools extends Component
 
     /**
      * Get a model from the database
+     *
+     * @template T
+     * @param class-string<T> $className
+     * @param array $filter
+     * @param bool $checkPermissions
+     * @return T
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getModel($className, $filter = [], $checkPermissions = true)
     {
@@ -165,9 +172,12 @@ class Tools extends Component
     }
 
     /**
+     * @template T
+     * @param class-string<T> $className
      * @param $className string
      * @param $filter array|ObjectId|string
-     * @return mixed
+     * @return T
+     * @throws \yii\base\InvalidConfigException
      * This will always work without a permissions check so shouldn't be used for basics
      * It's mainly for use when exporting or when you are likely to lookup the same information multiple times in a request.
      */
@@ -201,10 +211,11 @@ class Tools extends Component
      *    "status" => "draft"
      * ]);
      *
-     * @param string $className Class name of the model to get
+     * @template T
+     * @param class-string<T> $className Class name of the model to get
      * @param array $filter MongoDB filter to apply to the query
      * @param array $options
-     * @return    array    Returns an array of found models. If none found, returns an empty array.
+     * @return T[] Returns an array of found models. If none found, returns an empty array.
      */
     public static function getModels($className, $filter = [], $options = [])
     {
@@ -528,11 +539,12 @@ class Tools extends Component
      * When you want to easily foreach over entries
      *
      * Note that the sort order is GOING to be out of order, mostly reversed but going forwards in batches
-     * @param $class
+     * @template T
+     * @param class-string<T> $className Class name of the model to get
      * @param array $filter
      * @param array $options e.g ['checkPermissions' => true] or setting the sort, although you'll get it in the opposite order than what's requested as we start from the end and also work in batches
      * @param int $limit this doesn't support 1 as a limit. It's how many records are grabbed per batch, change it depending on the size of the models, the amount of ram you want and the database load you are willing to accept
-     * @return \Generator|void
+     * @return \Generator|Void
      *
      * Example usage:
      * foreach ($this->yieldModels(User::class, ['email' => ['$exists' => true]]) as $user) {
