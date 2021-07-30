@@ -30,6 +30,7 @@ class Mozzler extends Component
         'JsonArray' => 'mozzler\base\fields\JsonArray',
         'Double' => 'mozzler\base\fields\Double',
         'File' => 'mozzler\base\fields\File',
+        'Files' => 'mozzler\base\fields\Files',
     ];
 
 }

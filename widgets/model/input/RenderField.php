@@ -4,6 +4,7 @@ namespace mozzler\base\widgets\model\input;
 
 use mozzler\base\widgets\BaseWidget;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class RenderField extends BaseWidget
 {
@@ -23,6 +24,7 @@ class RenderField extends BaseWidget
 
         // load the field class, if it exists
         $className = ArrayHelper::getValue($modelField->widgets, 'input.class');
+//        \Yii::debug("Rendering the field with classname " . VarDumper::export($className) . "For the fieldType: {$fieldType}");
         if (!empty($className) && class_exists($className)) {
             $fieldWidget = \Yii::createObject($className);
         } else {

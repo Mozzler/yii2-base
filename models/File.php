@@ -24,6 +24,7 @@ use yii\helpers\VarDumper;
  * @property string $mimeType
  * @property string $filesystemName
  * @property string $version
+ * @property string $description
  * @property integer $size
  * @property array $other
  */
@@ -101,6 +102,11 @@ class File extends BaseModel
                 'type' => 'Text',
                 'label' => 'Model Type',
             ],
+            'description' => [
+                // Likely a user provided description
+                'type' => 'Text',
+                'label' => 'Description',
+            ],
             'fieldName' => [
                 // The associated model's field (e.g user.avatar)
                 'type' => 'Text',
@@ -147,11 +153,11 @@ class File extends BaseModel
     {
 
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'modelType', 'fieldName', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName', 'other'];
-        $scenarios[self::SCENARIO_UPDATE] = ['originalFilename']; // The original filename is used as what's sent to the browser on download
+        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'description', 'modelType', 'fieldName', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName', 'other'];
+        $scenarios[self::SCENARIO_UPDATE] = ['originalFilename', 'description',]; // The original filename is used as what's sent to the browser on download
         $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'modelType', 'fieldName', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'modelType', 'fieldName', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'filesystemName', 'mimeType', 'size', 'modelType', 'fieldName'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'description', 'filepath', 'mimeType', 'modelType', 'fieldName', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'description', 'originalFilename', 'filesystemName', 'mimeType', 'size', 'modelType', 'fieldName'];
 
         return $scenarios;
     }
@@ -265,6 +271,25 @@ class File extends BaseModel
     //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
     //        return $fileInfo;
     //    }
+
+
+    public function getFilenameSafeDescription()
+    {
+        if (empty($this->description)) {
+            return $this->description;
+        }
+        $description = $this->description;
+        if (!is_string($this->description)) {
+            // No idea why you'd put something like an array in the description field, but just in case
+            $description = str_replace("\n", ' ', VarDumper::export($this->description));
+        }
+
+        // max of 200 chars?
+        if (strlen($description) > 200) {
+            $description = substr($description, 0,197) . '___';
+
+        }
+    }
 
     /**
      * @param $originalFilename string

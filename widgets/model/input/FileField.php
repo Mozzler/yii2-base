@@ -43,7 +43,7 @@ if (typeof FilePond === "undefined") {
 	    allowDrop: true,
 	    allowReplace: true,
 	    instantUpload: true,
-	    allowMultiple: false,
+	    allowMultiple: true,
 	    server: {
 	        process: \'/file/create\',
 	        revert: \'/file/delete\', // Allow deleting uploaded files
@@ -52,9 +52,16 @@ if (typeof FilePond === "undefined") {
 	        fetch: null,
 	    },
 	});
-
-	// Allow image previews
+    // Allow image previews
 	$.fn.filepond.registerPlugin(FilePondPluginImagePreview);
+}
+', WebView::POS_READY, 'filepond-inits'); // Also used for the Files field
+
+
+        // -- For General file inputs
+        $view->registerJs('
+if (typeof FilePond !== "undefined") {
+
 
 	// ----------------------------------
 	//  Instanciate Filepond entries
@@ -86,7 +93,8 @@ if (typeof FilePond === "undefined") {
 
 	window.mozzler_filePonds = filePonds; // Make global var so devs can make their own changes if needed
 }
-', WebView::POS_READY, 'filepond-setup');
+', WebView::POS_READY, 'filepond-file-setup');
+
 
         /** @var \yii\widgets\ActiveField $field */
         $field = $config['form']->field($config['model'], $config['attribute'], ArrayHelper::merge($config['widgetConfig'], ['inputOptions' => ['value' => (string)$model->$attribute]])); // Ensure the value is saved as a normal string not oid reference

@@ -1,0 +1,7 @@
+<div {{ html.renderTagAttributes(widget.widgetConfig.options) }}>
+    {{ html.activeHiddenInput(widget.model, widget.attribute, widget.fieldOptions) }}
+    {{ html.activeLabel(widget.model, widget.attribute) }} <br/>
+    <button class="btn btn-primary mozzler-files-field-add-file">Add File</button>
+    <div class="mozzler-files-filepond-array-entries-wrapper">
+    </div>
+</div>

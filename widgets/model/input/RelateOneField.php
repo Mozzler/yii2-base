@@ -7,19 +7,6 @@ use yii\web\JsExpression;
 use yii\helpers\Html;
 use mozzler\base\components\Tools;
 
-class Select2 extends BaseSelect2 {
-	// Deal with values being strings
-	public function init()
-    {
-        parent::init();
-
-        if (!isset($this->data)) {
-            $key = empty($this->value) ? '' : (string)$this->value;
-            $val = empty($this->initValueText) ? $key : $this->initValueText;
-            $this->data = [$key => $val];
-        }
-    }
-}
 
 class RelateOneField extends BaseField
 {
@@ -138,5 +125,20 @@ class RelateOneField extends BaseField
         return $output;
 	}
 	
+}
+
+
+class Select2 extends BaseSelect2 {
+    // Deal with values being strings
+    public function init()
+    {
+        parent::init();
+
+        if (!isset($this->data)) {
+            $key = empty($this->value) ? '' : (string)$this->value;
+            $val = empty($this->initValueText) ? $key : $this->initValueText;
+            $this->data = [$key => $val];
+        }
+    }
 }
 
