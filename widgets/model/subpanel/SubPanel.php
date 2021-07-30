@@ -119,26 +119,6 @@ class SubPanel extends BaseWidget {
 		
 		return $config;
     }
-    
-    protected function buildColumns($model) {
-	    $base = \Yii::$app->getModule('mozzlerBase');
-		$fieldGridConfig = $base->fieldGridConfig;
-		
-	    $attributes = $model->activeAttributes();
-		$columns = [];
-		foreach ($attributes as $attribute) {
-			$field = $model->getModelField($attribute);
-			if (!$field) {
-				\Yii::warning("Unable to locate field for requested attribute ($attribute)");
-				continue;
-			}
-			
-			$customFieldConfig = [];
-			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
-		}
-		
-		return $columns;
-	}
 	
 	/**
 	 * Toggle the display of view, update, delete buttons

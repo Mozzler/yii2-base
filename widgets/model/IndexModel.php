@@ -75,26 +75,6 @@ class IndexModel extends BaseWidget {
 		return $finalConfig;
     }
     
-    protected function buildColumns($model) {
-	    $base = \Yii::$app->getModule('mozzlerBase');
-		$fieldGridConfig = $base->fieldGridConfig;
-		
-	    $attributes = $model->activeAttributes();
-		$columns = [];
-		foreach ($attributes as $attribute) {
-			$field = $model->getModelField($attribute);
-			if (!$field) {
-				\Yii::warning("Unable to locate field for requested attribute ($attribute)");
-				continue;
-			}
-			
-			$customFieldConfig = isset($field->widgets['grid']) ? $field->widgets['grid'] : [];
-			$columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
-		}
-		
-		return $columns;
-	}
-	
 	/**
 	 * Toggle the display of view, update, delete buttons
 	 * depending on if the current user has access to perform

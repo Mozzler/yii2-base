@@ -144,5 +144,27 @@ class BaseWidget extends Widget
         }
     }
 
+
+
+    protected function buildColumns($model) {
+        $base = \Yii::$app->getModule('mozzlerBase');
+        $fieldGridConfig = $base->fieldGridConfig;
+
+        $attributes = $model->activeAttributes();
+        $columns = [];
+        foreach ($attributes as $attribute) {
+            $field = $model->getModelField($attribute);
+            if (!$field) {
+                \Yii::warning("Unable to locate field for requested attribute ($attribute)");
+                continue;
+            }
+
+            $customFieldConfig = isset($field->widgets['grid']) ? $field->widgets['grid'] : [];
+            $columns[] = $fieldGridConfig->getFieldConfig($field, $customFieldConfig);
+        }
+
+        return $columns;
+    }
+
 }
 
