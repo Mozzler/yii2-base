@@ -34,58 +34,63 @@ class FileField extends BaseField
 
         $view->registerJs('
 
+document.addEventListener(\'FilePond:loaded\', function (e) {
+    console.log("FilePond:loaded"); // Doesn\'t seem to fire?
+});
 
 if (typeof FilePond === "undefined") {
-    console.error("ERROR: FilePond isn\'t installed");
+    console.error("ERROR: FilePond isn\'t installed"); // This won\'t be called because the event won\'t fire 
 } else {
-	console.log("Adding FilePond file upload support");
-	FilePond.setOptions({
-	    allowDrop: true,
-	    allowReplace: true,
-	    instantUpload: true,
-	    allowMultiple: false,
-	    server: {
-	        process: \'/file/create\',
-	        revert: \'/file/delete\', // Allow deleting uploaded files
-	        load: \'/file/download?filepond=load&id=\', // Allow viewing previously uploaded files
-	        restore: \'/file/download?filepond=restore&id=\',
-	        fetch: null,
-	    },
-	});
+    console.log("Adding FilePond file upload support");
+    FilePond.setOptions({
+        allowDrop: true,
+        allowReplace: true,
+        instantUpload: true,
+        allowMultiple: false,
+        server: {
+            process: \'/file/create\',
+            revert: \'/file/delete\', // Allow deleting uploaded files
+            load: \'/file/download?filepond=load&id=\', // Allow viewing previously uploaded files
+            restore: \'/file/download?filepond=restore&id=\',
+            fetch: null,
+        },
+    });
 
-	// Allow image previews
-	$.fn.filepond.registerPlugin(FilePondPluginImagePreview);
+    // Allow image previews
+    $.fn.filepond.registerPlugin(FilePondPluginImagePreview);
 
-	// ----------------------------------
-	//  Instantiate Filepond entries
-	// ----------------------------------
-	var $mozzlerFilePond = $(\'input.mozzler-filepond-fileinput\');
-	// Turn input element into a filepond
-	var filePonds = [];
-	$mozzlerFilePond.each(function(index, element) {
+    // ----------------------------------
+    //  Instantiate Filepond entries
+    // ----------------------------------
+    var $mozzlerFilePond = $(\'input.mozzler-filepond-fileinput\');
+    // Turn input element into a filepond
+    var filePonds = [];
+    $mozzlerFilePond.each(function(index, element) {
 
-	if (element.value) {
-	 filePond = FilePond.create(element, {
-	 	\'files\': [
-	        {
-	            // The server file reference
-	            source: element.value,
-	            // Set type to indicate an already uploaded file
-	            options: {
-	                type: \'limbo\'
-	            }
-	        }
-	    ]
-	  });
+    if (element.value) {
+     filePond = FilePond.create(element, {
+        \'files\': [
+            {
+                // The server file reference
+                source: element.value,
+                // Set type to indicate an already uploaded file
+                options: {
+                    type: \'limbo\'
+                }
+            }
+        ]
+      });
 
-	} else {
-	 filePond = FilePond.create(element);
-	}
-	filePonds.push({\'element\': element, \'filePond\': filePond });
-	});
+    } else {
+     filePond = FilePond.create(element);
+    }
+    filePonds.push({\'element\': element, \'filePond\': filePond });
+    });
 
-	window.mozzler_filePonds = filePonds; // Make global var so devs can make their own changes if needed
+    window.mozzler_filePonds = filePonds; // Make global var so devs can make their own changes if needed
 }
+
+
 ', WebView::POS_READY, 'filepond-setup');
 
         /** @var \yii\widgets\ActiveField $field */

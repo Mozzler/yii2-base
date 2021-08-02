@@ -104,9 +104,13 @@ class FileController extends BaseController
             throw new BaseException("The uploaded file is empty", null, null, ['Mozzler Base Filepond Uploader' => 'Create Action in the File Controller', 'Files' => $_FILES]);
         }
 
+        // If you want to check for provided POST or GET Params
+        $params = ArrayHelper::merge(\Yii::$app->request->get(), \Yii::$app->request->post());
+
         /** @var File $fileObject */
         $fileObject = \Yii::$app->t::createModel(File::class, [
             'filename' => $file['tmp_name'], // Need something for passing the validation, but this is to be re-written in the FileUploadBehaviour
+            'description' => htmlentities(urldecode($params['description'])) ?? null,
             'filepath' => $file['tmp_name'], // Need something for passing the validation, but this is to be re-written in the FileUploadBehaviour
             'fieldName' => isset($file['fieldName']) ? $file['fieldName'] : null,
             'modelType' => isset($file['modelType']) ? $file['modelType'] : null,
