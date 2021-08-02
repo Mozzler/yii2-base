@@ -9,6 +9,7 @@ use mozzler\base\models\behaviors\FileUploadBehaviour;
 use mozzler\base\models\File;
 use yii\helpers\ArrayHelper;
 use yii\helpers\UnsetArrayValue;
+use yii\helpers\VarDumper;
 use yii\web\HttpException;
 
 
@@ -175,8 +176,12 @@ class FileController extends BaseController
             $options['inline'] = false; // Don't show unknown files in the browser, force the user to try and download them
         }
 
-        $filename = empty($fileModel->originalFilename) ? $fileModel->filename : $fileModel->originalFilename; // Use the original filename if available
 
+        $filename = empty($fileModel->originalFilename) ? $fileModel->filename : $fileModel->originalFilename; // Use the original filename if available, but make it safe, if it hasn't already been
+        if ($fileModel->sanitiseFilename) {
+            $fileModel->filterFilename($filename);
+        }
+        \Yii::debug("The filename being served is: " . VarDumper::export($filename));
         // --------------------------------------
         //  Send file (as a stream)
         // --------------------------------------

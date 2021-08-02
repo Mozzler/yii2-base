@@ -57,7 +57,7 @@ if (typeof FilePond === "undefined") {
 	$.fn.filepond.registerPlugin(FilePondPluginImagePreview);
 
 	// ----------------------------------
-	//  Instanciate Filepond entries
+	//  Instantiate Filepond entries
 	// ----------------------------------
 	var $mozzlerFilePond = $(\'input.mozzler-filepond-fileinput\');
 	// Turn input element into a filepond

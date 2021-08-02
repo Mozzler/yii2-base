@@ -139,7 +139,11 @@ class FileUploadBehaviour extends Behavior
         $extension = $fileModel->getExtension($fileInfo['name']);
         $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName, 'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
 
-        $filename = \Yii::$app->t::renderTwig($fileModel->filenameTwigTemplate, $twigData);
+
+        $filename = \Yii::$app->t::renderTwig($fileModel->filenameTwigTemplate, $twigData); // Twig rendered, then we filter it to make sure it's filename safe
+        if ($fileModel->sanitiseFilename) {
+            $fileModel->filterFilename($filename);
+        }
         $twigData['filename'] = $filename;
         $folderpath = \Yii::$app->t::renderTwig($fileModel->folderpathTwigTemplate, $twigData);
         // NB: No longer pre-creating the folder as it doesn't seem to be needed
@@ -152,7 +156,7 @@ class FileUploadBehaviour extends Behavior
             // ----------------------------------
             //   Save the file
             // ----------------------------------
-            $stream = fopen($fileInfo['tmp_name'], 'r+');
+            $stream = fopen($fileInfo['tmp_name'], 'r+'); // Read from the locally saved file
             // As per https://flysystem.thephpleague.com/v1/docs/usage/filesystem-api/
             $writeSuccess = $fs->writeStream($filepath, $stream, ['visibility' => $visibility]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
             if (!$writeSuccess) {

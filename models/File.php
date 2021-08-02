@@ -24,6 +24,7 @@ use yii\helpers\VarDumper;
  * @property string $mimeType
  * @property string $filesystemName
  * @property string $version
+ * @property string $description
  * @property integer $size
  * @property array $other
  */
@@ -41,6 +42,7 @@ class File extends BaseModel
     public $folderpathTwigTemplate = ''; // Used by models/behaviors/FileUploadBehaviour.php and also contains filename (the just worked out filename). Local filesystem Example (using the first 2 chars of the MD5 hash): "{{ fileModel.other.md5[:2] }}/"
     public $defaultModelNamespace = 'app\models\\'; // Used by the $this->>workoutFilesystemName as we don't get this information
     public $defaultFs = 'fs'; // If you've not defined a File system in the File document and we can't determine one from the related model's fields then we use \Yii::$app->fs
+    public $sanitiseFilename = true; // Used in the File Controller Download and models/behaviors/FileUploadBehaviour.php
 
     protected function modelConfig()
     {
@@ -101,6 +103,11 @@ class File extends BaseModel
                 'type' => 'Text',
                 'label' => 'Model Type',
             ],
+            'description' => [
+                // Likely a user provided description
+                'type' => 'Text',
+                'label' => 'Description',
+            ],
             'fieldName' => [
                 // The associated model's field (e.g user.avatar)
                 'type' => 'Text',
@@ -147,11 +154,11 @@ class File extends BaseModel
     {
 
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'modelType', 'fieldName', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName', 'other'];
-        $scenarios[self::SCENARIO_UPDATE] = ['originalFilename']; // The original filename is used as what's sent to the browser on download
+        $scenarios[self::SCENARIO_CREATE] = ['filename', 'filepath', 'description', 'modelType', 'fieldName', 'mimeType', 'originalFilename', 'size', 'version', 'filesystemName', 'other'];
+        $scenarios[self::SCENARIO_UPDATE] = ['originalFilename', 'description',]; // The original filename is used as what's sent to the browser on download
         $scenarios[self::SCENARIO_LIST] = ['filename', 'originalFilename', 'size', 'modelType', 'fieldName', 'createdAt'];
-        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'filepath', 'mimeType', 'modelType', 'fieldName', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
-        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'originalFilename', 'filesystemName', 'mimeType', 'size', 'modelType', 'fieldName'];
+        $scenarios[self::SCENARIO_VIEW] = ['_id', 'filename', 'description', 'filepath', 'mimeType', 'modelType', 'fieldName', 'originalFilename', 'size', 'filesystemName', 'other', 'version', 'createdUserId', 'updatedUserId', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_SEARCH] = ['filename', 'description', 'originalFilename', 'filesystemName', 'mimeType', 'size', 'modelType', 'fieldName'];
 
         return $scenarios;
     }
@@ -265,6 +272,80 @@ class File extends BaseModel
     //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
     //        return $fileInfo;
     //    }
+
+
+    /**
+     * Filter Filename
+     *
+     * This makes the filename safe for most filesystems, in case you are using user input
+     * It also defaults to trying to beautify the filename incase there's lots of repeated spaces or replacement chars
+     * It still allows UTF8 characters
+     * @param $filename string
+     * @param bool $beautify
+     * @return string
+     *
+     * Based on https://stackoverflow.com/a/42058764/1495634
+     */
+    public function filterFilename($filename, $beautify = true)
+    {
+        // Sanitize filename
+        $filename = preg_replace(
+            '~
+        [<>:"/\\\|?*]|           // file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+        [\x00-\x1F]|             // control characters http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
+        [\x7F\xA0\xAD]|          // non-printing characters DEL, NO-BREAK SPACE, SOFT HYPHEN
+        [#\[\]@!$&\'()+,;=]|     // URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
+        [{}^\~`]                 // URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
+        ~x',
+            '-', $filename);
+        // avoids ".", ".." or ".hiddenFiles"
+        $filename = ltrim($filename, '.-');
+        // optional beautification
+        if ($beautify) {
+            $filename = $this->beautifyFilename($filename);
+        }
+        // maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
+
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $ext = mb_strtolower($ext, mb_detect_encoding($ext)); // Ensure lowercase extension
+        $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');
+        return $filename;
+    }
+
+    /**
+     * @param $filename
+     * @return string
+     *
+     * Based on https://stackoverflow.com/a/42058764/1495634
+     */
+    public function beautifyFilename($filename, $lowercaseName = false)
+    {
+        // reduce consecutive characters
+        $filename = preg_replace([
+            // "file   name.zip" becomes "file-name.zip"
+            '/ +/',
+            // "file---name.zip" becomes "file-name.zip"
+            '/-+/'
+        ], '-', $filename);
+
+        $filename = preg_replace([
+            // "file___name.zip" becomes "file_name.zip"
+            '/_+/',
+        ], '_', $filename);
+        $filename = preg_replace(array(
+            // "file--.--.-.--name.zip" becomes "file.name.zip"
+            '/-*\.-*/',
+            // "file...name..zip" becomes "file.name.zip"
+            '/\.{2,}/'
+        ), '.', $filename);
+        // You could also force lowercase for windows/unix interoperability http://support.microsoft.com/kb/100625
+        if ($lowercaseName) {
+            $filename = mb_strtolower($filename, mb_detect_encoding($filename));
+        }
+        // ".file-name.-" becomes "file-name"
+        $filename = trim($filename, '.-');
+        return $filename;
+    }
 
     /**
      * @param $originalFilename string
