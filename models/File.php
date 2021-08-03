@@ -273,6 +273,13 @@ class File extends BaseModel
     //        return $fileInfo;
     //    }
 
+    public function getSafeDescription()
+    {
+        if (empty($this->description)) {
+            return '';
+        }
+        return $this->filterFilename($this->description);
+    }
 
     /**
      * Filter Filename
