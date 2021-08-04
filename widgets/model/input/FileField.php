@@ -4,6 +4,7 @@ namespace mozzler\base\widgets\model\input;
 
 use mozzler\base\models\Model;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\View as WebView;
 
 class FileField extends BaseField
@@ -32,6 +33,17 @@ class FileField extends BaseField
         $view->registerCssFile('https://unpkg.com/filepond/dist/filepond.css', ['position' => WebView::POS_HEAD], 'filepond-styling');
         $view->registerCssFile('https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css', ['position' => WebView::POS_HEAD], 'filepond-styling-plugin-imagepreview');
 
+        // Load up the FilePond config settings - e.g {allowRemove: true} or if you want custom CSS classes, etc...
+        // Note that it'll be whichever field is loaded first who's config is used for all file's on the page
+        $filePondConfig = $model->getModelField($attribute)->filePondConfig ?? null; // Get the filePondConfig settings for that model's field
+        if (!empty($filePondConfig)) {
+            $filePondConfigString = rtrim(ltrim(json_encode($filePondConfig), '{'), '}');
+        } else {
+            $filePondConfigString = '';
+        }
+        if (!empty($filePondConfigString)) {
+            $filePondConfigString .= ',';
+        }
         $view->registerJs('
 
 document.addEventListener(\'FilePond:loaded\', function (e) {
@@ -43,10 +55,7 @@ if (typeof FilePond === "undefined") {
 } else {
     console.log("Adding FilePond file upload support");
     FilePond.setOptions({
-        allowDrop: true,
-        allowReplace: true,
-        instantUpload: true,
-        allowMultiple: false,
+        ' . $filePondConfigString . '
         server: {
             process: \'/file/create\',
             revert: \'/file/delete\', // Allow deleting uploaded files

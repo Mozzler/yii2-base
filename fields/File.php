@@ -16,6 +16,27 @@ class File extends Base
      */
     public $relatedField = '_id';
 
+
+    // Filepond Core Config Settings
+    // NB: Also update the Files Field
+    public $filePondConfig = [
+        // Core properties - Explained in https://pqina.nl/filepond/docs/api/instance/properties/
+        'allowMultiple' => false, // We don't currently allow an array of Files to be saved, but that can be made to happen
+        // ---
+        'allowDrop' => true, // Enable or disable drag n' drop
+        'allowBrowse' => true, // Enable or disable file browser
+        'allowPaste' => true, // Enable or disable pasting of files. Pasting files is not supported on all browesrs.
+        'allowReplace' => true, // Allow drop to replace a file, only works when allowMultiple is false
+        'allowRevert' => true, // Enable or disable the revert processing button
+        'allowRemove' => true, // When set to false the remove button is hidden and disabled
+        'allowProcess' => true, // Enable or disable the process button
+        'allowReorder' => false, // Allow users to reorder files with drag and drop interaction. Note that this only works in single column mode. It also only works on browsers that support pointer events.
+        'className' => null, // Additional CSS class to add to the root element
+        'required' => false, // Sets the required attribute to the output field
+        'disabled' => false, // Sets the disabled attribute to the output field
+    ];
+
+
     // -- Custom settings which allow you to override the ones used by models/behaviors/FileUploadBehaviour.php
     public $filenameTwigTemplate;
     public $folderpathTwigTemplate;
