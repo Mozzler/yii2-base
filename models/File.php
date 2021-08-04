@@ -604,4 +604,43 @@ class File extends BaseModel
         return $fileInfo;
     }
 
+
+    /**
+     * @param $fileModel
+     * @param $fileId
+     * @return string
+     *
+     * Returns the string output, aiming for the original filename, the filename or the fileId if needed
+     */
+    public function getFileValue()
+    {
+        if ($this->originalFilename) {
+            return $this->originalFilename;
+        }
+        if ($this->filename) {
+            return $this->filename;
+        }
+        return $this->getId();
+    }
+
+    public function getFileDownloadSizeReadable($sizeInBytes = null)
+    {
+        if (is_null($sizeInBytes)) {
+            $sizeInBytes = $this->size;
+        }
+        if (!$sizeInBytes) {
+            return 'Empty';
+        }
+
+        if ($sizeInBytes >= 1073741824) {
+            return number_format($sizeInBytes / 1024 / 1024 / 1024, 2) . ' GB';
+        } elseif ($sizeInBytes >= 1048576) {
+            return number_format($sizeInBytes / 1024 / 1024, 2) . ' MB';
+        } elseif ($sizeInBytes >= 1024) {
+            return number_format($sizeInBytes / 1024, 2) . ' KB';
+        } else {
+            return $sizeInBytes . ' bytes';
+        }
+    }
+
 }
