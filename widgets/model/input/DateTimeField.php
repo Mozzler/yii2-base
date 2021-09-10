@@ -28,7 +28,7 @@ class DateTimeField extends BaseField
         $model = $config['model'];
         $attribute = $config['attribute'];
 
-        $field = $form->field($model, $attribute);
+        $field = $form->field($model, $attribute, $config['fieldOptions']);
         return $field->widget(DateControl::className(), $config['widgetConfig']);
     }
 
