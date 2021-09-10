@@ -12,7 +12,7 @@ class PhoneField extends BaseField
     {
         $config = $this->config();
         /** @var ActiveField $field */
-        $field = $config['form']->field($config['model'], $config['attribute']);
+        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
 
         if (empty($config['widgetConfig']['hint']) && empty($config['widgetConfig']['placeholder'])) {
             $config['widgetConfig']['placeholder'] = '0412123123'; // Add a default placeholder

@@ -12,7 +12,7 @@ class PostcodeField extends BaseField
     {
         $config = $this->config();
         /** @var ActiveField $field */
-        $field = $config['form']->field($config['model'], $config['attribute']);
+        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
 
         return $field->textInput(ArrayHelper::merge(['type' => 'tel'], $config['widgetConfig'])); // Set as Telephone for the type
     }

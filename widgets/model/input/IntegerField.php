@@ -13,7 +13,7 @@ class IntegerField extends BaseField
     {
         $config = $this->config();
         /** @var ActiveField $field */
-        $field = $config['form']->field($config['model'], $config['attribute']);
+        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
 
         // Setting the type to 'number' as you shouldn't be seeing a generic text field
         $widgetConfig = ArrayHelper::merge(['type' => 'number'], $config['widgetConfig']);

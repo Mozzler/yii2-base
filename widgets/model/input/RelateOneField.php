@@ -26,9 +26,9 @@ class RelateOneField extends BaseField
 	
 	public function defaultConfig()
 	{
-		return [
+        return ArrayHelper::merge(parent::defaultConfig(), [
             'widgetConfig' => []
-		];
+		]);
     }
     
     public function run() {
@@ -37,7 +37,7 @@ class RelateOneField extends BaseField
         $model = $config['model'];
         $form = $config['form'];
 
-        $field = $config['form']->field($config['model'], $config['attribute']);
+        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
         $modelField = $config['model']->getModelField($attribute);
 
         $baseAttribute = $attribute; //substr($attribute,0,-2);

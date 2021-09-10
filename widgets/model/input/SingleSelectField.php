@@ -9,19 +9,19 @@ class SingleSelectField extends BaseField
 	
 	public function defaultConfig()
 	{
-		return [
+        return ArrayHelper::merge(parent::defaultConfig(), [
 			'widgetConfig' => [
 				'options' => ['placeholder' => 'Select {{ widget.model.getModelField(widget.attribute).label }} ...'],
 				'pluginOptions' => [
 					'allowClear' => false
 				]
 			]
-		];
+		]);
 	}
 	
 	public function run() {
 		$config = $this->config(true);
-		$field = $config['form']->field($config['model'], $config['attribute']);
+		$field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
 		$modelField = $config['model']->getModelField($config['attribute']);
 		
 		$selectConfig = ArrayHelper::merge([
