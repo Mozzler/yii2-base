@@ -103,7 +103,7 @@ if (typeof FilePond === "undefined") {
 ', WebView::POS_READY, 'filepond-setup');
 
         /** @var \yii\widgets\ActiveField $field */
-        $field = $config['form']->field($config['model'], $config['attribute'], ArrayHelper::merge($config['widgetConfig'], ['inputOptions' => ['value' => (string)$model->$attribute]])); // Ensure the value is saved as a normal string not oid reference
+        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions'], ArrayHelper::merge($config['widgetConfig'], ['inputOptions' => ['value' => (string)$model->$attribute]])); // Ensure the value is saved as a normal string not oid reference
         return $field->hiddenInput(ArrayHelper::merge($config['widgetConfig'], ['class' => 'mozzler-filepond-fileinput'])); // 'mozzler-filepond-fileinput' is what we'll use for triggering the filepond uploader
     }
 

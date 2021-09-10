@@ -37,7 +37,7 @@ class RelateOneField extends BaseField
         $model = $config['model'];
         $form = $config['form'];
 
-        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
+//        $field = $config['form']->field($config['model'], $config['attribute'], $config['fieldOptions']);
         $modelField = $config['model']->getModelField($attribute);
 
         $baseAttribute = $attribute; //substr($attribute,0,-2);
@@ -132,7 +132,7 @@ class RelateOneField extends BaseField
         
         $this->_field = $field;*/
         
-        $field = $form->field($model, $attribute);
+        $field = $form->field($model, $attribute, $config['fieldOptions']);
         $output = $field->widget(Select2::className(), $config['widgetConfig']);
 
         return $output;
