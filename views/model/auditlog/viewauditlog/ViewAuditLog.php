@@ -58,7 +58,7 @@ class ViewAuditLog extends BaseWidget
 
 
         // -- Get the associated auditLogs
-        $auditLogs = Tools::getModels(AuditLog::class, ['entityId' => Tools::ensureId($model->getId()), 'entityType' => $model::className()], ['limit' => $config['limit'], 'orderBy' => ['createdAt' => -1]]);
+        $auditLogs = \Yii::$app->t::getModels(AuditLog::class, ['entityId' => $model->_id, 'entityType' => $model::className()], ['limit' => $config['limit'], 'orderBy' => ['createdAt' => -1]]);
         if (!empty($auditLogs)) {
             $auditLogEntries = ArrayHelper::index($auditLogs, null, 'actionId');
 
@@ -73,10 +73,10 @@ class ViewAuditLog extends BaseWidget
                             continue;
                         }
                         if (isset($auditLog->previousValue)) {
-                            $auditLog->previousModel = Tools::createModel($auditLog->entityType, [$auditLog->field => $auditLog->previousValue]);
+                            $auditLog->previousModel = \Yii::$app->t::createModel($auditLog->entityType, [$auditLog->field => $auditLog->previousValue]);
                         }
                         if (isset($auditLog->newValue)) {
-                            $auditLog->newModel = Tools::createModel($auditLog->entityType, [$auditLog->field => $auditLog->newValue]);
+                            $auditLog->newModel = \Yii::$app->t::createModel($auditLog->entityType, [$auditLog->field => $auditLog->newValue]);
                         }
                     }
                 } catch (\Throwable $exception) {

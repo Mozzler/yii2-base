@@ -48,7 +48,6 @@ class ViewModel extends BaseWidget
     {
         $config = $this->config(false);
         $model = $config['model'];
-        $t = new \mozzler\base\components\Tools;
 
         $attributes = $model->activeAttributes();
 
@@ -71,7 +70,7 @@ class ViewModel extends BaseWidget
                 'attribute' => $attribute
             ];
 
-            $items[] = $t->renderWidget('mozzler.base.widgets.model.view.RenderField', $fieldConfig);
+            $items[] = \Yii::$app->t->renderWidget('mozzler.base.widgets.model.view.RenderField', $fieldConfig);
         }
 
         $config['items'] = $items;
@@ -87,7 +86,7 @@ class ViewModel extends BaseWidget
                     break;
                 }
                 // -- Check if there's any auditLogs for this model and that you are allowed to view them
-                $auditLog = $t::getModel(AuditLog::class, ['entityId' => $t::ensureId($model->getId()), 'entityType' => $model::className()]);
+                $auditLog = \Yii::$app->t::getModel(AuditLog::class, ['entityId' => $model->_id, 'entityType' => $model::className()]);
                 if (!empty($auditLog) && \Yii::$app->rbac->canAccessModel($auditLog, 'find')) {
                     $config['auditLogAttached'] = true;
                 }
