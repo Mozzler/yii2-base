@@ -51,9 +51,6 @@ class AuditLog extends BaseModel
                     'createdAt' => -1,
                 ],
             ],
-            'entityId' => [
-                'columns' => ['entityId' => 1],
-            ],
             'entityType' => [
                 'columns' => ['entityType' => 1],
             ],
