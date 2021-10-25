@@ -204,7 +204,7 @@ class FileUploadBehaviour extends Behavior
         return $visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
     }
 
-    public static function saveFile($fileModel, $fileInfo, $filepath, $visibility = true)
+    public static function saveFile($fileModel, $fileInfo, $filepath, $visibility = AdapterInterface::VISIBILITY_PRIVATE)
     {
         // -- Save the file
         $fs = $fileModel->getFilesystem();
