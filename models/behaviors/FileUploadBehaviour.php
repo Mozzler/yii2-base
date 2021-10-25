@@ -49,7 +49,7 @@ class FileUploadBehaviour extends Behavior
         // If you set the $file->other['_FILE_ALREADY_PROCESSED'] entry to true then we don't process any further
         // But you'll need to deal with actually uploading to the filesystem, setting the filepath, deleting any temp files, etc..
         if (true === ArrayHelper::getValue($fileModel, 'other._FILE_ALREADY_PROCESSED')) {
-            \Yii::debug("The file has already been processed, skipping the file upload behaviour");
+            \Yii::debug('The file has already been processed, skipping the file upload behaviour');
             return $fileModel;
         }
 
@@ -57,20 +57,61 @@ class FileUploadBehaviour extends Behavior
         // Example $file = {"name":"!!72484913_10156718971467828_53539529008611328_n.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpQa226D","error":0,"size":35420}
         $fileInfo = self::getFileInfo();
         if (!empty($fileInfo)) {
-            \Yii::debug("The file information is: " . json_encode($fileInfo));
+            \Yii::debug('The file information is: ' . json_encode($fileInfo));
         } else {
-            \Yii::error("No file uploaded" . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $fileInfo]));
+            \Yii::error('No file uploaded' . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $fileInfo]));
             return false;
         }
         if (!is_file($fileInfo['tmp_name'])) {
-            throw new BaseException("Unable to find the uploaded file", 500, null, ['Developer note' => "The temporary file {$fileInfo['tmp_name']} could not be found", 'file' => $fileInfo]);
+            throw new BaseException('Unable to find the uploaded file', 500, null, ['Developer note' => "The temporary file {$fileInfo['tmp_name']} could not be found", 'file' => $fileInfo]);
         }
-        $fs = $fileModel->getFilesystem();
 
 
         if (empty($fileModel->_id)) {
             $fileModel->_id = new ObjectId(); // Create a new model ID in case you want to use that in the filename, but do it after getting the Filesystem
         }
+
+
+        $convertFunctionReference = self::getFileConvertFunction($fileModel);
+        if (!is_null($convertFunctionReference)) {
+            // We later save the $file['tmp_name'] entry to the file system (e.g S3 or Google Cloud)
+            \Yii::debug("Running the custom convert method on the {$fileModel->ident()}");
+            // $convertFunctionReference is a function which can convert the file to a new type (e.g PNG to resized JPG)
+            // The function will be given the $fileInfo and the $file object and expects the $fileInfo returned
+            // Accepts a closure e.g: function($fileInfo, $file) { /* Do stuff...*/ return $fileInfo;}
+            // Also accepts a string pointing to a method on the model e.g: 'avatarFileConvert'
+            // Or accepts the array style callable e.g: '/class/Name', 'methodName']
+            $fileInfo = call_user_func($convertFunctionReference, $fileInfo, $fileModel); // If you need to do some conversion, e.g converting .png images to .jpg
+        }
+
+        // ----------------------------------
+        //   Prepare the file
+        // ----------------------------------
+        $filename = self::getFilename($fileModel, $fileInfo);
+        $folderpath = self::getFolderpath($fileModel, $fileInfo, $filename);
+        $visibility = self::getVisibility($this->visibilityPrivate); // Should be private
+        // ----------------------------------
+        //   Save the File fields
+        // ----------------------------------
+        $filepath = $folderpath . $filename;
+        $fileModel->filename = $filename;
+        $fileModel->filepath = $filepath; // The filepath is the full location
+
+        // -- Save the file
+        $saved = self::saveFile($fileModel, $fileInfo, $filepath, $visibility);
+
+        \Yii::debug('Final File Model - ' . VarDumper::export($fileModel->toArray()));
+        \Yii::debug("Final \$fileInfo - " . VarDumper::export($fileInfo) . "\nSaved Correctly? " . VarDumper::export($saved));
+        @unlink($fileInfo['tmp_name']); // PHP will automatically remove temporary files, but if the convert() method is pointing to a new file then we need to directly remove that
+        return $fileModel;
+    }
+
+    /**
+     * @param $fileModel
+     * @return array|callable|null
+     */
+    public static function getFileConvertFunction($fileModel)
+    {
 
         // ----------------------------------------
         //   Check associated model fields
@@ -79,7 +120,7 @@ class FileUploadBehaviour extends Behavior
         if (!empty($fileModel->modelType) && !empty($fileModel->fieldName)) {
             $associatedModelField = $fileModel->getAssociatedModelField();
             if (empty($associatedModelField)) {
-                \Yii::warning("Invalid model field yet the modelType and fieldName are set");
+                \Yii::warning('Invalid model field yet the modelType and fieldName are set');
             } else {
 
                 if (!empty($associatedModelField['filenameTwigTemplate'])) {
@@ -115,42 +156,58 @@ class FileUploadBehaviour extends Behavior
                 }
             }
         }
-
         // -- Convert the file, if needed
         if (is_null($convertFunctionReference) && method_exists($fileModel, 'convert')) {
             $convertFunctionReference = [$fileModel, 'convert'];
             \Yii::debug("Using the {$fileModel->ident()} associated convert method");
         }
-        if (!is_null($convertFunctionReference)) {
-            // We later save the $file['tmp_name'] entry to the file system (e.g S3 or Google Cloud)
-            \Yii::debug("Running the custom convert method on the {$fileModel->ident()}");
-            // $convertFunctionReference is a function which can convert the file to a new type (e.g PNG to resized JPG)
-            // The function will be given the $fileInfo and the $file object and expects the $fileInfo returned
-            // Accepts a closure e.g: function($fileInfo, $file) { /* Do stuff...*/ return $fileInfo;}
-            // Also accepts a string pointing to a method on the model e.g: 'avatarFileConvert'
-            // Or accepts the array style callable e.g: '/class/Name', 'methodName']
-            $fileInfo = call_user_func($convertFunctionReference, $fileInfo, $fileModel); // If you need to do some conversion, e.g converting .png images to .jpg
-        }
-
-        // ----------------------------------
-        //   Prepare the file
-        // ----------------------------------
-
-        $extension = $fileModel->getExtension($fileInfo['name']);
-        $twigData = ['fileModel' => $fileModel, 'extension' => $extension, 'fsName' => $fileModel->filesystemName, 'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
+        return $convertFunctionReference;
+    }
 
 
-        $filename = \Yii::$app->t::renderTwig($fileModel->filenameTwigTemplate, $twigData); // Twig rendered, then we filter it to make sure it's filename safe
+    /**
+     * @param $fileModel
+     * @param $fileInfo
+     * @return mixed
+     */
+    public static function getFilename($fileModel, $fileInfo)
+    {
+        $filenameTwigTemplate = $fileModel->filenameTwigTemplate ?? '{{fileModel._id}}.{{ extension }}';
+        $twigData = ['fileModel' => $fileModel, 'extension' => $fileModel->getExtension($fileInfo['name']), 'fsName' => $fileModel->filesystemName, 'REQUEST' => \Yii::$app->request]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
+        $filename = \Yii::$app->t::renderTwig($filenameTwigTemplate, $twigData); // Twig rendered, then we filter it to make sure it's filename safe
         if ($fileModel->sanitiseFilename) {
-            $fileModel->filterFilename($filename);
+            $filename = $fileModel->filterFilename($filename);
         }
-        $twigData['filename'] = $filename;
-        $folderpath = \Yii::$app->t::renderTwig($fileModel->folderpathTwigTemplate, $twigData);
-        // NB: No longer pre-creating the folder as it doesn't seem to be needed
+        return $filename;
+    }
 
-        $visibility = $this->visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
+    /**
+     * @param File $fileModel
+     * @param array $fileInfo
+     * @param string $filename from the getFilename response
+     * @return mixed
+     */
+    public static function getFolderpath($fileModel, $fileInfo, $filename)
+    {
+        $folderpathTwigTemplate = $fileModel->folderpathTwigTemplate ?? '{{ now | date(\'Y\') }}/{{ now | date(\'m\') }}/'; // If you don't have a folder defined then we use the year then month e.g 2021/10
+        // NB: No longer pre-creating the folder as it doesn't seem to be needed by the FS system
+        $twigData = ['fileModel' => $fileModel, 'extension' => $fileModel->getExtension($fileInfo['name']), 'fsName' => $fileModel->filesystemName, 'REQUEST' => \Yii::$app->request, 'filename' => $filename]; // The REQUEST lets you do things like {{REQUEST.GET.state}} to access a query string
+        return \Yii::$app->t::renderTwig($folderpathTwigTemplate, $twigData);
+    }
 
-        $filepath = $folderpath . $filename;
+    /**
+     * @param bool $visibilityPrivate
+     * @return string
+     */
+    public static function getVisibility($visibilityPrivate = true)
+    {
+        return $visibilityPrivate ? AdapterInterface::VISIBILITY_PRIVATE : AdapterInterface::VISIBILITY_PUBLIC; // Defaults to Private
+    }
+
+    public static function saveFile($fileModel, $fileInfo, $filepath, $visibility = true)
+    {
+        // -- Save the file
+        $fs = $fileModel->getFilesystem();
         $exists = $fs->has($filepath);
         if (!$exists) {
             // ----------------------------------
@@ -162,21 +219,12 @@ class FileUploadBehaviour extends Behavior
             if (!$writeSuccess) {
                 \Yii::error("Unable to write {$filepath} for {$fileModel->ident()} to stream");
             }
+            return true;
         } else {
             // This is a duplicate file
             \Yii::warning("This is a duplicate file, you've already uploaded {$filepath}");
+            return false;
         }
-
-        // ----------------------------------
-        //   Save the File fields
-        // ----------------------------------
-        $fileModel->filename = $filename;
-        $fileModel->filepath = $filepath; // The filepath is the full location
-
-        \Yii::debug("Final File Model - " . VarDumper::export($fileModel->toArray()));
-        \Yii::debug("Final \$fileInfo - " . VarDumper::export($fileInfo));
-        @unlink($fileInfo['tmp_name']); // PHP will automatically remove temporary files, but if the convert() method is pointing to a new file then we need to directly remove that
-        return $fileModel;
     }
 
     public function deleteFile($event)
