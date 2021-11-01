@@ -100,12 +100,18 @@ class Tools extends Component
      *
      * Can obviously be used for other object types as well
      *
-     * @param $model \mozzler\base\models\Model|object|mixed
+     * @param $model \mozzler\base\models\Model|object|mixed|string
      * @return false|string
      */
     public static function getModelClassName($model)
     {
-        $classname = get_class($model);
+        if (!is_string($model)) {
+            // Get the classname from the Object instance
+            $classname = get_class($model);
+        } else {
+            // Assuming you've provided something like \app\models\User::class (which is just '\app\models\User')
+            $classname = $model;
+        }
         if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
         return $pos;
     }
