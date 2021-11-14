@@ -201,7 +201,7 @@ class File extends BaseModel
      * ],
      * @throws \yii\base\InvalidConfigException
      */
-    private function workoutFilesystemName()
+    public function workoutFilesystemName()
     {
         if (!empty($this->filesystemName)) {
             // Using what's been saved with the document
