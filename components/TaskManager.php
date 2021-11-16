@@ -33,6 +33,11 @@ class TaskManager extends \yii\base\Component
      * @param array $scriptConfig
      * @param int $scriptTimeout
      * @param bool $runNow if true then trigger the CLI TaskController command straight away which is the default as background tasks aren't supported, create a Cron entry instead
+     * Whilst called $runNow it will actually trigger a new command that will run this in the background.
+     * If you want to create the task and then wait for the output (serially not in parallel) you are best off setting $runNow to false
+     * Then using runTask()
+     *
+     * Example usage: $task = \Yii::$app->taskManager::schedule(SendPushNotificationsScript::class, [], 240, true, '');
      * @return Task
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\base\NotSupportedException
@@ -65,6 +70,7 @@ class TaskManager extends \yii\base\Component
         }
 
         if (true === $runNow) {
+
             self::triggerTask($task);
         }
 
