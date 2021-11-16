@@ -2,6 +2,7 @@
 
 namespace mozzler\base\components;
 
+use mozzler\base\exceptions\BaseException;
 use mozzler\base\models\Task;
 use mozzler\base\scripts\ScriptBase;
 use yii\helpers\ArrayHelper;
@@ -46,21 +47,24 @@ class TaskManager extends \yii\base\Component
                 'timeoutSeconds' => $scriptTimeout,
                 'status' => Task::STATUS_PENDING,
                 'name' => "{$unixTimestampMinuteStarted}-" . ($runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND) . "-{$scriptClassName}" . (empty($threadName) ? '' : '-' . $threadName),
-                'triggerType' => $runNow ? Task::TRIGGER_TYPE_INSTANT : Task::TRIGGER_TYPE_BACKGROUND
+                'triggerType' => Task::TRIGGER_TYPE_INSTANT, // @todo: Support Task::TRIGGER_TYPE_BACKGROUND
             ];
 
-        if (Task::TRIGGER_TYPE_BACKGROUND === $taskConfig['triggerType']) {
-            throw new \yii\base\NotSupportedException("Background task scheduling is not yet supported, trying instantly triggering it instead or running via Cron");
+        if ($runNow !== true) {
+            \Yii::warning("Background task scheduling is not yet supported, trying instantly triggering it using runTask instead or running via Cron");
         }
 
         /** @var Task $task */
         $task = Tools::createModel(Task::class, $taskConfig);
 
         if (!$task->saveAndLogErrors()) {
-            throw new \Exception("Unable to save a task for execution: " . VarDumper::export(['Save Error(s)' => $task->getErrors(), 'Task' => $task->toScenarioArray()]));
+            throw new BaseException("Unable to save the {$task->ident()}", 500, null, [
+                'Save Error(s)' => $task->getErrors(),
+                'Task' => $task->toArray()
+            ]);
         }
 
-        if (Task::TRIGGER_TYPE_INSTANT === $task->triggerType) {
+        if (true === $runNow) {
             self::triggerTask($task);
         }
 
