@@ -2,6 +2,7 @@
 
 namespace mozzler\base\models\traits;
 
+
 trait LoggableModelTrait
 {
 

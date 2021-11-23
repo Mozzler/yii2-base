@@ -4,7 +4,6 @@ namespace mozzler\base\exceptions;
 
 use Throwable;
 use Yii;
-use yii\web\HttpException;
 
 /**
  * Class BaseException
@@ -15,7 +14,7 @@ use yii\web\HttpException;
  *
  * It's expected you'll be logging Yii:error exceptions and
  */
-class BaseException extends HttpException
+class BaseException extends \Exception
 {
     public $defaultMessage = 'Unknown system error';
     public $defaultCode = 502;
@@ -34,7 +33,7 @@ class BaseException extends HttpException
     public function __construct($message = "", $code = 0, \Throwable $previous = null, $systemLogInfo = null)
     {
         $this->setVars($message, $code, $systemLogInfo);
-        parent::__construct($this->code, $this->message, $this->code, $previous); // When based off the HttpException we are using $code as the HTTP Status
+        parent::__construct($this->message, $this->code, $previous); // When based off the HttpException we are using $code as the HTTP Status
     }
 
     public function setVars($message, $code, $systemLogInfo)
@@ -85,5 +84,6 @@ class BaseException extends HttpException
     {
         return $this->name;
     }
+
 
 }
