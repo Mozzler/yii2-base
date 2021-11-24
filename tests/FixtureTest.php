@@ -4,6 +4,7 @@ namespace mozzler\base\tests;
 
 use Codeception\Util\Debug;
 use mozzler\base\components\IndexManager;
+use mozzler\base\exceptions\BaseException;
 use mozzler\base\models\Model;
 use Yii;
 use mozzler\base\components\Tools;
@@ -125,8 +126,10 @@ class FixtureTest extends \Codeception\Test\Unit
         $fixtures = [];
         foreach ($fixtureFiles as $className => $filePath) {
 
-
             $realpath = realpath($filePath);
+            if (empty($realpath) || !is_readable($realpath)) {
+                throw new BaseException("Unable to load Fixture File " . VarDumper::export(['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]), 500, null, ['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]);
+            }
             Debug::debug("Loading Fixtures from file '{$realpath}'");
             $fileData = include $realpath;
             if (is_numeric($className)) {
