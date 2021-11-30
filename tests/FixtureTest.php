@@ -81,18 +81,6 @@ class FixtureTest extends \Codeception\Test\Unit
      */
     protected $fixtureFiles = [];
 
-
-    protected function _before()
-    {
-        Debug::debug("\n\n\n\n--------=== Start Test ===--------\n");
-    }
-
-    protected function _after()
-    {
-        Debug::debug("\n=======--- End Test ---=======\n\n");
-    }
-
-
     public function _fixtures()
     {
         // ==============================================================
@@ -104,44 +92,6 @@ class FixtureTest extends \Codeception\Test\Unit
         $this->loadFixtures($this->fixtures);
         unset($this->fixtures); // Reduce memory usage
 //        parent::_fixtures();
-    }
-
-    /**
-     * @param $fixtureFiles
-     * Expects the files to be returning with the classname e.g
-     * <\?php
-     * use app\models\Car;
-     * use MongoDB\BSON\ObjectId;
-     * return [
-     *  Car::class => [
-     *     [ '_id' => new ObjectId('5e007631c5ff1f07ed6976e1'), 'name' => 'Ford Fairlane', 'createdAt' => time(), 'updatedAt' => time()],
-     *   ]
-     * ];
-     */
-    protected function loadFixtureFiles($fixtureFiles)
-    {
-        if (empty($fixtureFiles)) {
-            $fixtureFiles = $this->fixtureFiles;
-        }
-        $fixtures = [];
-        foreach ($fixtureFiles as $className => $filePath) {
-
-            $realpath = realpath($filePath);
-            if (empty($realpath) || !is_readable($realpath)) {
-                throw new BaseException("Unable to load Fixture File " . VarDumper::export(['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]), 500, null, ['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]);
-            }
-            Debug::debug("Loading Fixtures from file '{$realpath}'");
-            $fileData = include $realpath;
-            if (is_numeric($className)) {
-                // The file can contain multiple different classes
-                $fixtures = ArrayHelper::merge($fixtures, $fileData);
-            } else {
-                // The file contains a single class, but there could already be fixture data loaded
-                $fixtures[$className] = ArrayHelper::merge($fixtures[$className] ?? [], $fileData);
-            }
-        }
-        // It's assumed that $this->loadFixtures($this->fixtures);  will be called after this
-        $this->fixtures = ArrayHelper::merge($this->fixtures, $fixtures);
     }
 
     public function emptyDatabase($dropAll = null)
@@ -215,6 +165,71 @@ class FixtureTest extends \Codeception\Test\Unit
         */
     }
 
+    /**
+     * @return array
+     *
+     * This is an empty example and meant to be filled
+     *
+     * Example usage:
+     *
+     *  return [
+     *   'app\models\Account' => [
+     *     [
+     *        '_id' => $this->accountId,
+     *        'name' => 'UNIT TESTING Account',
+     *        'billingPlan' => 'full',
+     *        'createdAt' => 1620208147,
+     *        'updatedAt' => 1636909180,
+     *        'createdUserId' => new ObjectId('5de5c889c5ff1f54717b4ad2'), // Use new ObjectId() without a string if you just want any random entry created
+     *        'updatedUserId' => new ObjectId('5de5c889c5ff1f54717b4ad2'),
+     *     ],
+     *    // ... Add more Account entries here
+     *   ],
+     * //  Add more class based model arrays here
+     * ];
+     */
+    public function getFixtures()
+    {
+        return [];
+    }
+
+    /**
+     * @param $fixtureFiles
+     * Expects the files to be returning with the classname e.g
+     * <\?php
+     * use app\models\Car;
+     * use MongoDB\BSON\ObjectId;
+     * return [
+     *  Car::class => [
+     *     [ '_id' => new ObjectId('5e007631c5ff1f07ed6976e1'), 'name' => 'Ford Fairlane', 'createdAt' => time(), 'updatedAt' => time()],
+     *   ]
+     * ];
+     */
+    protected function loadFixtureFiles($fixtureFiles)
+    {
+        if (empty($fixtureFiles)) {
+            $fixtureFiles = $this->fixtureFiles;
+        }
+        $fixtures = [];
+        foreach ($fixtureFiles as $className => $filePath) {
+
+            $realpath = realpath($filePath);
+            if (empty($realpath) || !is_readable($realpath)) {
+                throw new BaseException("Unable to load Fixture File " . VarDumper::export(['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]), 500, null, ['className' => $className, 'filePath' => $filePath, 'realpath' => $realpath]);
+            }
+            Debug::debug("Loading Fixtures from file '{$realpath}'");
+            $fileData = include $realpath;
+            if (is_numeric($className)) {
+                // The file can contain multiple different classes
+                $fixtures = ArrayHelper::merge($fixtures, $fileData);
+            } else {
+                // The file contains a single class, but there could already be fixture data loaded
+                $fixtures[$className] = ArrayHelper::merge($fixtures[$className] ?? [], $fileData);
+            }
+        }
+        // It's assumed that $this->loadFixtures($this->fixtures);  will be called after this
+        $this->fixtures = ArrayHelper::merge($this->fixtures, $fixtures);
+    }
 
     protected function loadFixtures($fixtures)
     {
@@ -258,6 +273,16 @@ class FixtureTest extends \Codeception\Test\Unit
             }
         }
         \Yii::$app->rbac->forceAdmin = false;
+    }
+
+    protected function _before()
+    {
+        Debug::debug("\n\n\n\n--------=== Start Test ===--------\n");
+    }
+
+    protected function _after()
+    {
+        Debug::debug("\n=======--- End Test ---=======\n\n");
     }
 
 
