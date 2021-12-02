@@ -59,7 +59,7 @@ class FileUploadBehaviour extends Behavior
         if (!empty($fileInfo)) {
             \Yii::debug('The file information is: ' . json_encode($fileInfo));
         } else {
-            \Yii::error('No file uploaded' . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $fileInfo]));
+            \Yii::warning('No file uploaded' . json_encode(['Error' => 'No valid $_FILES info defined', '_FILES' => $_FILES, '$file' => $fileInfo]));
             return false;
         }
         if (!is_file($fileInfo['tmp_name'])) {
@@ -238,7 +238,7 @@ class FileUploadBehaviour extends Behavior
         $exists = $fs->has($fileModel->filepath);
         if ($exists) {
             $deleted = $fs->delete($fileModel->filepath);
-            \Yii::error("Deleted file {$fileModel->filepath} based on the File ID: {$fileModel->getId()}");
+            \Yii::warning("Deleted file {$fileModel->filepath} based on the File ID: {$fileModel->getId()}");
             // Note: There could be other file documents pointing to the same file (multiple uploads of the same file).
             // Might need to delete the other duplicate File entries? (If so, trigger that in the FileController actionDelete method, not here)
             return $deleted;
