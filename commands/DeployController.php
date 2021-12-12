@@ -43,9 +43,16 @@ class DeployController extends BaseController
      */
     public function actionSync()
     {
-        $indexManager = \Yii::createObject('mozzler\base\components\IndexManager');
+        // Use a custom index manager if defined ( esp if it's got it's own $defaultModelPaths )
+        if (\Yii::$app->has('indexManager')) {
+            $indexManager = \Yii::$app->indexManager;
+            if (!method_exists($indexManager, 'buildModelClassList')) {
+                $indexManager = null;
+            }
+        }
+        $indexManager = $indexManager ?? \Yii::createObject('mozzler\base\components\IndexManager');
 
-        // find all the models
+        // Find all the models
         $models = $indexManager->buildModelClassList($this->modelPaths);
 
         foreach ($models as $className) {
@@ -60,6 +67,12 @@ class DeployController extends BaseController
         return ExitCode::OK;
     }
 
+    protected function outputLogs($logs)
+    {
+        foreach ($logs as $entry) {
+            $this->stdout($entry['message'] . "\n", $entry['type'] == 'error' ? Console::FG_RED : null);
+        }
+    }
 
     /**
      * {@inheritdoc}
@@ -87,13 +100,13 @@ class DeployController extends BaseController
 
         if (empty($collectionsCSV)) {
             $this->stderr("No collections specified. Please provide a CSV list of the collections you wish to drop.\n" .
-                "e.g ./yii deploy/drop-collections app.cache,app.config,mozzler.auth.access_tokens");
+                'e.g ./yii deploy/drop-collections app.cache,app.config,mozzler.auth.access_tokens');
             return ExitCode::USAGE;
         }
 
         $collections = explode(',', $collectionsCSV);
         $totalDocuments = 0;
-        $collectionReference = count($collections) > 1 ? "collections" : "collection";
+        $collectionReference = count($collections) > 1 ? 'collections' : 'collection';
 
         $this->stdout("You requested to drop the {$collectionReference}:\n\n");
         foreach ($collections as $collectionIndex => $collectionName) {
@@ -122,10 +135,10 @@ class DeployController extends BaseController
         }
 
 
-        if (false === boolval($this->force) && $this->confirm("Are you sure you want to delete the " . count($collections) . " {$collectionReference} with {$totalDocuments} total documents ?")) {
+        if (false === boolval($this->force) && $this->confirm('Are you sure you want to delete the ' . count($collections) . " {$collectionReference} with {$totalDocuments} total documents ?")) {
             \Yii::debug("User requested to drop the {$collectionReference}");
         } else if (true === boolval($this->force)) {
-            $this->stdout("Force = " . json_encode($this->force) . "\n");
+            $this->stdout('Force = ' . json_encode($this->force) . "\n");
         } else {
             $this->stdout("Not dropping the {$collectionReference}\n");
             return ExitCode::NOUSER;
@@ -140,7 +153,7 @@ class DeployController extends BaseController
                 /** @var \yii\mongodb\Collection $databaseCollection */
                 $collection = \Yii::$app->mongodb->getCollection($collectionName);
                 $drop = $collection->drop();
-                $this->stdout((true === $drop ? "✓ Dropped" : "✗ Failed to drop") . " collection {$collectionName}\n");
+                $this->stdout((true === $drop ? '✓ Dropped' : '✗ Failed to drop') . " collection {$collectionName}\n");
             } catch (\Throwable $exception) {
                 $this->stderr("✗ Error: Unable to drop collection {$collectionName}\n" . \Yii::$app->t::returnExceptionAsString($exception));
             }
@@ -148,18 +161,17 @@ class DeployController extends BaseController
         return ExitCode::OK;
     }
 
-
     public function actionInit()
     {
 
         if (!isset(\Yii::$app->deployManager)) {
-            $this->stderr("The deployManager is not defined, please check your console.php configuration");
+            $this->stderr('The deployManager is not defined, please check your console.php configuration');
         }
-        $this->stdout("Init Commands: " . print_r(\Yii::$app->deployManager->init, true) . "\n");
-        if (false === boolval($this->force) && $this->confirm("Are you sure you want to run the deploy/init commands?")) {
-            \Yii::debug("User requested to run the init commands");
+        $this->stdout('Init Commands: ' . print_r(\Yii::$app->deployManager->init, true) . "\n");
+        if (false === boolval($this->force) && $this->confirm('Are you sure you want to run the deploy/init commands?')) {
+            \Yii::debug('User requested to run the init commands');
         } else if (true === boolval($this->force)) {
-            $this->stdout("Force = " . json_encode($this->force) . "\n");
+            $this->stdout('Force = ' . json_encode($this->force) . "\n");
         } else {
             $this->stdout("Not running the init commands\n");
             return ExitCode::NOUSER;
@@ -174,12 +186,11 @@ class DeployController extends BaseController
         $this->stdout(print_r($stats, true));
     }
 
-
     public function actionRedeploy()
     {
 
         if (!isset(\Yii::$app->deployManager)) {
-            $this->stderr("The deployManager is not defined, please check your console.php configuration");
+            $this->stderr('The deployManager is not defined, please check your console.php configuration');
         }
 
 
@@ -200,11 +211,11 @@ class DeployController extends BaseController
         }
 
 
-        $this->stdout("Redeploy Commands: " . print_r(\Yii::$app->deployManager->redeploy, true) . "\n");
-        if (false === boolval($this->force) && $this->confirm("Are you sure you want to run the deploy/redeploy commands?")) {
-            \Yii::debug("User requested to run the redeploy commands");
+        $this->stdout('Redeploy Commands: ' . print_r(\Yii::$app->deployManager->redeploy, true) . "\n");
+        if (false === boolval($this->force) && $this->confirm('Are you sure you want to run the deploy/redeploy commands?')) {
+            \Yii::debug('User requested to run the redeploy commands');
         } else if (true === boolval($this->force)) {
-            $this->stdout("Force = " . json_encode($this->force) . "\n");
+            $this->stdout('Force = ' . json_encode($this->force) . "\n");
         } else {
             $this->stdout("Not running the redeploy commands\n");
             return ExitCode::NOUSER;
@@ -217,13 +228,6 @@ class DeployController extends BaseController
         // -- Output
         $this->stdout("Redeploy commands ran with: \n");
         $this->stdout(print_r($stats, true));
-    }
-
-    protected function outputLogs($logs)
-    {
-        foreach ($logs as $entry) {
-            $this->stdout($entry['message'] . "\n", $entry['type'] == 'error' ? Console::FG_RED : null);
-        }
     }
 
 }
