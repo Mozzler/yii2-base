@@ -87,7 +87,7 @@ class FixtureTest extends \Codeception\Test\Unit
         //   Load the Fixtures (this makes a lot of debugging noise)
         // ==============================================================
         $this->emptyDatabase();
-        $this->fixtures = $this->getFixtures();
+        $this->fixtures = ArrayHelper::merge(empty($this->fixtures) ? [] : $this->fixtures, $this->getFixtures()); // Merge in the getFixtures results, but also you could just set $this->fixtures directly
         $this->loadFixtureFiles($this->fixtureFiles); // Must be called before loadFixtures()
         $this->loadFixtures($this->fixtures);
         unset($this->fixtures); // Reduce memory usage
