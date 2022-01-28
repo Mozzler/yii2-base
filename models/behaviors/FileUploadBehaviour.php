@@ -89,7 +89,7 @@ class FileUploadBehaviour extends Behavior
         // ----------------------------------
         $filename = self::getFilename($fileModel, $fileInfo);
         $folderpath = self::getFolderpath($fileModel, $fileInfo, $filename);
-        $visibility = self::getVisibility($this->visibilityPrivate); // Should be private
+        $visibility = $fileInfo['visibility'] ?? self::getVisibility($this->visibilityPrivate); // Should be private
         // ----------------------------------
         //   Save the File fields
         // ----------------------------------
@@ -104,6 +104,33 @@ class FileUploadBehaviour extends Behavior
         \Yii::debug("Final \$fileInfo - " . VarDumper::export($fileInfo) . "\nSaved Correctly? " . VarDumper::export($saved));
         @unlink($fileInfo['tmp_name']); // PHP will automatically remove temporary files, but if the convert() method is pointing to a new file then we need to directly remove that
         return $fileModel;
+    }
+
+    /**
+     * Get File Info
+     *
+     * Only expecting a single file response
+     * @return array|bool
+     *
+     * Example response: {"modelType":"Client","name":"!Ikigai - A reason for Being.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpuLPa2S","error":0,"size":109927,"fieldName":"driversLicenceFile"}
+     */
+    public static function getFileInfo()
+    {
+        // Example $_FILES = {"Client":{"name":{"driversLicenceFile":"!!72484913_10156718971467828_53539529008611328_n.jpg"},"type":{"driversLicenceFile":"image\/jpeg"},"tmp_name":{"driversLicenceFile":"\/tmp\/phpmypYid"},"error":{"driversLicenceFile":0},"size":{"driversLicenceFile":35420}}}
+        if (empty($_FILES)) {
+            return false;
+        }
+        $modelType = key($_FILES);
+        $file = ['modelType' => $modelType];
+        foreach ($_FILES[$modelType] as $fieldField => $infoEntry) {
+
+            $fieldName = key($infoEntry);
+            // e.g name = image.jpg
+            $file[$fieldField] = $infoEntry[$fieldName];
+
+        };
+        $file['fieldName'] = isset($fieldName) ? $fieldName : null;
+        return $file;
     }
 
     /**
@@ -164,7 +191,6 @@ class FileUploadBehaviour extends Behavior
         return $convertFunctionReference;
     }
 
-
     /**
      * @param $fileModel
      * @param $fileInfo
@@ -198,6 +224,9 @@ class FileUploadBehaviour extends Behavior
     /**
      * @param bool $visibilityPrivate
      * @return string
+     * Based on a Boolean where true === Private which is the default
+     *
+     * NB: If the fileInfo['visibility'] field is set, we use that instead of using the response from this
      */
     public static function getVisibility($visibilityPrivate = true)
     {
@@ -216,8 +245,10 @@ class FileUploadBehaviour extends Behavior
             $stream = fopen($fileInfo['tmp_name'], 'r+'); // Read from the locally saved file
             // As per https://flysystem.thephpleague.com/v1/docs/usage/filesystem-api/
             $writeSuccess = $fs->writeStream($filepath, $stream, ['visibility' => $visibility]); // Save to the filesystem (locally, Amazon S3... Whatever you've defined)
-            if (!$writeSuccess) {
-                \Yii::error("Unable to write {$filepath} for {$fileModel->ident()} to stream");
+            if ($writeSuccess) {
+                \Yii::info("Uploaded file " . VarDumper::export(['filepath' => $filepath, 'visibility' => $visibility, 'fileModel' => $fileModel->ident(), 'fileInfo' => $fileInfo]));
+            } else {
+                \Yii::error("Unable to write {$filepath} for {$fileModel->ident()} to stream. " . VarDumper::export(['filepath' => $filepath, 'visibility' => $visibility, 'fileModel' => $fileModel->toArray(), 'fileInfo' => $fileInfo]));
             }
             return true;
         } else {
@@ -248,7 +279,6 @@ class FileUploadBehaviour extends Behavior
         return false; // Doesn't stop the processing
     }
 
-
     /**
      * @param $originalFilename
      * @return string original file base name
@@ -260,33 +290,6 @@ class FileUploadBehaviour extends Behavior
         // https://github.com/yiisoft/yii2/issues/11012
         $pathInfo = pathinfo('_' . $originalFilename, PATHINFO_FILENAME);
         return mb_substr($pathInfo, 1, mb_strlen($pathInfo, '8bit'), '8bit');
-    }
-
-    /**
-     * Get File Info
-     *
-     * Only expecting a single file response
-     * @return array|bool
-     *
-     * Example response: {"modelType":"Client","name":"!Ikigai - A reason for Being.jpg","type":"image\/jpeg","tmp_name":"\/tmp\/phpuLPa2S","error":0,"size":109927,"fieldName":"driversLicenceFile"}
-     */
-    public static function getFileInfo()
-    {
-        // Example $_FILES = {"Client":{"name":{"driversLicenceFile":"!!72484913_10156718971467828_53539529008611328_n.jpg"},"type":{"driversLicenceFile":"image\/jpeg"},"tmp_name":{"driversLicenceFile":"\/tmp\/phpmypYid"},"error":{"driversLicenceFile":0},"size":{"driversLicenceFile":35420}}}
-        if (empty($_FILES)) {
-            return false;
-        }
-        $modelType = key($_FILES);
-        $file = ['modelType' => $modelType];
-        foreach ($_FILES[$modelType] as $fieldField => $infoEntry) {
-
-            $fieldName = key($infoEntry);
-            // e.g name = image.jpg
-            $file[$fieldField] = $infoEntry[$fieldName];
-
-        };
-        $file['fieldName'] = isset($fieldName) ? $fieldName : null;
-        return $file;
     }
 
 }
