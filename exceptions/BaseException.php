@@ -30,7 +30,7 @@ class BaseException extends \Exception
      * @param Throwable|\Exception|null $previous
      * @param $systemLogInfo array
      */
-    public function __construct($message = "", $code = 0, \Throwable $previous = null, $systemLogInfo = null)
+    public function __construct($message = '', $code = 0, \Throwable $previous = null, $systemLogInfo = null)
     {
         $this->setVars($message, $code, $systemLogInfo);
         parent::__construct($this->message, $this->code, $previous); // When based off the HttpException we are using $code as the HTTP Status
@@ -74,6 +74,27 @@ class BaseException extends \Exception
     public function toSystemLog()
     {
         if (!empty($this->systemLogInfo)) {
+
+            // Remove and $ dollar signs from the start of the arrays as they cause MongoDB to error! e.g
+            // 	Unable to send log via mozzler\base\log\SystemLogTarget: Exception 'MongoDB\Driver\Exception\InvalidArgumentException' with message 'invalid document for insert: keys cannot begin with "$": "$value"'
+            if (is_array($this->systemLogInfo)) {
+                $arrayKeys = array_keys($this->systemLogInfo);
+                foreach ($arrayKeys as $arrayKey) {
+                    if (substr($arrayKey, 0, 1) === '$') {
+                        // -- If the first character of the string starts with $ then we can't save it to MongoDB, so we move this to a new entry
+                        $arrayKeyNew = ltrim($arrayKey, '$');
+
+                        // Looks like the array key was simply '$' and now we've removed that it's empty, so we'll name it dollarSign-1 or how many characters long the array key is (e.g $$$ = 'dollarSign-3' )
+                        if (empty($arrayKeyNew)) {
+                            $arrayKeyNew = 'dollarSign-' . strlen($arrayKey); // Add the number of dollar signs
+                        }
+
+                        $this->systemLogInfo[$arrayKeyNew] = $this->systemLogInfo[$arrayKey]; // Migrate data
+                        unset($this->systemLogInfo[$arrayKey]); // Remove invalid entry
+//                        \Yii::debug("Renamed the invalid systemLog entry array key '{$arrayKey}' to '{$arrayKeyNew}'"); // This doesn't get output, because this method is used to output a different line
+                    }
+                }
+            }
             return $this->systemLogInfo;
         }
         return null;
