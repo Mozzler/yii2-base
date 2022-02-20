@@ -482,9 +482,10 @@ class Model extends ActiveRecord
      * @param string $action Page action to obtain URL from (eg: view, list or update)
      * @param array $params Array of additional GET parameters to append to the URL
      * @param boolean $absolute Whether to return an absolute path
+     * @param string|null $scheme If set, it ensure's the scheme. Either `http`, `https` or empty string or null. Only used if $absolute is true
      * @return    string    URL for the requested action on this model
      */
-    public function getUrl($action = 'view', $params = [], $absolute = false)
+    public function getUrl($action = 'view', $params = [], $absolute = false, $scheme = null)
     {
         $urlParams = ArrayHelper::merge([$this->controllerRoute . '/' . $action], $params);
         if (!isset($urlParams['id']) && $this->id) {
@@ -492,7 +493,7 @@ class Model extends ActiveRecord
         }
 
         if ($absolute) {
-            return \Yii::$app->urlManager->createAbsoluteUrl($urlParams);
+            return \Yii::$app->urlManager->createAbsoluteUrl($urlParams, $scheme);
         } else {
             //return Url::toRoute($params);
             return \Yii::$app->urlManager->createUrl($urlParams);
