@@ -9,7 +9,7 @@
     <div class="col-md-12">
         <div class="panel panel-default" id="{{ widget.id }}" style="clear: both">
             <div class="panel-heading">
-                Filter {{ widget.model.getModelConfig("labelPlural") }}
+                {# Filter #} Search {{ widget.model.getModelConfig("labelPlural") }}
                 <{{ widget.buttonsContainer.tag }} {{ html.renderTagAttributes(widget.buttonsContainer.options) }}>
                     <{{ widget.clear.tag }} href="{{ widget.clear.url }}" {{ html.renderTagAttributes(widget.clear.options) }}>{{ widget.clear.label }}</{{ widget.clear.tag }}>
                     <{{ widget.submit.tag }} href="{{ widget.submit.url }}" {{ html.renderTagAttributes(widget.submit.options) }}>{{ widget.submit.label }}</{{ widget.submit.tag }}>

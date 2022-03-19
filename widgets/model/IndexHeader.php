@@ -2,9 +2,10 @@
 namespace mozzler\base\widgets\model;
 
 use mozzler\base\widgets\BaseWidget;
+use yii\helpers\ArrayHelper;
 
 class IndexHeader extends BaseWidget {
-	
+
 	public function defaultConfig()
 	{
 		return [
@@ -26,18 +27,20 @@ class IndexHeader extends BaseWidget {
 				'filter' => [
 					'options' => [
 						'class' => 'btn btn-default btn-sm btn-filter',
-						'title' => 'Filter the results'
+//						'title' => 'Filter the results'
+						'title' => 'Search'
 					],
                     'tag' => 'a',
-					'text' => '<span class="glyphicon glyphicon-filter"></span>'
+//					'text' => '<span class="glyphicon glyphicon-filter"></span>'
+					'text' => '<span class="glyphicon glyphicon-search"></span>'
 				]
 			],
 		];
 	}
-	
+
 	public function config($templatify=false) {
 		$config = parent::config($templatify);
-		
+
 		$config['model']->scenario = $config['model']::SCENARIO_SEARCH;
 		$config['model']->load(\Yii::$app->request->get());
 		$config['canCreateModel'] = \Yii::$app->rbac->canAccessModel($config['model'], 'insert');
@@ -46,8 +49,14 @@ class IndexHeader extends BaseWidget {
 
 		$config['exportUrl'] = $config['model']->getUrl("export", \Yii::$app->request->get());
 
+        try {
+            ArrayHelper::setValue($config, 'buttonsContainer.filter.options.title', "Search the " . $config['model']->getModelConfig('labelPlural'));
+        } catch (\Throwable $exception) {
+            // Unable to set the nicer search label, that's fine
+        }
+
 		return $config;
 	}
-	
+
 }
 

@@ -12,7 +12,8 @@ class FilterModel extends BaseWidget {
             "id" => null,
             "model" => null,
             "filterSelector" => ".btn-filter",
-            "placeholder" => "Filter by {fieldLabel}",
+//            "placeholder" => "Filter by {fieldLabel}",
+            "placeholder" => "Search by {fieldLabel}",
             "hasFilter" => false,
             "submit" => [
                 "url" => null
