@@ -120,7 +120,7 @@ class TaskManager extends \yii\base\Component
      * @return boolean
      * @throws \yii\base\InvalidConfigException
      */
-    protected static function triggerTask($taskObject)
+    public static function triggerTask($taskObject)
     {
         if (empty($taskObject)) {
             \Yii::error("Given an empty taskObject: " . var_export($taskObject, true));
