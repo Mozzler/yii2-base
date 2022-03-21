@@ -8,7 +8,7 @@ use yii\helpers\FileHelper;
 class IndexManager
 {
 
-    public $defaultModelPaths = ['@app/models/', '@mozzler/base/models/', '@mozzler/auth/models/', '@mozzler/auth/models/oauth/'];
+    public $defaultModelPaths = ['@mozzler/base/models/', '@mozzler/auth/models/', '@mozzler/auth/models/oauth/', '@app/models/'];
     public $logs = [];
 
     public function syncModelIndexes($className)
@@ -56,6 +56,25 @@ class IndexManager
         $this->handleCreate($collection, $modelIndexes, $existingIndexes);
     }
 
+    protected function getModelIndexes($className)
+    {
+        $model = \Yii::createObject($className);
+        return $model->modelIndexes();
+    }
+
+    protected function getExistingIndexes($className)
+    {
+        $collection = $this->getCollection($className);
+        $indexes = $collection->listIndexes();
+
+        return $indexes;
+    }
+
+    protected function getCollection($className)
+    {
+        return $className::getCollection();
+    }
+
     /**
      * Handle updating existing indexes if they have changed
      */
@@ -69,6 +88,24 @@ class IndexManager
         $collection->createIndex($indexConfig['columns'], $options);
 
         $this->addLog("Updated index: " . $indexName);
+    }
+
+    protected function addLog($message, $type = 'info')
+    {
+        $this->logs[] = [
+            'message' => $message,
+            'type' => $type
+        ];
+    }
+
+    /**
+     * Handle deleting existing indexes if they have been removed
+     */
+    protected function handleDelete($collection, $indexName)
+    {
+        $collection->dropIndexes($indexName);
+
+        $this->addLog("Deleted index: " . $indexName);
     }
 
     /**
@@ -105,43 +142,6 @@ class IndexManager
                 }
             }
         }
-    }
-
-    /**
-     * Handle deleting existing indexes if they have been removed
-     */
-    protected function handleDelete($collection, $indexName)
-    {
-        $collection->dropIndexes($indexName);
-
-        $this->addLog("Deleted index: " . $indexName);
-    }
-
-    protected function getExistingIndexes($className)
-    {
-        $collection = $this->getCollection($className);
-        $indexes = $collection->listIndexes();
-
-        return $indexes;
-    }
-
-    protected function getModelIndexes($className)
-    {
-        $model = \Yii::createObject($className);
-        return $model->modelIndexes();
-    }
-
-    protected function getCollection($className)
-    {
-        return $className::getCollection();
-    }
-
-    protected function addLog($message, $type = 'info')
-    {
-        $this->logs[] = [
-            'message' => $message,
-            'type' => $type
-        ];
     }
 
     /**
