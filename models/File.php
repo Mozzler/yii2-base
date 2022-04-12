@@ -293,8 +293,11 @@ class File extends BaseModel
      *
      * Based on https://stackoverflow.com/a/42058764/1495634
      */
-    public function filterFilename($filename, $beautify = true)
+    public function filterFilename($filename = null, $beautify = true)
     {
+        if (null === $filename) {
+            $filename = $this->filename;
+        }
         // Sanitize filename
         $filename = preg_replace(
             '~
