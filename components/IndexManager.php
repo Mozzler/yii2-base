@@ -138,7 +138,7 @@ class IndexManager
                         $this->addLog("Unable to create index: $indexName", 'error');
                     }
                 } catch (\Exception $e) {
-                    $this->addLog("Exception creating: $indexName (" . $e->getMessage() . ")\n" . \Yii::$app->t::returnExceptionAsString($e), 'error');
+                    $this->addLog("Exception creating: $indexName (" . $e->getMessage() . ")\n" . \Yii::$app->t::returnExceptionAsString($e)."\n", 'error');
                 }
             }
         }
