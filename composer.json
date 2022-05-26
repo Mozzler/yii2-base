@@ -19,7 +19,7 @@
     "openbuildings/swiftmailer-css-inliner": "^0.5.2",
     "ext-json": "*",
     "creocoder/yii2-flysystem": "^0.9.3",
-    "udokmeci/yii2-phone-validator": "^1.0",
+    "kublermdk/yii2-phone-validator": "^1.0",
     "ext-mbstring": "*",
     "ext-mongodb": "*",
     "kartik-v/yii2-date-range": "dev-master"
@@ -28,5 +28,11 @@
     "psr-4": {
       "mozzler\\base\\": ""
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/kublermdk/yii2-phone-validator"
+    }
+  ]
 }
