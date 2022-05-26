@@ -6,6 +6,10 @@
     {
       "name": "Chris Were",
       "email": "chris@mozzler.com.au"
+    },
+    {
+      "name": "Michael Kubler",
+      "email": "michael@greyphoenix.biz"
     }
   ],
   "minimum-stability": "stable",
@@ -19,10 +23,10 @@
     "openbuildings/swiftmailer-css-inliner": "^0.5.2",
     "ext-json": "*",
     "creocoder/yii2-flysystem": "^0.9.3",
-    "kublermdk/yii2-phone-validator": "^1.0",
     "ext-mbstring": "*",
     "ext-mongodb": "*",
-    "kartik-v/yii2-date-range": "dev-master"
+    "kartik-v/yii2-date-range": "dev-master",
+    "kublermdk/yii2-phone-validator": "^1.0"
   },
   "autoload": {
     "psr-4": {
