@@ -1093,7 +1093,7 @@
             "type": "validator",
             "autoload": {
                 "psr-0": {
-                    "kublermdk\\yii2PhoneValidator": "src"
+                    "udokmeci\\yii2PhoneValidator": "src"
                 }
             },
             "license": [
