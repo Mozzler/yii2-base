@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "753eba3186d3621c094bc949f09d6273",
+    "content-hash": "f8745c78f525810411a27c51e87b5910",
     "packages": [
         {
             "name": "bower-asset/inputmask",
@@ -1079,7 +1079,7 @@
         },
         {
             "name": "kublermdk/yii2-phone-validator",
-            "version": "1.0.4",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kublermdk/yii2-phone-validator",
@@ -1093,7 +1093,7 @@
             "type": "validator",
             "autoload": {
                 "psr-0": {
-                    "udokmeci\\yii2PhoneValidator": "src"
+                    "kublermdk\\yii2PhoneValidator": "src"
                 }
             },
             "license": [

@@ -32,11 +32,5 @@
     "psr-4": {
       "mozzler\\base\\": ""
     }
-  },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/kublermdk/yii2-phone-validator"
-    }
-  ]
+  }
 }
