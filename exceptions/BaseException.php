@@ -80,6 +80,7 @@ class BaseException extends \Exception
             if (is_array($this->systemLogInfo)) {
                 $arrayKeys = array_keys($this->systemLogInfo);
                 foreach ($arrayKeys as $arrayKey) {
+                    $arrayKeyNew = $arrayKey;
                     if (substr($arrayKey, 0, 1) === '$') {
                         // -- If the first character of the string starts with $ then we can't save it to MongoDB, so we move this to a new entry
                         $arrayKeyNew = ltrim($arrayKey, '$');
@@ -88,11 +89,16 @@ class BaseException extends \Exception
                         if (empty($arrayKeyNew)) {
                             $arrayKeyNew = 'dollarSign-' . strlen($arrayKey); // Add the number of dollar signs
                         }
+                    }
 
+                    // Remove '.' dots from the key, MongoDB barfs at them too
+                    $arrayKeyNew = str_replace('.', '-', $arrayKeyNew);
+                    if ($arrayKeyNew !== $arrayKey) {
                         $this->systemLogInfo[$arrayKeyNew] = $this->systemLogInfo[$arrayKey]; // Migrate data
                         unset($this->systemLogInfo[$arrayKey]); // Remove invalid entry
 //                        \Yii::debug("Renamed the invalid systemLog entry array key '{$arrayKey}' to '{$arrayKeyNew}'"); // This doesn't get output, because this method is used to output a different line
                     }
+
                 }
             }
             return $this->systemLogInfo;
