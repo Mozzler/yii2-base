@@ -161,6 +161,31 @@ class SystemLog extends BaseModel
                     ]
                 ]
             ],
+            // -- Virtual fields (only for Index grid)
+            'messageShortened' => [
+                'label' => 'Message',
+                'type' => 'Text',
+                'widgets' => [
+                    'grid' => [
+                        'headerOptions' => ['title' => 'Message...'],
+                        // Custom field config as per yii2-base/widgets/model/IndexModel.php:buildColumns()
+                        'value' => function ($model, $key, $index, $widget) {
+
+                            $maxStringLength = 200;
+                            /** @var SystemLog $model */
+                            $widget->format = 'raw';
+                            if (empty($model->message)) {
+                                return '';
+                            }
+
+                            $message = $model->message;
+                            if (strlen($message) > $maxStringLength) {
+                                $message = substr($message, 0, $maxStringLength) . '...';
+                            }
+                            return '<pre>' . htmlspecialchars($message, ENT_HTML5) . '</pre>';
+                        }
+                    ]]
+            ],
         ]);
     }
 
@@ -169,7 +194,7 @@ class SystemLog extends BaseModel
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = ['type', 'message', 'namespace', 'endpoint', 'messageData', 'systemData', 'requestData', 'trace'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['namespace', 'message', 'endpoint', 'createdAt'];
+        $scenarios[self::SCENARIO_LIST] = ['type', 'namespace', 'messageShortened', 'endpoint', 'createdAt'];
         $scenarios[self::SCENARIO_VIEW] = ['_id', 'namespace', 'message', 'type', 'createdAt', 'endpoint', 'messageData', 'requestData', 'systemData', 'trace', 'createdUserId', 'updatedUserId', 'updatedAt'];
         $scenarios[self::SCENARIO_SEARCH] = ['type', 'namespace', 'message', 'endpoint'];
 
