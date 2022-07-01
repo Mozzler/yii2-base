@@ -107,6 +107,8 @@ class TaskController extends BaseController
      */
     public function actionRun($taskId)
     {
+        $tools = \Yii::$app->has('t') ? \Yii::$app->t : \Yii::createObject(Tools::class);
+
         if (empty($taskId)) {
             $this->stderr("#### Error ####\nNo or invalid taskId provided", Console::FG_RED, Console::UNDERLINE);
             return ExitCode::USAGE;
@@ -114,9 +116,8 @@ class TaskController extends BaseController
 
         // -- Check the MongoDB entry
         /** @var Task $taskModel */
-        $taskModel = \Yii::createObject(Task::class);
-        /** @var Task $task */
-        $task = $taskModel->findOne(['_id' => new ObjectId($taskId)]);
+        $task = $tools::getModel(Task::class, $tools::ensureId($taskId));
+
         if (empty($task)) {
             $this->stderr("#### Error ####\nCouldn't find a Task with the taskId of " . json_encode($taskId) . "\n", Console::FG_RED, Console::BOLD);
             return ExitCode::USAGE;
