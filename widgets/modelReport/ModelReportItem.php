@@ -31,7 +31,7 @@ class ModelReportItem extends BaseWidget
         $config = parent::config($templatify);
         $reportItemName = $config['reportItemName'];
 
-        \Yii::debug("The config is: " . VarDumper::export($config));
+//        \Yii::debug("The config is: " . VarDumper::export($config));
         $config['options']['class'] = $config['options']['class'] . ' model-report-item'; // Add model-report-item to the class
         $config['reportItem'] = $config['model']->reportItems()[$reportItemName];
         $config['modelName'] = \Yii::$app->t::getModelClassName($config['model']);
