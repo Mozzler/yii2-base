@@ -775,8 +775,13 @@ class Model extends ActiveRecord
         // We want to allow a default orderby to be defined per model, but also can be overridden per search query
         if (null === $orderBy) {
             $orderBy = $this->defaultOrderBy;
+            if (!empty($dataProviderConfig['sort'])) {
+                \Yii::warning("The dataProviderConfig sort is: " . VarDumper::export($dataProviderConfig['sort']));
+                $orderBy = null;
+            }
         }
         if (!empty($orderBy)) {
+            \Yii::warning("The search orderBy is: " . VarDumper::export($orderBy));
             $query->orderBy($orderBy);
         }
 
@@ -825,7 +830,6 @@ class Model extends ActiveRecord
             'query' => $query,
         ]));
     }
-
     /**
      * Set the scenario, but support an array of scenarios to check
      */

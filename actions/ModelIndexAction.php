@@ -36,7 +36,24 @@ class ModelIndexAction extends BaseModelAction
         $model->setScenario($this->scenario);
 
         $rbacFilter = \Yii::$app->rbac->canAccessAction($this);
-        $dataProvider = $model->search(\Yii::$app->request->get(), null, $rbacFilter ? $rbacFilter : null, $this->dataProviderConfig);
+
+        $sort = null;
+        if (!empty(\Yii::$app->request->get('sort'))) {
+            $sort = \Yii::$app->request->get('sort');
+        }
+        if (!empty($sort) && is_string($sort)) {
+            // e.g 'createdAt'
+            $sortOrder = SORT_ASC; // Default ascending
+            $sortEntry = $sort;
+            // e.g '-updatedAt'
+            if ('-' === substr($sort, 0, 1)) {
+                $sortEntry = substr($sort, 1, strlen($sort) -1);
+                $sortOrder = SORT_DESC;
+            }
+            $sort = [$sortEntry => $sortOrder];
+        }
+
+        $dataProvider = $model->search(\Yii::$app->request->get(), null, $rbacFilter ? $rbacFilter : null, $this->dataProviderConfig, $sort);
 
         $this->controller->templateData['dataProvider'] = $dataProvider;
         $this->controller->templateData['model'] = $model;
