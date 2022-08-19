@@ -35,8 +35,6 @@ class Task extends BaseModel
     protected static $collectionName = 'app.task';
 
 
-
-
     protected function modelConfig()
     {
         return [
@@ -57,7 +55,23 @@ class Task extends BaseModel
             ],
             'createdAt' => [
                 'columns' => ['createdAt' => 1]
-            ]
+            ],
+            'pendingBackgroundTasks' => [
+                // Searching for queued, background tasks that were scheduled for now or in the past, or don't have a scheduled time
+                // This is likely run once every couple of seconds
+                'columns' => [
+                    'status' => 1,
+                    'triggerType' => 1,
+                    'scheduled' => -1,
+                ]
+            ],
+            'timedOutTasks' => [
+                // Searching for inProgress tasks that haven't been updated in over an hour
+                'columns' => [
+                    'status' => 1,
+                    'updatedAt' => -1
+                ]
+            ],
         ]);
     }
 
@@ -93,6 +107,12 @@ class Task extends BaseModel
                 'label' => 'Logs',
                 'type' => 'Json', // Use addLog(),
                 'default' => [],
+            ],
+            'scheduled' => [
+                'label' => 'Scheduled At',
+                'type' => 'DateTime',
+                'default' => null, // By default, assume a BackgroundTask wants to be run straight away.
+                // If you want to run a task (esp a Background task) at a specified time in the future. Note that this means it won't be run BEFORE that time but doesn't guarantee when exactly it'll be run
             ],
             'timeoutSeconds' => [
                 'label' => 'Timeout In Seconds',
