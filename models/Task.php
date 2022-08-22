@@ -54,15 +54,17 @@ class Task extends BaseModel
                 'duplicateMessage' => 'That task already exists'
             ],
             'createdAt' => [
-                'columns' => ['createdAt' => 1]
+                // For the default ordering by
+                'columns' => ['createdAt' => -1]
             ],
             'pendingBackgroundTasks' => [
                 // Searching for queued, background tasks that were scheduled for now or in the past, or don't have a scheduled time
-                // This is likely run once every couple of seconds
+                // This is likely run once every couple of seconds or maybe even 10x a second
                 'columns' => [
                     'status' => 1,
                     'triggerType' => 1,
                     'scheduled' => -1,
+                    'scriptClass' => 1
                 ]
             ],
             'timedOutTasks' => [
