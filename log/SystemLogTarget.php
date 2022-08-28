@@ -130,36 +130,16 @@ class SystemLogTarget extends Target
         // -- Process the phpInput
         // The idea is to have the phpInput from mobile app / API endpoints, most likely provided as JSON input
         // First, we only add the phpInput if there's no $_POST request and no $_FILES.
-        // We check if there's any maskVars for the phpInput, if there is we attempt to json_decode the input so if there's any fields you want masked we can do that
+        // We attempt to json_decode the input so if there's any fields you want masked we can do that, it also looks better in the final output
 
         try {
 
-            if ($this->logPHPInput) {
-                if (empty($_POST) && empty($_FILES) && !empty(file_get_contents('php://input'))) {
-                    // Log the phpInput if there's something worth logging, most likely it's JSON sent to an API endpoint
-                    $context['phpInput'] = file_get_contents('php://input');
-
-                    // -- Note: If you set a phpInput maskVar and it's JSON, then you'll have it saved as decoded into a PHP array
-                    // Example  'maskVars' => [
-                    //    '_SERVER.HTTP_AUTHORIZATION',
-                    //    'phpInput.password',
-
-                    //  -- Do any of the keys belong to the phpInput?
-                    $hasPhpInputMaskVars = false;
-                    foreach ($this->maskVars as $maskVarKey => $maskVarValue) {
-                        if (strpos($maskVarKey, 'phpInput.') === 0) {
-                            $hasPhpInputMaskVars = true;
-                            break; // Don't need to check anymore
-                        }
-                    }
-
-                    // -- Decode
-                    if ($hasPhpInputMaskVars) {
-                        $decodedPhpInput = json_decode($this->maskVars['phpInput'], true);
-                        if (!empty($decodedPhpInput)) {
-                            $context['phpInput'] = $decodedPhpInput;
-                        }
-                    }
+            if ($this->logPHPInput && empty($_POST) && empty($_FILES) && !empty(file_get_contents('php://input'))) {
+                // Log the phpInput if there's something worth logging, most likely it's JSON sent to an API endpoint
+                $context['phpInput'] = file_get_contents('php://input');
+                $decodedPhpInput = json_decode($context['phpInput'], true);
+                if (!empty($decodedPhpInput)) {
+                    $context['phpInput'] = $decodedPhpInput;
                 }
             }
 
