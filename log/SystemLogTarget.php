@@ -31,6 +31,15 @@ use yii\log\Target;
  * 'class' => 'mozzler\base\log\SystemLogTarget',
  * 'levels' => ['error'], // Careful if adding 'warning', 'info', 'trace'
  * 'disableInfoCollection' => true, // By default if there's any error entries then an info entry is also added by Yii, this prevents the unneeded info entries
+ *  'maskVars' => [
+ * '_SERVER.HTTP_AUTHORIZATION',
+ * '_SERVER.PHP_AUTH_USER',
+ * '_SERVER.PHP_AUTH_PW',
+ * // -- Also hide the DB_DSN and users identity info
+ * '_SERVER.DB_DSN',
+ * '_SERVER.HTTP_COOKIE',
+ * '_COOKIE._identity',
+ * ],
  * ]]],
  *
  *
@@ -66,7 +75,10 @@ class SystemLogTarget extends Target
 {
 
     public $disableInfoCollection = true; // By default Yii outputs an 'info' message even if you are only tracking 'error', this is our attempt at stopping it
+    public $logPHPInput = true; // Add to the logVars context the php:://input for raw JSON requests and API's etc...
 
+
+    // Example public $maskVars => [ '_SERVER.HTTP_AUTHORIZATION', '_SERVER.PHP_AUTH_USER', '_SERVER.PHP_AUTH_PW',  '_SERVER.DB_DSN', '_SERVER.HTTP_COOKIE', '_COOKIE._identity', ],
     /**
      * Initializes the route.
      * This method is invoked after the route is created by the route manager.
@@ -113,11 +125,55 @@ class SystemLogTarget extends Target
     protected function getContextMessage()
     {
         $context = ArrayHelper::filter($GLOBALS, $this->logVars);
+
+
+        // -- Process the phpInput
+        // The idea is to have the phpInput from mobile app / API endpoints, most likely provided as JSON input
+        // First, we only add the phpInput if there's no $_POST request and no $_FILES.
+        // We check if there's any maskVars for the phpInput, if there is we attempt to json_decode the input so if there's any fields you want masked we can do that
+
+        try {
+
+            if ($this->logPHPInput) {
+                if (empty($_POST) && empty($_FILES) && !empty(file_get_contents('php://input'))) {
+                    // Log the phpInput if there's something worth logging, most likely it's JSON sent to an API endpoint
+                    $context['phpInput'] = file_get_contents('php://input');
+
+                    // -- Note: If you set a phpInput maskVar and it's JSON, then you'll have it saved as decoded into a PHP array
+                    // Example  'maskVars' => [
+                    //    '_SERVER.HTTP_AUTHORIZATION',
+                    //    'phpInput.password',
+
+                    //  -- Do any of the keys belong to the phpInput?
+                    $hasPhpInputMaskVars = false;
+                    foreach ($this->maskVars as $maskVarKey => $maskVarValue) {
+                        if (strpos($maskVarKey, 'phpInput.') === 0) {
+                            $hasPhpInputMaskVars = true;
+                            break; // Don't need to check anymore
+                        }
+                    }
+
+                    // -- Decode
+                    if ($hasPhpInputMaskVars) {
+                        $decodedPhpInput = json_decode($this->maskVars['phpInput'], true);
+                        if (!empty($decodedPhpInput)) {
+                            $context['phpInput'] = $decodedPhpInput;
+                        }
+                    }
+                }
+            }
+
+        } catch (\Throwable $exception) {
+            // Can't do much when you thrown an exception in an exception
+            $context['exceptionProcessingPhpInput'] = \Yii::$app->t::returnExceptionAsString($exception);
+        }
+
         foreach ($this->maskVars as $var) {
             if (ArrayHelper::getValue($context, $var) !== null) {
                 ArrayHelper::setValue($context, $var, '***');
             }
         }
+
         return $context;
     }
 
