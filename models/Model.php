@@ -178,6 +178,24 @@ class Model extends ActiveRecord
         return $modelFields;
     }
 
+    /**
+     * @throws \yii\base\InvalidConfigException
+     *
+     * Update the cached model fields
+     *
+     * This is mostly useful if the model field defaults changes based on the currently logged in user and the login process has just completed
+     * or it's a long running CLI request and the default sets the time, or the database might have been updated, etc..
+     */
+    public function updateModelFields() {
+
+        // -- Delete the existing key if it exists
+        $sessionCache = \Yii::$app->t->getRequestCache();
+        $sessionKey = static::collectionName() . '-modelField';
+        $sessionCache->delete($sessionKey);
+
+        $this->modelFields = FieldHelper::createFields($this, $this->getCachedModelFields());
+    }
+
     protected function initModelFields()
     {
         $this->modelFields = FieldHelper::createFields($this, $this->getCachedModelFields());
