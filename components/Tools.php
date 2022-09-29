@@ -560,9 +560,7 @@ class Tools extends Component
     public static function yieldModels($class, $filter = [], $options = [], $limit = 10)
     {
 
-        $count = \Yii::$app->t::countModels($class, $filter, [
-            'checkPermissions' => false
-        ]);
+        $count = \Yii::$app->t::countModels($class, $filter, ArrayHelper::merge(['checkPermissions' => false], $options));
         if ($count === 0) {
             return;
         }
