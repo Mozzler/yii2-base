@@ -566,7 +566,7 @@ class Tools extends Component
             return;
         }
 
-        $rounds = ceil($count / $limit);
+        $rounds = floor($count / $limit);
         if ($count % $limit === 0) {
             // e.g if 2080 / 10 = 208 rounds then the offset will be 2080 and we won't get any results the first time through. Instead want 207 rounds with 2070 as the offset
             $rounds--; // @todo: Ensure this works as expected
