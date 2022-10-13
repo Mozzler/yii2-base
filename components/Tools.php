@@ -7,6 +7,7 @@ use Yii;
 use yii\base\Component;
 use yii\caching\ArrayCache;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class Tools extends Component
 {
@@ -564,7 +565,12 @@ class Tools extends Component
         if ($count === 0) {
             return;
         }
-        $rounds = floor($count / $limit);
+
+        $rounds = ceil($count / $limit);
+        if ($count % $limit === 0) {
+            // e.g if 2080 / 10 = 208 rounds then the offset will be 2080 and we won't get any results the first time through. Instead want 207 rounds with 2070 as the offset
+            $rounds--; // @todo: Ensure this works as expected
+        }
         $modelsYielded = 0;
 
         // Note: Because of the way you could be modifying entries based on a filter we start from the end and work backwards.
@@ -580,8 +586,10 @@ class Tools extends Component
 
             if (empty($models)) {
                 if ($round !== $rounds) {
-                    \Yii::warning("yieldModels() Unexpectedly no more entries. Yielded $modelsYielded of $count. In round $round of $rounds of $class\n", Console::FG_RED);
+                    \Yii::warning("yieldModels() Unexpectedly no more entries. Yielded $modelsYielded of $count. In round $round of $rounds of $class");
                 }
+                \Yii::debug("yieldModels() No more entries. Yielded $modelsYielded of $count. In round $round of $rounds of $class using: " . VarDumper::export(['limit' => $limit, 'offset' => $offset]));
+
                 return;
             }
 
