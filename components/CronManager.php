@@ -3,6 +3,7 @@
 namespace mozzler\base\components;
 
 use mozzler\base\cron\CronEntry;
+use mozzler\base\exceptions\BaseException;
 use mozzler\base\models\CronRun;
 use mozzler\base\models\Task;
 use \yii\helpers\ArrayHelper;
@@ -128,19 +129,65 @@ class CronManager extends Component
             } else {
                 $stats['Entries Skipped']++;
             }
-            $cronRun->saveAndLogErrors();
+            $this->saveAndIgnoreAlreadyRunError($cronRun);
         }
 
         $cronRun->stats = $stats;
         $cronRun->status = 'complete';
-        if (!$cronRun->save()) {
-            $error = "Unable to save the cronRun. Error: " . json_encode($cronRun->getErrors());
-            \Yii::error($error);
+        if (!$cronRun->save(true, null, false)) {
+            $error = "Unable to save the cronRun. Error: " . VarDumper::export($cronRun->getErrors());
+            \Yii::error(new BaseException("Unable to save the {$cronRun->ident()}", 500, null, [
+                'errors' => $cronRun->getErrors(),
+                'cronRun' => $cronRun->toArray(),
+            ]));
             $cronRun->addLog($error, 'error');
             $stats['Error'] = $error;
             $stats['Errors']++;
         }
         return $stats;
+    }
+
+
+    /**
+     * @param $errors
+     *
+     * This is because we don't want the System Log errors around Cron having already been run
+     *
+     * Error saving CronRun . Validation Error(s): [
+     * 'timestampUniqueId' => [
+     * [
+     * 'Cron has already been run for this timetamp',
+     * ],
+     * ],
+     * ]
+     */
+    public function ignoreAlreadyRunError($errors)
+    {
+        if (empty($errors)) {
+            return $errors;
+        }
+
+        if (!is_array($errors)) {
+            return $errors;
+        }
+
+        if (count($errors) > 1) {
+            // There's more than a single error
+            return $errors;
+        }
+
+        $timestampUniqueIdError = ArrayHelper::getValue($errors, 'timestampUniqueId.0.0');
+        if (empty($timestampUniqueIdError)) {
+            return $errors;
+        }
+        if ('Cron has already been run for this timestamp' === $timestampUniqueIdError) {
+            // Note: The duplicate message Used to be incorrectly have 'timetamp' but is now 'timestamp'
+            // If there's issues with this changing then you could check for whateve rthe yii2-base models/CronRun.php:modelIndexes().timestampUniqueId.duplicateMessage is
+            // or just accept that any timestampUniqueId entry can be ignored
+            return []; // Ignore this error
+        }
+
+        return $errors;
     }
 
     /**
@@ -158,13 +205,23 @@ class CronManager extends Component
             'stats' => [],
         ], "");
 
-        // @todo: try/catch this and gracefully deal with the Exception 'yii\mongodb\Exception' example message: 'E11000 duplicate key error collection: viterra.app.cronRun index: timestampUniqueId dup key: { : 1550638500 }'
-        if (!$cronRun->saveAndLogErrors()) {
-            // Unable to save cron due to an entry already existing for this
-            // timestamp minute interval
+        $saved = $this->saveAndIgnoreAlreadyRunError($cronRun);
+        return false === $saved ? false : $cronRun; // If false then return false, otherwise return the $cronRun
+    }
+
+
+    public function saveAndIgnoreAlreadyRunError($cronRun)
+    {
+        if (!$cronRun->save(true, null, false)) {
+
+            // Ignore errors around unable to save cron due to an entry already existing for this timestamp minute interval
+            if (empty($this->ignoreAlreadyRunError($cronRun->getErrors()))) {
+                return false;
+            }
+            \Yii::error(new BaseException("Error saving {$cronRun->ident()}. Validation Error(s)", 500, null, ['Errors' => $cronRun->getErrors(), CronRun::class => $cronRun->toArray()])); // A nicer Exception
             return false;
         }
-        return $cronRun;
+        return true;
     }
 
 }

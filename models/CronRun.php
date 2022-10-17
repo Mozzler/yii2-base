@@ -40,7 +40,7 @@ class CronRun extends BaseModel
                 'options' => [
                     'unique' => 1
                 ],
-                'duplicateMessage' => ['Cron has already been run for this timetamp']
+                'duplicateMessage' => ['Cron has already been run for this timestamp']
             ],
             'createdAt' => [
                 'columns' => ['createdAt' => 1],
