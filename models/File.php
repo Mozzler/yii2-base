@@ -323,13 +323,22 @@ class File extends BaseModel
     }
 
     /**
-     * @param $filename
+     * Beautify Filename
+     *
+     * Used by filterFilename which also does extra filtering
+     * Although you can use this on its own, it's best to use filterFilename() method
+     *
+     * @param $filename string|null the filename to beautify, or if not defined it'll use the current file's filename
      * @return string
+     * @see filterFilename
      *
      * Based on https://stackoverflow.com/a/42058764/1495634
      */
-    public function beautifyFilename($filename, $lowercaseName = false)
+    public function beautifyFilename($filename = null, $lowercaseName = false)
     {
+        if (empty($filename)) {
+            $filename = $this->filename;
+        }
         // reduce consecutive characters
         $filename = preg_replace([
             // "file   name.zip" becomes "file-name.zip"
