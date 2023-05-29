@@ -8,6 +8,7 @@ use mozzler\base\models\AuditLog;
 use mozzler\base\models\Model;
 use yii\db\BaseActiveRecord;
 use yii\behaviors\AttributesBehavior;
+use yii\helpers\VarDumper;
 
 /**
  * AuditLog Behaviour for logging all changes to an entity
@@ -34,7 +35,7 @@ class AuditLogBehaviour extends AttributesBehavior
 
             // We need to save the auditLog :
             // - After the Insert so we know the modelId
-            // - After the Update so we know the previous and validated updated value 
+            // - After the Update so we know the previous and validated updated value
 
 
             if (!empty($this->auditLogAttributes)) {
@@ -98,6 +99,13 @@ class AuditLogBehaviour extends AttributesBehavior
                 $auditLogData['previousValue'] = empty($event->changedAttributes[$attribute]) ? '(empty)' : $event->changedAttributes[$attribute];
             } else if (AuditLog::ACTION_UPDATE === $action) {
                 return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
+            }
+
+            // -- Check for ObjectId to String differences
+            // There's an issue whereby an ObjectId is considered changed because the previousValue was an ObjectId and the newValue is a string representation. This creates noise
+            if ($auditLogData['previousValue'] instanceof ObjectId && is_string($auditLogData['newValue']) && (string)$auditLogData['previousValue'] === $auditLogData['newValue']) {
+                \Yii::debug("Ignoring the Auditlog edge case of an ObjectId old value being saved as the string representation of that same ObjectId for: " . VarDumper::export($auditLogData));
+                return $this->owner->$attribute;
             }
 
             $auditLog = Tools::createModel(AuditLog::class, $auditLogData);
