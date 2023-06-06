@@ -101,6 +101,9 @@ class AuditLogBehaviour extends AttributesBehavior
                 return $this->owner->$attribute; // The field hasn't changed, so return the original attribute and don't save this
             }
 
+            if (!isset($auditLogData['previousValue'])) {
+                $auditLogData['previousValue'] = '(empty)';
+            }
             // -- Check for ObjectId to String differences
             // There's an issue whereby an ObjectId is considered changed because the previousValue was an ObjectId and the newValue is a string representation. This creates noise
             if ($auditLogData['previousValue'] instanceof ObjectId && is_string($auditLogData['newValue']) && (string)$auditLogData['previousValue'] === $auditLogData['newValue']) {
