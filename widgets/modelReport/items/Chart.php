@@ -33,6 +33,7 @@ class Chart extends ModelReportItem
             'title' => ArrayHelper::getValue($config, 'reportItem.title', null),
             'reportItemName' => $config['reportItemName'],
             'apiEndpoint' => \Yii::$app->reportsManager->apiEndpoint,
+            'debounceTimeMs' => ArrayHelper::getValue($config, 'reportItem.widgetConfig.debounceTimeMs', null), // Allow specifying the debounceTimeMs so you can use the default 6,000 (6s) or increase it if you want, e.g for line charts where you want to disable values example usage:  public function reportItems() return ['stats-line-graph' => ['widgetConfig' => ['debounceTimeMs' => 30000,...]...]];
         ]);
         return $config;
     }
