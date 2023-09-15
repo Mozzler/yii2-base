@@ -65,11 +65,11 @@ class Config extends BaseModel
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = ['key_', 'value_'];
+        $scenarios[self::SCENARIO_CREATE] = ['key_', 'value_', 'description'];
         $scenarios[self::SCENARIO_UPDATE] = $scenarios[self::SCENARIO_CREATE];
-        $scenarios[self::SCENARIO_LIST] = ['key_', 'value_', 'createdAt', 'updatedAt', 'updatedUserId'];
-        $scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'createdAt', 'updatedAt', 'createdUserId', 'updatedUserId'];
-        $scenarios[self::SCENARIO_SEARCH] = ['key_', 'createdAt', 'updatedAt'];
+        $scenarios[self::SCENARIO_LIST] = ['key_', 'value_', 'description', 'createdAt', 'updatedAt', 'updatedUserId'];
+        $scenarios[self::SCENARIO_VIEW] = ['key_', 'value_', 'description', 'createdAt', 'updatedAt', 'createdUserId', 'updatedUserId'];
+        $scenarios[self::SCENARIO_SEARCH] = ['key_', 'value_', 'description', 'createdAt', 'updatedAt'];
 
         return $scenarios;
     }
@@ -94,7 +94,14 @@ class Config extends BaseModel
                 'type' => 'Text',
                 'label' => 'Value',
                 'required' => true
-            ]
+            ],
+
+            // Optional info about this field and why you set it to this
+            'description' => [
+                'type' => 'Text',
+                'label' => 'Description',
+                'hint' => "Basic info about why you've set it to this value or you can explain what the value does"
+            ],
         ]);
     }
 
