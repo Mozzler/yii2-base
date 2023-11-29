@@ -11,7 +11,7 @@ class Password extends Base {
 	
 	public function defaultRules() {
 		return [
-			'string' => ['min' => 6, 'max' => 30]
+			'string' => ['min' => 6, 'max' => 1024]
 		];
 	}
 	
