@@ -347,7 +347,7 @@ class Tools extends Component
      * - via config if specified when calling sendEmail
      * - via `web.php` configuration
      *
-     * @param string $to Email recipient(s) in the format `[<email address> => <name>]`
+     * @param string|string[] $to Email recipient(s) in the format `[<email address> => <name>]` or simply their email address e.g 'michael+mozzler-base@greyphoenix.biz'
      * @param string $subject Email subject.
      * @param string $template Name of template to use for rendering the email (eg: `user/welcome.twig`). Email templates are all prefixed by `emails/`, but this doesn't need to be included when specifying the template name.
      * @param array $data Data to send to the email template.
@@ -356,6 +356,8 @@ class Tools extends Component
      */
     public static function sendEmail($to, $subject, $template, $data = [], $config = [])
     {
+        $profileName = 'Emailing-to-' (is_array($to) ? array_keys($to) : $to) . '-subject-' . str_replace(' ', '_', $subject) . "-at-" . time();
+        \Yii::beginProfile($profileName, "Emailing");
         Yii::$app->mailer->view->params = \Yii::$app->params;
 
         $mailer = \Yii::$app->mailer;
@@ -375,7 +377,56 @@ class Tools extends Component
             $message->setReplyTo($config['replyTo']);
         }
 
-        return $message->send();
+        $sent = $message->send();
+        \Yii::endProfile($profileName, "Emailing");
+        return $sent;
+
+    }
+
+
+    /**
+     *
+     * This was originally created in the Stripe Manager
+     *
+     * @param string|array $to Email Address
+     * @param string $subject Subject text
+     * @param string $template File path
+     * @param array $data Data to provide to the Twig renderer for the templating
+     * @param array $config Any custom configuration e.g 'from' or 'bcc'
+     * @param array $files An array of the file names and file options. Example: $files = ['/tmp/fileToUpload.pdf' => [], '/tmp/622748c3c92d45ccbe87970d.pdf' => ['fileName' => 'important document for you.pdf', 'contentType' => 'application/pdf']] as per https://www.yiiframework.com/doc/api/2.0/yii-mail-messageinterface#attach()-detail
+     * @return bool
+     */
+    public static function sendEmailWithAttachment($to, $subject, $template, $data = [], $config = [], $files = [])
+    {
+        $profileName = 'Emailing-with-' . count($files) . '-attachments-to-' (is_array($to) ? array_keys($to) : $to) . '-subject-' . str_replace(' ', '_', $subject) . "-at-" . time();
+        \Yii::beginProfile($profileName, "EmailingWithAttachments");
+        Yii::$app->mailer->view->params = Yii::$app->params;
+
+        $mailer = Yii::$app->mailer;
+        // Adding in the params to the data. mainly for access to something like {{ _params.emailAssetsUrl }} for a Url to where you might store files on a CDN
+        $message = $mailer->compose($template, ArrayHelper::merge(['_params' => Yii::$app->params], $data))
+            ->setTo($to)
+            ->setSubject($subject);
+
+
+        $config = ArrayHelper::merge(Yii::$app->params['mozzler.base']['email'], $config);
+
+        foreach ($config as $configName => $configValue) {
+            $configSet = 'set' . ucfirst($configName); // e.g setFrom or setReplyTo
+            if (method_exists($message, $configSet)) {
+                $message->$configSet($configValue);
+            }
+        }
+        if (!empty($files)) {
+            foreach ($files as $fileName => $fileOptions) {
+                $message->attach($fileName, $fileOptions);
+            }
+        }
+
+        // -- Actually send
+        $sent = $message->send();
+        \Yii::endProfile($profileName, "EmailingWithAttachments");
+        return $sent;
     }
 
     /**
