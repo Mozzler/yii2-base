@@ -210,7 +210,8 @@ class Tools extends Component
      *    'limit' => 10
      *    'offset' => 0,
      *    'orderBy' => ['inserted' => SORT_DESC],
-     *    'checkPermissions' => false
+     *    'checkPermissions' => false,
+     *    'select' => ['name', 'updatedAt'], // Note that the default response will include all the scenario fields but they'll be listed as null, so you'll want to set it to a scenario with the same fields as well
      * ]);
      *
      * // get models using a filter
@@ -230,12 +231,14 @@ class Tools extends Component
             'limit' => 20,
             'offset' => null,
             'orderBy' => [],
+            'select' => [], // The fields to return, keep empty if you want them all
             'checkPermissions' => true
         ], $options);
 
         $limit = $options['limit'];
         $offset = $options['offset'];
         $orderBy = $options['orderBy'];
+        $select = $options['select'];
         $checkPermissions = $options['checkPermissions'];
 
         $model = static::createModel($className);
@@ -249,6 +252,9 @@ class Tools extends Component
 
         if ($offset)
             $query->offset = $offset;
+
+        if ($select)
+            $query->select = $select;
 
         if ($orderBy)
             $query->orderBy = $orderBy;
