@@ -356,7 +356,7 @@ class Tools extends Component
      */
     public static function sendEmail($to, $subject, $template, $data = [], $config = [])
     {
-        $profileName = 'Emailing-to-' (is_array($to) ? array_keys($to) : $to) . '-subject-' . str_replace(' ', '_', $subject) . "-at-" . time();
+        $profileName = 'Emailing-to-' . self::getEmailAddressesStringFromEmailTo($to) . '-subject-' . str_replace(' ', '_', $subject) . "-at-" . time();
         \Yii::beginProfile($profileName, "Emailing");
         Yii::$app->mailer->view->params = \Yii::$app->params;
 
@@ -381,6 +381,42 @@ class Tools extends Component
         \Yii::endProfile($profileName, "Emailing");
         return $sent;
 
+    }
+
+    /**
+     * Get Email Addresses String From Email To
+     * @param $emailTo array
+     * @param $separator string
+     * @return string|void
+     *
+     * Used for converting the array syntax used by the sendEmail($to...) to a string of the email addresses
+     *
+     * e.g $emailTo =[
+     *  0 => 'newcarsales@greyphoenix.biz',
+     *  'michael+staging@drivible.com' => 'Mr Drivible',
+     * ]
+     * should return:
+     *
+     * "newcarsales@greyphoenix.biz,michael+staging@drivible.com"
+     *
+     */
+    public static function getEmailAddressesStringFromEmailTo($emailTo, $separator = ',')
+    {
+        $emailAddresses = [];
+        if (empty($emailTo)) {
+            return '';
+        }
+        foreach ($emailTo as $key => $value) {
+            if (is_integer($key) && is_string($value)) {
+                // e.g 0 => 'newcarsales@greyphoenix.biz', we want the value
+                $emailAddresses[] = $value;
+            }
+            if (is_string($key) && is_string($value)) {
+                // e.g 'michael+staging@drivible.com' => 'Mr Drivible',, we want the key
+                $emailAddresses[] =  $key;
+            }
+        }
+        return implode($separator, $emailAddresses);
     }
 
 
