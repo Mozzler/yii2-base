@@ -385,9 +385,10 @@ class Tools extends Component
 
     /**
      * Get Email Addresses String From Email To
-     * @param $emailTo array
+     *
+     * @param $emailTo array|string
      * @param $separator string
-     * @return string|void
+     * @return string
      *
      * Used for converting the array syntax used by the sendEmail($to...) to a string of the email addresses
      *
@@ -404,6 +405,14 @@ class Tools extends Component
     {
         $emailAddresses = [];
         if (empty($emailTo)) {
+            return '';
+        }
+        if (is_string($emailTo)) {
+            return $emailTo;
+        }
+
+        if (!is_array($emailTo)) {
+            \Yii::warning("Unkown type provided to getEmailAddressesStringFromEmailTo for emailTo. Expected a string or array instead got: " . VarDumper::export($emailTo));
             return '';
         }
         foreach ($emailTo as $key => $value) {
