@@ -82,7 +82,7 @@ class IndexManager
     {
         $collection->dropIndexes($indexName);
 
-        $options = $indexConfig['options'];
+        $options = ArrayHelper::getValue($indexConfig, ['options'], []);
         $options['name'] = $indexName;
 
         $collection->createIndex($indexConfig['columns'], $options);
