@@ -2,8 +2,10 @@
 
 namespace mozzler\base\components;
 
+use mozzler\base\exceptions\BaseException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
+use yii\helpers\VarDumper;
 
 class IndexManager
 {
@@ -75,19 +77,47 @@ class IndexManager
         return $className::getCollection();
     }
 
+
     /**
      * Handle updating existing indexes if they have changed
+     *
+     * @param $collection yii\mongodb\Collection
+     * @param $indexName string
+     * @param $indexConfig array
+     *
+     * Example data provided:
+     *
+     *   $collection = $this->getCollection('mozzler\auth\models\User');
+     *
+     *   $indexName' => 'lastLoggedIn'
+     *
+     *   $indexConfig = [
+     *     'columns' => [
+     *        'lastLoggedIn' => -1,
+     *        'isDeleted' => 1,
+     *    ]],
      */
     protected function handleUpdate($collection, $indexName, $indexConfig)
     {
         $collection->dropIndexes($indexName);
 
         $options = ArrayHelper::getValue($indexConfig, ['options'], []);
+        if (empty($options)) {
+            \Yii::error(new BaseException("Issue updating the Indexes. Likely an invalid Index Config or invalid options for the Index based on collectionName: '{$collection->name}', indexName:  '{$indexName}'", 500, null, [
+                'devMessage' => "Check the Index config, e.g it should be something like ['columns' => ['lastLoggedIn' => -1]]",
+                'collectionName' => $collection->name,
+                'indexName' => $indexName,
+                'indexConfig' => $indexConfig,
+            ]));
+            $this->addLog("Error with index: {$indexName} on {$collection->name} please check the index config is valid: " . VarDumper::export($indexConfig));
+            return false;
+        }
+
         $options['name'] = $indexName;
 
         $collection->createIndex($indexConfig['columns'], $options);
 
-        $this->addLog("Updated index: " . $indexName);
+        $this->addLog("Updated index: {$indexName}");
     }
 
     protected function addLog($message, $type = 'info')
@@ -138,7 +168,7 @@ class IndexManager
                         $this->addLog("Unable to create index: $indexName", 'error');
                     }
                 } catch (\Exception $e) {
-                    $this->addLog("Exception creating: $indexName (" . $e->getMessage() . ")\n" . \Yii::$app->t::returnExceptionAsString($e)."\n", 'error');
+                    $this->addLog("Exception creating: $indexName (" . $e->getMessage() . ")\n" . \Yii::$app->t::returnExceptionAsString($e) . "\n", 'error');
                 }
             }
         }
