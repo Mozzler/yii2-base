@@ -818,7 +818,8 @@ class Model extends ActiveRecord
 
         foreach ($searchAttributes as $attribute) {
             $modelField = $this->getModelField($attribute);
-            if ($model->$attribute) {
+            if ($model->$attribute !== null) {
+                // NB: Checking for !== null to support things like filtering on '0' as a false boolean value from the params
                 $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
             }
         }
