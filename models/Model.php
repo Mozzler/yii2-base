@@ -819,16 +819,9 @@ class Model extends ActiveRecord
 
         foreach ($searchAttributes as $attribute) {
             $modelField = $this->getModelField($attribute);
-            if (\Yii::$app->has('t') && \Yii::$app->t::isApi()) {
-                if ($model->$attribute !== null) {
-                    // NB: Checking for !== null to support things like filtering on '0' as a false boolean value from the params to the API (e.g /v1/ or /v2/ )
-                    $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
-                }
-            } else {
-                if ($model->$attribute) {
-                    // NB: The ACP (Admin Control Panel / main site) sends empty fields, so the !== null check above fails
-                    $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
-                }
+            if ($model->$attribute !== null && $model->$attribute !== '') {
+                // NB: Checking for !== null and !== '' to support things like filtering on '0' as a false boolean value from the params to the API (e.g /v1/ or /v2/ )
+                $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
             }
         }
 
