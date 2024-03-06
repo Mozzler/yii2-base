@@ -186,7 +186,8 @@ class Model extends ActiveRecord
      * This is mostly useful if the model field defaults changes based on the currently logged in user and the login process has just completed
      * or it's a long running CLI request and the default sets the time, or the database might have been updated, etc..
      */
-    public function updateModelFields() {
+    public function updateModelFields()
+    {
 
         // -- Delete the existing key if it exists
         $sessionCache = \Yii::$app->t->getRequestCache();
@@ -818,9 +819,16 @@ class Model extends ActiveRecord
 
         foreach ($searchAttributes as $attribute) {
             $modelField = $this->getModelField($attribute);
-            if ($model->$attribute !== null) {
-                // NB: Checking for !== null to support things like filtering on '0' as a false boolean value from the params
-                $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
+            if (\Yii::$app->has('t') && \Yii::$app->t::isApi()) {
+                if ($model->$attribute !== null) {
+                    // NB: Checking for !== null to support things like filtering on '0' as a false boolean value from the params to the API (e.g /v1/ or /v2/ )
+                    $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
+                }
+            } else {
+                if ($model->$attribute) {
+                    // NB: The ACP (Admin Control Panel / main site) sends empty fields, so the !== null check above fails
+                    $attributeFilters[] = $modelField->generateFilter($model, $attribute, $params);
+                }
             }
         }
 
@@ -849,6 +857,7 @@ class Model extends ActiveRecord
             'query' => $query,
         ]));
     }
+
     /**
      * Set the scenario, but support an array of scenarios to check
      */
