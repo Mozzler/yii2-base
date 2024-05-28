@@ -486,6 +486,40 @@ class Tools extends Component
 
 
     /**
+     * @param $exception \Throwable
+     * @return string
+     *
+     * This is useful in the message when rethrowing an exception, we get the message, file locaiton and line number all in one line, where as returnExceptionAsString() gives you everything
+     *
+     *  'Exception Message' at fileLocation::lineNumber
+     *
+     *
+     * Example usage:
+     *
+     * try {
+     *   ... Some code that will probably throw an exception we want to know about, but don't want to continue processing because of
+     * } catch (\Throwable $exception) {
+     *
+     *  if (!$exception instanceof BaseException) {
+     *      $exception = new DataCommandsException("Exception whilst batch inserting the $className preload / seed data -- " . \Yii::$app->t::returnExceptionMessageAndFileLine($exception), $exception->getCode(), $exception, [
+     *      'className' => $className,
+     *      'classData' => $classData,
+     *  ]);
+     *  }
+     *  \Yii::error($exception);
+     * }
+     */
+    public static function returnExceptionMessageAndFileLine($exception)
+    {
+        if (empty($exception) || !$exception instanceof \Throwable) {
+            return ""; // Incorrect Exception provided
+        }
+        /** @var $exception \Exception */
+        return "'{$exception->getMessage()}' at {$exception->getFile()}::{$exception->getLine()}";
+    }
+
+
+    /**
      * Array Keys Exist
      *
      * Check if the Keys are in the array.
