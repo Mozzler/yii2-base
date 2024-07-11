@@ -379,11 +379,15 @@ class File extends BaseModel
     public function getExtension($originalFilename = null)
     {
         $mimeExtensions = \yii\helpers\FileHelper::getExtensionsByMimeType($this->mimeType) ?? [];
-        $mimeExtension = is_array($mimeExtensions) ? reset($mimeExtensions) : null; // First entry in the array, we are assuming that'll be what we want
+        $mimeExtension = is_array($mimeExtensions) ? array_pop($mimeExtensions) : null; // Last entry in the array, we are assuming that'll be what we want
+        // Example $mimeExtensions for "image/jpeg" is [
+        //      'jpe',
+        //      'jpeg',
+        //      'jpg',
+        //  ]
         if (!empty($mimeExtension)) {
             return $mimeExtension;
         }
-
         // -- Try again with our own attempt
         $mimeExtension = $this->mimeTypeToExtension($this->mimeType);
         if (!empty($mimeExtension)) {
