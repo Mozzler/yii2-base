@@ -34,7 +34,7 @@ class TaskController extends BaseController
         return ['o' => 'outputLog'];
     }
 
-    public function actionRedo($taskId)
+    public function actionRedo($taskId, $clearTaskLog = true)
     {
 
         if (empty($taskId)) {
@@ -52,13 +52,16 @@ class TaskController extends BaseController
             return ExitCode::USAGE;
         }
 
+        if ($clearTaskLog) {
+            $task->log = [];
+        }
         $task->status = Task::STATUS_PENDING;
-        $task->save(true, null, false);
+        $task->saveAndLogErrors();
 
         // -- Run then view the logs
         $exitCode = $this->actionRun($taskId);
         $this->actionView($taskId);
-        
+
         return $exitCode;
     }
 
