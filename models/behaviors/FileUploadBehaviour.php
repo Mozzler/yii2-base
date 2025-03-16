@@ -248,9 +248,14 @@ class FileUploadBehaviour extends Behavior
             if ($writeSuccess) {
                 \Yii::info("Uploaded file " . VarDumper::export(['filepath' => $filepath, 'visibility' => $visibility, 'fileModel' => $fileModel->ident(), 'fileInfo' => $fileInfo]));
             } else {
-                \Yii::error("Unable to write {$filepath} for {$fileModel->ident()} to stream. " . VarDumper::export(['filepath' => $filepath, 'visibility' => $visibility, 'fileModel' => $fileModel->toArray(), 'fileInfo' => $fileInfo]));
+                \Yii::$app->t::logAnException(new BaseException("saveFile() Unable to write {$filepath} for {$fileModel->ident()} to stream, file not uploaded to the cloud", 500, null, [
+                    'filepath' => $filepath,
+                    'visibility' => $visibility,
+                    'fileModel' => \Yii::$app->t::exportModels($fileModel),
+                    'fileInfo' => $fileInfo,
+                ]));
             }
-            return true;
+            return $writeSuccess;
         } else {
             // This is a duplicate file
             \Yii::warning("This is a duplicate file, you've already uploaded {$filepath}");

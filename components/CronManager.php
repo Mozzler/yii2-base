@@ -136,7 +136,7 @@ class CronManager extends Component
         $cronRun->status = 'complete';
         if (!$cronRun->save(true, null, false)) {
             $error = "Unable to save the cronRun. Error: " . VarDumper::export($cronRun->getErrors());
-            \Yii::error(new BaseException("Unable to save the {$cronRun->ident()}", 500, null, [
+            \Yii::$app->t::logAnException(new BaseException("Unable to save the {$cronRun->ident()}", 500, null, [
                 'errors' => $cronRun->getErrors(),
                 'cronRun' => $cronRun->toArray(),
             ]));
@@ -147,6 +147,38 @@ class CronManager extends Component
         return $stats;
     }
 
+    /**
+     * @return CronRun|boolean
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function createCronRun()
+    {
+        $nearestMinuteTimestamp = round(floor(time() / 60) * 60);
+
+        /** @var CronRun $cronRun */
+        $cronRun = \Yii::createObject('mozzler\base\models\CronRun');
+        $cronRun->load([
+            'timestamp' => $nearestMinuteTimestamp,
+            'stats' => [],
+        ], "");
+
+        $saved = $this->saveAndIgnoreAlreadyRunError($cronRun);
+        return false === $saved ? false : $cronRun; // If false then return false, otherwise return the $cronRun
+    }
+
+    public function saveAndIgnoreAlreadyRunError($cronRun)
+    {
+        if (!$cronRun->save(true, null, false)) {
+
+            // Ignore errors around unable to save cron due to an entry already existing for this timestamp minute interval
+            if (empty($this->ignoreAlreadyRunError($cronRun->getErrors()))) {
+                return false;
+            }
+            \Yii::$app->t::logAnException(new BaseException("Error saving {$cronRun->ident()}. Validation Error(s)", 500, null, ['Errors' => $cronRun->getErrors(), CronRun::class => $cronRun->toArray()])); // A nicer Exception
+            return false;
+        }
+        return true;
+    }
 
     /**
      * @param $errors
@@ -188,40 +220,6 @@ class CronManager extends Component
         }
 
         return $errors;
-    }
-
-    /**
-     * @return CronRun|boolean
-     * @throws \yii\base\InvalidConfigException
-     */
-    protected function createCronRun()
-    {
-        $nearestMinuteTimestamp = round(floor(time() / 60) * 60);
-
-        /** @var CronRun $cronRun */
-        $cronRun = \Yii::createObject('mozzler\base\models\CronRun');
-        $cronRun->load([
-            'timestamp' => $nearestMinuteTimestamp,
-            'stats' => [],
-        ], "");
-
-        $saved = $this->saveAndIgnoreAlreadyRunError($cronRun);
-        return false === $saved ? false : $cronRun; // If false then return false, otherwise return the $cronRun
-    }
-
-
-    public function saveAndIgnoreAlreadyRunError($cronRun)
-    {
-        if (!$cronRun->save(true, null, false)) {
-
-            // Ignore errors around unable to save cron due to an entry already existing for this timestamp minute interval
-            if (empty($this->ignoreAlreadyRunError($cronRun->getErrors()))) {
-                return false;
-            }
-            \Yii::error(new BaseException("Error saving {$cronRun->ident()}. Validation Error(s)", 500, null, ['Errors' => $cronRun->getErrors(), CronRun::class => $cronRun->toArray()])); // A nicer Exception
-            return false;
-        }
-        return true;
     }
 
 }

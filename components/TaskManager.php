@@ -78,41 +78,6 @@ class TaskManager extends \yii\base\Component
     }
 
     /**
-     * @param $task Task
-     * @return mixed
-     */
-    public static function runTask($task)
-    {
-        if (Task::STATUS_PENDING !== $task->status) {
-            $task->addLog("Refusing to re-run task as it is not in a pending state", 'error');
-            $task->save(true, null, false);
-            return $task;
-        }
-
-        $task->status = $task::STATUS_INPROGRESS;
-        $task->save(true, null, false);
-
-        try {
-            /** @var ScriptBase $script */
-            $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
-            $scriptReturn = $script->run($task); // !! Actually run the script (task)
-        } catch (\Throwable $exception) {
-            $task->status = Task::STATUS_ERROR;
-            $task->addLog(\Yii::$app->t::returnExceptionAsString($exception), 'error');
-            $task->save(true, null, false);
-            return $task;
-        }
-
-        // -- Unless the script set the status to error, then save this as complete
-        if ($task->status !== Task::STATUS_ERROR) {
-            $task->status = Task::STATUS_COMPLETE;
-        }
-
-        $task->save(true, null, false);
-        return $task;
-    }
-
-    /**
      * Trigger a task to be fired via the command line.
      * Called by the schedule command
      *
@@ -156,18 +121,16 @@ class TaskManager extends \yii\base\Component
         return $runCommand;
     }
 
-    public static function isWindows()
-    {
-        // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
-        return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'; // Or could use > $isWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
-    }
-
-
     public static function yiiCommandLocation()
     {
         return \Yii::getAlias('@app') . DIRECTORY_SEPARATOR . "yii" . (true === self::isWindows() ? '.bat' : ''); // e.g \app\yii or C:\www\yii.bat
     }
 
+    public static function isWindows()
+    {
+        // Determine if running in Windows or *nix ( as per http://thisinterestsme.com/php-detect-operating-system-windows/ ) WINNT : Linux
+        return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'; // Or could use > $isWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
+    }
 
     /**
      * @param $filePath string The command to run
@@ -176,6 +139,8 @@ class TaskManager extends \yii\base\Component
      * @param string $currentDirectory
      * @param bool $escapeArgs If the arguments should be automatically escaped (wrapped in 'single quotes')
      * @return array ['runCommand', 'exitCode', 'output' ] the command that was run, the exitCode ( more than 0 is a failure on *nix ) and the output
+     *
+     * ['runCommand' => $runCommand, 'exitCode' => $exitCode, 'output' => $output]
      */
     public static function runCommand($filePath, $arguments = [], $runAsync = true, $currentDirectory = null, $escapeArgs = true, $redirectOutput = '2>&1')
     {
@@ -285,5 +250,40 @@ class TaskManager extends \yii\base\Component
 
         // Run the task
         return \Yii::$app->taskManager->runTask($task);
+    }
+
+    /**
+     * @param $task Task
+     * @return mixed
+     */
+    public static function runTask($task)
+    {
+        if (Task::STATUS_PENDING !== $task->status) {
+            $task->addLog("Refusing to re-run task as it is not in a pending state", 'error');
+            $task->save(true, null, false);
+            return $task;
+        }
+
+        $task->status = $task::STATUS_INPROGRESS;
+        $task->save(true, null, false);
+
+        try {
+            /** @var ScriptBase $script */
+            $script = \Yii::createObject(ArrayHelper::merge($task->config, ['class' => $task->scriptClass]));
+            $scriptReturn = $script->run($task); // !! Actually run the script (task)
+        } catch (\Throwable $exception) {
+            $task->status = Task::STATUS_ERROR;
+            $task->addLog(\Yii::$app->t::returnExceptionAsString($exception), 'error');
+            $task->save(true, null, false);
+            return $task;
+        }
+
+        // -- Unless the script set the status to error, then save this as complete
+        if ($task->status !== Task::STATUS_ERROR) {
+            $task->status = Task::STATUS_COMPLETE;
+        }
+
+        $task->save(true, null, false);
+        return $task;
     }
 }

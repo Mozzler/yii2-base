@@ -44,14 +44,6 @@ class File extends BaseModel
     public $defaultFs = 'fs'; // If you've not defined a File system in the File document and we can't determine one from the related model's fields then we use \Yii::$app->fs
     public $sanitiseFilename = true; // Used in the File Controller Download and models/behaviors/FileUploadBehaviour.php
 
-    protected function modelConfig()
-    {
-        return [
-            'label' => 'File',
-            'labelPlural' => 'Files',
-        ];
-    }
-
     public static function rbac()
     {
         return ArrayHelper::merge(parent::rbac(), [
@@ -80,72 +72,17 @@ class File extends BaseModel
         ]);
     }
 
-    protected function modelFields()
+    public function behaviors()
     {
-        return ArrayHelper::merge(parent::modelFields(), [
-            'filename' => [
-                'type' => 'Text',
-                'label' => 'Filename',
-                'required' => true,
+        return ArrayHelper::merge(parent::behaviors(), [
+            // Save any previous file versions, esp for S3 saves, file updates, etc..
+            'auditLog' => [
+                'class' => AuditLogBehaviour::class,
+                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
+                'skipUpdateOnClean' => true,
             ],
-            'filepath' => [
-                'type' => 'Text',
-                'label' => 'Filepath',
-                'required' => true,
-                'widgets' => [
-                    'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\CodeField',
-                    ]
-                ],
-            ],
-            'modelType' => [
-                // The associated model (e.g user)
-                'type' => 'Text',
-                'label' => 'Model Type',
-            ],
-            'description' => [
-                // Likely a user provided description
-                'type' => 'Text',
-                'label' => 'Description',
-            ],
-            'fieldName' => [
-                // The associated model's field (e.g user.avatar)
-                'type' => 'Text',
-                'label' => 'Field Name',
-            ],
-
-            'originalFilename' => [
-                'type' => 'Text',
-                'label' => 'Original Filename',
-            ],
-            'mimeType' => [
-                'type' => 'Text',
-                'label' => 'MIME Type',
-                'widgets' => [
-                    'view' => [
-                        'class' => 'mozzler\base\widgets\model\view\CodeField',
-                    ]
-                ]
-            ],
-            'size' => [
-                'type' => 'Integer',
-                'label' => 'Size (in Bytes)',
-            ],
-            // Used for Amazon S3 uploads
-            'version' => [
-                // Normal S3 versions are long strings, not numbers
-                'type' => 'Text',
-                'label' => 'Version Number',
-                'default' => '1' // NB: Has to be a string not integer otherwise this barfs
-            ],
-            'other' => [
-                // In case you want to save anything else
-                'type' => 'JsonArray',
-                'label' => 'Other Information'
-            ],
-            'filesystemName' => [
-                'type' => 'Text',
-                'label' => 'Filesystem Name',
+            'fileUpload' => [
+                'class' => FileUploadBehaviour::class
             ]
         ]);
     }
@@ -163,21 +100,6 @@ class File extends BaseModel
         return $scenarios;
     }
 
-    public function behaviors()
-    {
-        return ArrayHelper::merge(parent::behaviors(), [
-            // Save any previous file versions, esp for S3 saves, file updates, etc..
-            'auditLog' => [
-                'class' => AuditLogBehaviour::class,
-                'auditLogAttributes' => $this->scenarios()[self::SCENARIO_AUDITABLE],
-                'skipUpdateOnClean' => true,
-            ],
-            'fileUpload' => [
-                'class' => FileUploadBehaviour::class
-            ]
-        ]);
-    }
-
     public function getFilesystem()
     {
         $fsName = $this->workoutFilesystemName();
@@ -191,7 +113,6 @@ class File extends BaseModel
         $this->filesystemName = $fsName;
         return \Yii::$app->$fsName;
     }
-
 
     /**
      * Example:   'other' => [
@@ -225,7 +146,6 @@ class File extends BaseModel
         }
         return $fsName;
     }
-
 
     public function getAssociatedModelField()
     {
@@ -262,16 +182,6 @@ class File extends BaseModel
         }
         return $model;
     }
-
-    // -- Example convert method, used by the FileUploadBehaviour
-    // -- You'll want to extend or override this file model and add your own convert to use this
-    //    public function convert($fileInfo) {
-    //        if ($this->getExtension() === 'png') {
-    //            // -- Here you would convert the file to JPG
-    //        }
-    //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
-    //        return $fileInfo;
-    //    }
 
     public function getSafeDescription()
     {
@@ -321,6 +231,16 @@ class File extends BaseModel
         $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');
         return $filename;
     }
+
+    // -- Example convert method, used by the FileUploadBehaviour
+    // -- You'll want to extend or override this file model and add your own convert to use this
+    //    public function convert($fileInfo) {
+    //        if ($this->getExtension() === 'png') {
+    //            // -- Here you would convert the file to JPG
+    //        }
+    //        // $file['tmp_name'] - This is the file that's later read and saved to the fs filesystem (e.g S3 or Google Cloud)
+    //        return $fileInfo;
+    //    }
 
     /**
      * Beautify Filename
@@ -594,7 +514,6 @@ class File extends BaseModel
         return isset($mime_map[$mime]) ? $mime_map[$mime] : false;
     }
 
-
     /**
      * @param $fileInfo array
      * @param $newTmpFileLocation string e.g '/tmp/5f773fa7c5ff1f1ac1155d94.pdf'
@@ -626,7 +545,6 @@ class File extends BaseModel
         \Yii::info("Converted {$this->ident()} to point to $newTmpFileLocation");
         return $fileInfo;
     }
-
 
     /**
      * @param $fileModel
@@ -664,6 +582,84 @@ class File extends BaseModel
         } else {
             return $sizeInBytes . ' bytes';
         }
+    }
+
+    protected function modelConfig()
+    {
+        return [
+            'label' => 'File',
+            'labelPlural' => 'Files',
+        ];
+    }
+
+    protected function modelFields()
+    {
+        return ArrayHelper::merge(parent::modelFields(), [
+            'filename' => [
+                'type' => 'Text',
+                'label' => 'Filename',
+                'required' => true,
+            ],
+            'filepath' => [
+                'type' => 'Text',
+                'label' => 'Filepath',
+                'required' => true,
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\CodeField',
+                    ]
+                ],
+            ],
+            'modelType' => [
+                // The associated model (e.g user)
+                'type' => 'Text',
+                'label' => 'Model Type',
+            ],
+            'description' => [
+                // Likely a user provided description
+                'type' => 'Text',
+                'label' => 'Description',
+            ],
+            'fieldName' => [
+                // The associated model's field (e.g user.avatar)
+                'type' => 'Text',
+                'label' => 'Field Name',
+            ],
+
+            'originalFilename' => [
+                'type' => 'Text',
+                'label' => 'Original Filename',
+            ],
+            'mimeType' => [
+                'type' => 'Text',
+                'label' => 'MIME Type',
+                'widgets' => [
+                    'view' => [
+                        'class' => 'mozzler\base\widgets\model\view\CodeField',
+                    ]
+                ]
+            ],
+            'size' => [
+                'type' => 'Integer',
+                'label' => 'Size (in Bytes)',
+            ],
+            // Used for Amazon S3 uploads
+            'version' => [
+                // Normal S3 versions are long strings, not numbers
+                'type' => 'Text',
+                'label' => 'Version Number',
+                'default' => '1' // NB: Has to be a string not integer otherwise this barfs
+            ],
+            'other' => [
+                // In case you want to save anything else
+                'type' => 'JsonArray',
+                'label' => 'Other Information'
+            ],
+            'filesystemName' => [
+                'type' => 'Text',
+                'label' => 'Filesystem Name',
+            ]
+        ]);
     }
 
 }

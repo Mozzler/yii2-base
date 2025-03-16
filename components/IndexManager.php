@@ -103,7 +103,7 @@ class IndexManager
 
         $options = ArrayHelper::getValue($indexConfig, ['options'], []);
         if (empty($options)) {
-            \Yii::error(new BaseException("Issue updating the Indexes. Likely an invalid Index Config or invalid options for the Index based on collectionName: '{$collection->name}', indexName:  '{$indexName}'", 500, null, [
+            \Yii::$app->t::logAnException(new BaseException("Issue updating the Indexes. Likely an invalid Index Config or invalid options for the Index based on collectionName: '{$collection->name}', indexName:  '{$indexName}'", 500, null, [
                 'devMessage' => "Check the Index config, e.g it should be something like ['columns' => ['lastLoggedIn' => -1]]",
                 'collectionName' => $collection->name,
                 'indexName' => $indexName,
