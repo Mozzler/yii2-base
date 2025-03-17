@@ -117,10 +117,10 @@ trait LoggableModelTrait
             }
 
             if ($logEntry['type'] === $this->_LOG_TYPE_ERROR) {
-                $logLines .= "#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n";
+                $logLines .= "\n#####################\n##  {$logEntry['type']}\n#####################\nDate: " . date('r') . "\n{$message}\n\"--------\n\n";
             } else {
 
-                $logLines .= "{$logEntry['type']} - {$message} | " . date('r') . "\n";
+                $logLines .= "{$logEntry['type']} - {$message} | " . date('r') . "\n\n";
             }
         }
         return $logLines;
