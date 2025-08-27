@@ -10,8 +10,15 @@ use yii\helpers\ArrayHelper;
  * Class Config
  * @package mozzler\base\models
  *
+ * ============================================================
+ *     Config
+ * ============================================================
+ * Fields: [ '_id', 'name', 'createdAt', 'createdUserId', 'updatedAt', 'updatedUserId', 'key_', 'value_', 'description', ]
+ *
  * @property string $key_
  * @property string $value_
+ * @property string $description
+ *
  */
 class Config extends BaseModel
 {
@@ -91,14 +98,14 @@ class Config extends BaseModel
                 'required' => true
             ],
             'value_' => [
-                'type' => 'Text',
+                'type' => 'TextLarge', // TextLarge allows more than 256 chars
                 'label' => 'Value',
                 'required' => true
             ],
 
             // Optional info about this field and why you set it to this
             'description' => [
-                'type' => 'Text',
+                'type' => 'TextLarge',
                 'label' => 'Description',
                 'hint' => "Basic info about why you've set it to this value or you can explain what the value does"
             ],
