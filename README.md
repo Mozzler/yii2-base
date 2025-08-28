@@ -1,3 +1,11 @@
+# Updates
+
+Updated the components/TwigFactory.php file for the newer way that the updated Twig does things
+
+This might mean it's not backwards compatible.
+
+If you want to use an older version of Yii2 and Twig then use the tag '2025-08-29th-before-twig-updates'
+
 ## Installation
 
 Add the following to your `config/params.php`:
